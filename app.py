@@ -1,32 +1,26 @@
-import sqlite3
 from flask import Flask, render_template, url_for, request, flash, session, redirect
-from flask_login import LoginManager, login_user, UserMixin
+from flask_login import LoginManager, login_user, UserMixin, login_required
+from db import db
+from models import Usuario
+from werkzeug.security import check_password_hash
+from werkzeug.security import generate_password_hash
+import sqlite3
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db' #define a url do banco de dados sqlite
+db.init_app(app) #Inicializa o db
+
+with app.app_context():
+    db.create_all()
+
 app.secret_key = 'ifnexus'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-class User(UserMixin):
-    def __init__(self, email, senha):
-        self.id = email
-        self.senha = senha
-
-def obter_conexao():
-    conn = sqlite3.connect('banco.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
 @login_manager.user_loader
 def load_user(user_id):
-    conn = obter_conexao()
-    usuario = conn.execute("SELECT * FROM usuarios WHERE email = ?", (user_id,)).fetchone()
-    conn.close()
-    if usuario:
-        user = User(usuario['email'], usuario['senha'])
-        return user
-    return None
+    return Usuario.query.get(int(user_id))
 
 @app.route('/')
 def index():
@@ -68,45 +62,33 @@ def login():
         email = request.form['email']
         senha = request.form['senha']
 
-        conn = obter_conexao()
-        usuario = conn.execute("SELECT * FROM usuarios WHERE email = ?", (email,)).fetchone()
-        conn.close()
+        usuario = Usuario.query.filter_by(email=email).first()
 
-        if usuario and senha == usuario['senha']:
-            user = User(usuario['email'], usuario['senha'])
-            login_user(user)
+        if usuario and senha == usuario.senha:
+            login_user(usuario)
             flash('Login realizado com sucesso!', 'success')
             return redirect(url_for('index'))
-
-        flash('Email ou senha inválidos.', category='error')
-        return redirect(url_for('login'))
+        else:
+            flash('Email ou senha inválidos.', category='error')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == "POST":
-        nome = request.form['nome']
+    if request.method == 'POST':
+        nome = request.form['name']
         email = request.form['email']
-        senha = request.form['senha']
-        senhaconfirmada = request.form['senhaconfirmada']
+        senha = request.form['password']
 
+        senha_hash = generate_password_hash(senha)
 
-        conn = obter_conexao()
-        usuario = conn.execute("SELECT * FROM usuarios WHERE email = ?", (email,)).fetchone()
-
-        if usuario:
-            conn.close()
-            flash('Erro: este email já está cadastrado.', category='error')
-            return redirect(url_for('register'))
-
-        conn.execute("INSERT INTO usuarios (nome, email, senha, senhaconfirmada) VALUES (?, ?, ?, ?)", (nome, email, senha, senhaconfirmada))
-        conn.commit()
-        conn.close()
-
+        novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash)
+        with app.app_context():
+            db.session.add(novo_usuario)
+            db.session.commit()
+            
         flash('Cadastro realizado com sucesso! Agora faça login.', 'success')
         return redirect(url_for('login'))
 
     return render_template('register.html')
-
-
