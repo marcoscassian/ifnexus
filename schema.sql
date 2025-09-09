@@ -1,7 +1,0 @@
-DROP TABLE IF EXISTS usuarios;
-
-CREATE TABLE usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    senha TEXT NOT NULL
-);
