@@ -1,15 +1,21 @@
 from flask import Flask, render_template, url_for, request, flash, session, redirect
 from flask_login import LoginManager, login_user, UserMixin, login_required
-from db import db
-from models import Usuario
+from flask_bcrypt import Bcrypt
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-import sqlite3
+
+from models import (
+    db,
+    Usuario
+    )
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db' #define a url do banco de dados sqlite
 db.init_app(app) #Inicializa o db
 
+bcrypt = Bcrypt(app)
+
+#criação do banco de dados
 with app.app_context():
     db.create_all()
 
@@ -59,12 +65,12 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
-        email = request.form['email']
-        senha = request.form['senha']
+        email = request.form.get('email')
+        senha = request.form.get('senha')
 
         usuario = Usuario.query.filter_by(email=email).first()
 
-        if usuario and senha == usuario.senha:
+        if usuario and bcrypt.check_password_hash(usuario.senha, senha):
             login_user(usuario)
             flash('Login realizado com sucesso!', 'success')
             return redirect(url_for('index'))
@@ -77,16 +83,24 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        nome = request.form['name']
-        email = request.form['email']
-        senha = request.form['password']
-
-        senha_hash = generate_password_hash(senha)
+        nome = request.form.get('name') 
+        email = request.form.get('email')
+        senha = request.form.get('password')
+        confirm = request.form.get('confirm_password')
+        if senha != confirm:
+            flash("As senhas não coincidem.", "error")
+            return redirect(url_for('register'))
+        
+        user_exists = Usuario.query.filter_by(email=email).first()
+        if user_exists:
+            flash("Este email já está cadastrado.", "error")
+            return redirect(url_for("register"))
+        
+        senha_hash = bcrypt.generate_password_hash(senha).decode('utf-8')
 
         novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash)
-        with app.app_context():
-            db.session.add(novo_usuario)
-            db.session.commit()
+        db.session.add(novo_usuario)
+        db.session.commit()
             
         flash('Cadastro realizado com sucesso! Agora faça login.', 'success')
         return redirect(url_for('login'))
