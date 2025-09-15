@@ -12,11 +12,11 @@
 
 {% include 'componentes/erro.html' %}
 <p>Crie sua conta e faça parte do IFNexus.</p>
-<form action="{{ url_for('login') }}" method="post">
-  <input type="text" name="nome" placeholder="Nome de Usuário">
+<form action="{{ url_for('register') }}" method="post">
+  <input type="text" name="name" placeholder="Nome de Usuário">
     <input type="text" name="email" placeholder="Email">
-    <input type="password" name="senha" placeholder="Senha">
-    <input type="password" name="senha" placeholder="Confirme sua senha">
+    <input type="password" name="password" placeholder="Senha">
+    <input type="password" name="confirm_password" placeholder="Confirme sua senha">
     <button>Cadastre-se</button>
 </form>
 
