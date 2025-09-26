@@ -1,0 +1,87 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    color: white;
+}
+
+.page-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+}
+
+
+.container {
+    width: 400px;
+    background-color: #30782B;
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px #30782B;
+    text-align: center;
+}
+
+.container p {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: white;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-color: white;
+    color: #30782B;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #22531e;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    color: #30782B;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+.subcontainer {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #30782B;
+}
+
+.subcontainer a {
+    color: #30782B;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.subcontainer a:hover {
+    text-decoration: underline;
+}
