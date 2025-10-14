@@ -1,0 +1,72 @@
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.card {
+    position: relative;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 15px;
+    margin: 5px;
+    width: 350px;
+    height: 370px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.card .imgcard {
+    background-color: black;
+    width: 349px;
+    height: 203px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.card .tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color:#30782B;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.card .tag p {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.card .content {
+    padding-left: 15px;
+}
+h3 {
+    font-size: 25px;
+}
+
+p {
+    font-size: 13px;
+}
+
+.card .saibamais {
+    position: absolute;
+    bottom: 35px;
+}
+
+
+.card a {
+    font-size: 20px;
+    color: #30782B;
+    font-weight: bold;
+    text-decoration: none;
+}

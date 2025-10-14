@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    Login
+{% endblock %}
+
+
+{% block conteudo %}
+
+
+{% include 'componentes/erro.html' %}
+
+
+<link rel="stylesheet" href="static/css/login.css">
+
+
+<div class="page-center">
+    <div class="container">
+
+
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="IFNexus Logo">
+        </div>
+
+
+        <p>Entre com sua conta e explore os projetos do IFRN.</p>
+        <form action="{{ url_for('login') }}" method="post">
+            <div class="input-group">
+                <input type="text" name="email" placeholder="Email">
+                <span class="icon"></span>
+            </div>
+            <div class="input-group">
+                <input type="password" name="senha" placeholder="Senha">
+                <span class="icon"></span>
+            </div>
+            <button>Entrar</button>
+        </form>
+    </div>
+
+
+    <div class="subcontainer">
+        <p>
+            Não tem conta?
+            <a href="{{ url_for('register') }}">Cadastre-se</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

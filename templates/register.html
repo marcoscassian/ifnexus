@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastre-se{% endblock %}
+
+{% block conteudo %}
+
+{% include 'componentes/erro.html' %}
+<link rel="stylesheet" href="static/css/register.css">
+<div class="page-center">
+    <div class="container">
+
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="IFNexus Logo">
+        </div>
+
+        <p>Crie sua conta e faça parte do IFNexus.</p>
+
+        <form action="{{ url_for('register') }}" method="post">
+            <div class="input-group">
+                <input type="text" name="name" placeholder="Nome de Usuário">
+                <span class="icon"></span>
+            </div>
+            <div class="input-group">
+                <input type="text" name="email" placeholder="Email">
+                <span class="icon"></span>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Senha">
+                <span class="icon"></span>
+            </div>
+            <div class="input-group">
+                <input type="password" name="confirm_password" placeholder="Confirme sua senha">
+                <span class="icon"></span>
+            </div>
+            <button>Cadastre-se</button>
+        </form>
+    </div>
+
+    <div class="subcontainer">
+        <p>
+            Já tem conta?
+            <a href="{{ url_for('login') }}">Conecte-se</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

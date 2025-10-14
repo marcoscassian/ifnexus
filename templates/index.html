@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Bem-vindo ao IFNexus!{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="hero">
+    <div class="hero-left">
+        <h1>Ideias que conectam. </h1>
+        <h1>Projetos que transformam.</h1>
+        <p>Um portal para explorar, divulgar e se inspirar com os projetos do IF.</p>
+        <button>Explorar Projetos</button>
+    </div>
+
+    <div class="hero-rigth">
+        <img src="static/img/geral/imghero.jpg" alt="Imagem Hero"> <!-- imagem do hero>-->
+    </div>
+</div>
+<div class="content">
+    <h2>Projetos em Destaque</h2>
+    <!-- loop para mostrar os cards -->
+    <div class="cards">
+        {% for card in cards %}
+            {% include '_card.html' %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

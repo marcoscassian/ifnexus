@@ -1,0 +1,171 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+header {
+    height: 88px;
+    display: flex;
+    background-color: #30782B;
+    align-items: center;
+    color: white;
+    justify-content: space-between;
+}
+
+header > h1 {
+    padding-left: 20px;
+}
+
+.botoes {
+    padding-right: 20px;
+}
+
+.botoes nav a {
+    font-weight: bold;
+    font-size: 18px;
+    padding: 15px;
+    color: white;
+    text-decoration: none;
+}
+
+/* Botão de login (quando não logado) */
+.botoes > .botoes_not_logged > .Login {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.botoes > .botoes_not_logged > .Login:hover {
+    background-color: white;
+    color: #30782B;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    margin-top: 8px;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.dropdown-content .user-name {
+    font-weight: bold;
+    color: #30782B;        
+    padding: 12px 16px;
+    border-bottom: 1px solid #ccc;
+  }
+ 
+  .dropdown-content a {
+    color: #555;            
+    padding: 10px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;              
+    font-size: 15px;
+    font-weight: 500;
+  }
+ 
+  .dropdown-content a:hover {
+    background-color: #f2f2f2;
+    color: #555;
+  }
+ 
+.dropdown-content {
+    display: none;
+  }
+ 
+  .dropdown:focus-within .dropdown-content {
+    display: block;
+  }
+
+.dropbtn:hover {
+    background-color: #30782B;
+    color: white;
+}
+
+.flash-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.flash {
+  padding: 15px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 250px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.flash-success {
+  background: linear-gradient(135deg, #4caf50, #81c784);
+}
+
+.flash-error {
+  background: linear-gradient(135deg, #d32f2f, #f44336);
+}
+
+.flash-warning {
+  background: linear-gradient(135deg, #f57c00, #ffb74d);
+}
+
+.flash-info {
+  background: linear-gradient(135deg, #1976d2, #64b5f6);
+}
+
+.flash-success::before { content: "✔"; font-weight: bold; }
+.flash-error::before   { content: "❌"; font-weight: bold; }
+.flash-warning::before { content: "⚠"; font-weight: bold; }
+.flash-info::before    { content: "ℹ"; font-weight: bold; }
+
+
+.flash.fade-out {
+  opacity: 0;
+  transform: translateY(-50px);
+}
