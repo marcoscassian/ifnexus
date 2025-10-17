@@ -1,43 +1,125 @@
 {% extends 'base.html' %}
 
-{% block title %}Criar Projeto{% endblock %}
+{% block title %}Cadastrar Projeto{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/criar_projeto.css') }}">
+{% endblock %}
 
 {% block conteudo %}
+<h1>Cadastrar Projeto</h1>
 
-{% include 'componentes/erro.html' %}
-<link rel="stylesheet" href="static/css/criar_projeto.css">
-<div class="page-center">
-    <h1>Cadastrar Novo Projeto</h1>
-    <p>Preencha os dados abaixo para publicar seu projeto na vitrine do IF.</p>
-    <div class="container">
+<form action="{{ url_for('criar_projeto') }}" method="POST" enctype="multipart/form-data">
 
-        <form action="{{ url_for('register') }}" method="post">
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Nome de Usuário">
-                <span class="icon"></span>
+    <!-- 1. Informações Gerais do Projeto -->
+    <div class="sessao">
+        <legend>Informações Gerais do Projeto</legend>
+
+        <label>Título do Projeto</label>
+        <input type="text" name="titulo" required>
+
+        <label>Subtítulo</label>
+        <input type="text" name="subtitulo">
+
+        <label>Resumo/Descrição</label>
+        <textarea name="descricao" required></textarea>
+
+        <label>Tipo</label>
+        <select name="tipo" required>
+            <option value="">Selecionar</option>
+            <option value="pesquisa">Pesquisa</option>
+            <option value="extensao">Extensão</option>
+            <option value="ensino">Ensino</option>
+        </select>
+
+        <label>Curso</label>
+        <select name="curso" required>
+            <option value="">Selecionar</option>
+            <option value="informatica">Informática</option>
+            <option value="textil">Têxtil</option>
+            <option value="vestuario">Vestuário</option>
+            <option value="eletro">Eletrotécnica</option>
+        </select>
+
+        <h3>Autores</h3>
+        <div id="autores">
+            <div class="autor">
+                <input type="text" name="autor_nome[]" placeholder="Nome" required>
+                <input type="text" name="autor_matricula[]" placeholder="Matrícula" required>
             </div>
-            <div class="input-group">
-                <input type="text" name="email" placeholder="Email">
-                <span class="icon"></span>
-            </div>
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Senha">
-                <span class="icon"></span>
-            </div>
-            <div class="input-group">
-                <input type="password" name="confirm_password" placeholder="Confirme sua senha">
-                <span class="icon"></span>
-            </div>
-            <button>Cadastre-se</button>
-        </form>
+        </div>
+        <button type="button" onclick="addAutor()">+ Adicionar Autor</button>
+
     </div>
 
-    <div class="subcontainer">
-        <p>
-            Já tem conta?
-            <a href="{{ url_for('login') }}">Conecte-se</a>
-        </p>
-    </div>
-</div>
+    <!-- 2. Estrutura Acadêmica -->
+    <div class="sessao">
+        <legend>Estrutura Acadêmica</legend>
+        <h3>Objetivos</h3>
+        <div id="objetivos">
+            <textarea name="objetivos[]" placeholder="Digite um objetivo"></textarea>
+        </div>
+        <button type="button" onclick="addObjetivo()">+ Adicionar Objetivo</button>
 
+        <h3>Metodologias</h3>
+        <div id="metodologias">
+            <textarea name="metodologias[]" placeholder="Digite uma metodologia"></textarea>
+        </div>
+        <button type="button" onclick="addMetodologia()">+ Adicionar Metodologia</button>
+
+        <label>Selecione o arquivo do Projeto</label>
+        <input type="file" name="arquivo" accept=".pdf,.doc,.docx">
+
+    </div>
+
+    <!-- 3. Mídias e Links Externos -->
+    <div class="sessao">
+        <legend>Mídias e Links Externos</legend>
+
+        <label>Links Externos</label>
+        <div id="links">
+            <input type="url" name="links[]" placeholder="Link">
+        </div>
+        <button type="button" onclick="addLink()">+ Adicionar Link</button>
+    </div>
+
+    <br>
+    <button type="submit">Cadastrar Projeto</button>
+</form>
+
+<script>
+function addAutor() {
+    const div = document.getElementById('autores');
+    const novo = document.createElement('div');
+    novo.classList.add('autor');
+    novo.innerHTML = '<input type="text" name="autor_nome[]" placeholder="Nome" required> ' +
+                     '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required>';
+    div.appendChild(novo);
+}
+
+function addObjetivo() {
+    const div = document.getElementById('objetivos');
+    const novo = document.createElement('textarea');
+    novo.name = 'objetivos[]';
+    novo.placeholder = 'Digite um objetivo';
+    div.appendChild(novo);
+}
+
+function addMetodologia() {
+    const div = document.getElementById('metodologias');
+    const novo = document.createElement('textarea');
+    novo.name = 'metodologias[]';
+    novo.placeholder = 'Digite uma metodologia';
+    div.appendChild(novo);
+}
+
+function addLink() {
+    const div = document.getElementById('links');
+    const novo = document.createElement('input');
+    novo.type = 'url';
+    novo.name = 'links[]';
+    novo.placeholder = 'Link';
+    div.appendChild(novo);
+}
+</script>
 {% endblock %}
