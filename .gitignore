@@ -1,4 +1,11 @@
+# Ignorar ambiente virtual
 env/
+venv/
+
+# Ignorar cache do Python
 __pycache__/
-*.py[cod]
-*.pyo
+*.pyc
+
+# Ignorar arquivos temporários do sistema
+*.swp
+.DS_Store
