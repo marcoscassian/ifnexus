@@ -152,10 +152,13 @@ def criar_projeto():
     return render_template('criar_projeto.html')
 
 
-@app.route('/listarprojeto')
-def listar_projeto():
-    projeto = db.session.query(Projeto).all()
-    return render_template('listar_projeto.html', projeto=projeto)
+@app.route("/projeto/<int:id>")
+def ver_projeto(id):
+    projeto = Projeto.query.get(id)
+    if projeto:
+        return render_template("listar_projeto.html", projeto=projeto)
+    else:
+        pass
 
 if __name__ == '__main__':
     app.run(debug=True)

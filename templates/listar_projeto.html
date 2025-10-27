@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Projeto{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/listar_projeto.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<h1>Listar Projeto</h1>
+<div class="container">
+    <div class="left">
+        <div class="block1">
+            <h1> {{projeto.titulo}} - {{projeto.subtitulo}}</h1>
+            <p> {{projeto.descricao}} </p>
+            <p><strong>Autores:</strong> 
+                {{ projeto.autores | map(attribute='nome') | join(', ') }}
+            </p>
+            <hr>
+
+        </div>
+
+        <div class="block2">
+            <h1> Objetivos </h1>
+            <ul>
+                {% for objetivo in projeto.objetivos %}
+                <li>{{ objetivo.descricao }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="block3">
+            <h1> Metodologias </h1>
+            <ul>
+                {% for metodologia in projeto.metodologias %}
+                <li>{{ metodologia.descricao }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="block4">
+            <h1> Links e Materias Coplementares </h1>
+            <ul>
+                {% for link in projeto.links %}
+                <li>{{ link.url }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="right">
+
+    </div>
+</div>
+{% endblock %}
