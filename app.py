@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, request, flash, redirect
 from flask_login import LoginManager, login_user, UserMixin, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
+from werkzeug.utils import secure_filename
 import os
 
 from models import (
@@ -15,6 +16,16 @@ from models import (
 
 
 app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.config['UPLOAD_FOLDER_PDF'] = os.path.join(BASE_DIR, 'static', 'uploads', 'pdf')
+app.config['UPLOAD_FOLDER_IMG'] = os.path.join(BASE_DIR, 'static', 'uploads', 'img')
+
+ALLOWED_IMG_EXT = {'png', 'jpg', 'jpeg'}
+
+os.makedirs(app.config['UPLOAD_FOLDER_PDF'], exist_ok=True)
+os.makedirs(app.config['UPLOAD_FOLDER_IMG'], exist_ok=True)
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db'
 app.secret_key = 'ifnexus'
 
@@ -117,7 +128,25 @@ def criar_projeto():
         )
         db.session.add(novo_projeto)
         db.session.flush()
+        arquivo = request.files.get('arquivo')
+        if arquivo and arquivo.filename:
+            nome_pdf = secure_filename(arquivo.filename)
+            caminho_pdf = os.path.join(app.config['UPLOAD_FOLDER_PDF'], nome_pdf)
+            arquivo.save(caminho_pdf)
+            novo_projeto.arquivo = nome_pdf
+        imagens = request.files.getlist('imagens[]')
+        lista_imagens = []
 
+        for img in imagens:
+            if img and img.filename:
+                nome_img = secure_filename(img.filename)
+                caminho_img = os.path.join(app.config['UPLOAD_FOLDER_IMG'], nome_img)
+                img.save(caminho_img)
+                lista_imagens.append(nome_img)
+
+        novo_projeto.estrutura = ",".join(lista_imagens)
+
+    
         nomes_autores = request.form.getlist('autor_nome[]')
         matriculas_autores = request.form.getlist('autor_matricula[]')
         for nome, matricula in zip(nomes_autores, matriculas_autores):
@@ -162,3 +191,4 @@ def ver_projeto(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    

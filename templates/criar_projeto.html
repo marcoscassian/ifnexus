@@ -67,8 +67,9 @@
         </div>
         <button type="button" onclick="addMetodologia()">+ Adicionar Metodologia</button>
 
-        <label>Selecione o arquivo do Projeto</label>
+        <h3>Arquivo do Projeto (PDF/DOC)</h3>
         <input type="file" name="arquivo" accept=".pdf,.doc,.docx">
+
 
     </div>
 
@@ -77,6 +78,12 @@
         <legend>Mídias e Links Externos</legend>
 
         <label>Links Externos</label>
+        <h3>Imagens do Projeto</h3>
+        <div id="imagens">
+            <input type="file" name="imagens[]" accept="image/*">
+        </div>
+        <button type="button" onclick="addImagem()">+ Adicionar Imagem</button>
+
         <div id="links">
             <input type="url" name="links[]" placeholder="Link">
         </div>
@@ -121,5 +128,15 @@ function addLink() {
     novo.placeholder = 'Link';
     div.appendChild(novo);
 }
+
+function addImagem() {
+    const div = document.getElementById('imagens');
+    const novo = document.createElement('input');
+    novo.type = 'file';
+    novo.name = 'imagens[]';
+    novo.accept = "image/*";
+    div.appendChild(novo);
+}
+
 </script>
 {% endblock %}

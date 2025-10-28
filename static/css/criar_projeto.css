@@ -112,3 +112,10 @@ h3 {
         padding: 20px;
     }
 }
+
+input[type="file"] {
+    border: none;
+    background: #e7e7e7;
+    padding: 10px;
+    cursor: pointer;
+}
