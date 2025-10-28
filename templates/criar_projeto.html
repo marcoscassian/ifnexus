@@ -7,136 +7,193 @@
 {% endblock %}
 
 {% block conteudo %}
-<h1>Cadastrar Projeto</h1>
+{% include 'componentes/erro.html' %}
+
+<div class="header-projeto">
+    <h1>Cadastrar Novo Projeto</h1>
+    <p>Preencha os dados abaixo para publicar seu projeto na vitrine do IF.</p>
+</div>
 
 <form action="{{ url_for('criar_projeto') }}" method="POST" enctype="multipart/form-data">
 
-    <!-- 1. Informações Gerais do Projeto -->
-    <div class="sessao">
+    <div class="sessao green-header">
         <legend>Informações Gerais do Projeto</legend>
+        
+        <div class="form-row">
+            <div class="form-group large">
+                <label>Título do Projeto</label>
+                <input type="text" name="titulo" required>
+            </div>
+            
+            <div class="form-group small autores-group">
+                <label>Autores</label>
+                <div id="autores" class="autor-input-group">
+                    <div class="autor">
+                        <input type="text" name="autor_nome[]" placeholder="Nome" required>
+                        <input type="text" name="autor_matricula[]" placeholder="Matrícula" required>
+                        <select name="autor_tipo[]" required>
+                            <option value="">Selecionar Tipo</option>
+                            <option value="aluno">Aluno</option>
+                            <option value="servidor">Servidor</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <label>Título do Projeto</label>
-        <input type="text" name="titulo" required>
-
-        <label>Subtítulo</label>
-        <input type="text" name="subtitulo">
+        <div class="form-row">
+            <div class="form-group large">
+                <label>Subtítulo do Projeto</label>
+                <input type="text" name="subtitulo">
+            </div>
+            
+            <div class="form-group small right-align">
+                <button type="button" class="add-autor-btn" onclick="addAutor()">+ Adicionar Autor</button>
+            </div>
+        </div>
 
         <label>Resumo/Descrição</label>
         <textarea name="descricao" required></textarea>
 
-        <label>Tipo</label>
-        <select name="tipo" required>
-            <option value="">Selecionar</option>
-            <option value="pesquisa">Pesquisa</option>
-            <option value="extensao">Extensão</option>
-            <option value="ensino">Ensino</option>
-        </select>
-
-        <label>Curso</label>
-        <select name="curso" required>
-            <option value="">Selecionar</option>
-            <option value="informatica">Informática</option>
-            <option value="textil">Têxtil</option>
-            <option value="vestuario">Vestuário</option>
-            <option value="eletro">Eletrotécnica</option>
-        </select>
-
-        <h3>Autores</h3>
-        <div id="autores">
-            <div class="autor">
-                <input type="text" name="autor_nome[]" placeholder="Nome" required>
-                <input type="text" name="autor_matricula[]" placeholder="Matrícula" required>
+        <div class="form-row-small">
+             <div class="form-group-small">
+                <label>Tipo</label>
+                <select name="tipo" required>
+                    <option value="">Selecionar Tipo</option>
+                    <option value="pesquisa">Pesquisa</option>
+                    <option value="extensao">Extensão</option>
+                    <option value="ensino">Ensino</option>
+                </select>
+            </div>
+            <div class="form-group-small">
+                <label>Curso</label>
+                <select name="curso" required>
+                    <option value="">Selecionar Curso</option>
+                    <option value="informatica">Informática</option>
+                    <option value="textil">Têxtil</option>
+                    <option value="vestuario">Vestuário</option>
+                    <option value="eletro">Eletrotécnica</option>
+                </select>
             </div>
         </div>
-        <button type="button" onclick="addAutor()">+ Adicionar Autor</button>
-
     </div>
 
-    <!-- 2. Estrutura Acadêmica -->
-    <div class="sessao">
+
+    <div class="sessao green-header">
         <legend>Estrutura Acadêmica</legend>
-        <h3>Objetivos</h3>
-        <div id="objetivos">
-            <textarea name="objetivos[]" placeholder="Digite um objetivo"></textarea>
+        
+        <div class="form-row academic-row">
+            <div class="form-group-col">
+                <label>Objetivos do Projeto</label>
+                <div id="objetivos" class="input-list">
+                    <input type="text" name="objetivos[]" placeholder="" required>
+                    <input type="text" name="objetivos[]" placeholder="" required>
+                    <input type="text" name="objetivos[]" placeholder="" required>
+                </div>
+            </div>
+            
+            <div class="form-group-col">
+                <label>Metodologias</label>
+                <div id="metodologias" class="input-list">
+                    <input type="text" name="metodologias[]" placeholder="" required>
+                    <input type="text" name="metodologias[]" placeholder="" required>
+                    <input type="text" name="metodologias[]" placeholder="" required>
+                </div>
+            </div>
         </div>
-        <button type="button" onclick="addObjetivo()">+ Adicionar Objetivo</button>
-
-        <h3>Metodologias</h3>
-        <div id="metodologias">
-            <textarea name="metodologias[]" placeholder="Digite uma metodologia"></textarea>
+        
+        <label>Adicione aqui o arquivo do seu Projeto.</label>
+        <div class="file-upload-container">
+            <input type="file" name="arquivo" accept=".pdf,.doc,.docx" id="arquivo-projeto" class="hidden-file-input">
+            <label for="arquivo-projeto" class="custom-file-label">
+                <span id="file-name-display">Selecionar Arquivo</span>
+                <span class="dropdown-arrow"></span>
+            </label>
         </div>
-        <button type="button" onclick="addMetodologia()">+ Adicionar Metodologia</button>
-
-        <h3>Arquivo do Projeto (PDF/DOC)</h3>
-        <input type="file" name="arquivo" accept=".pdf,.doc,.docx">
-
-
     </div>
 
-    <!-- 3. Mídias e Links Externos -->
-    <div class="sessao">
+    <div class="sessao green-header">
         <legend>Mídias e Links Externos</legend>
 
-        <label>Links Externos</label>
-        <h3>Imagens do Projeto</h3>
-        <div id="imagens">
-            <input type="file" name="imagens[]" accept="image/*">
-        </div>
-        <button type="button" onclick="addImagem()">+ Adicionar Imagem</button>
+        <div class="media-gallery-pp3">
+            
+            <div class="media-small-grid">
+                <div class="media-card-pp3 image-card-pp3">
+                     <label for="img-1" class="media-label-pp3">
+                         <span class="icon-nuvem-upload"></span>
+                     </label>
+                     <input type="file" name="imagens[]" accept="image/*" id="img-1" class="media-input">
+                </div>
+                <div class="media-card-pp3 image-card-pp3">
+                     <label for="img-2" class="media-label-pp3">
+                         <span class="icon-nuvem-upload"></span>
+                     </label>
+                     <input type="file" name="imagens[]" accept="image/*" id="img-2" class="media-input">
+                </div>
+                <div class="media-card-pp3 image-card-pp3">
+                     <label for="img-3" class="media-label-pp3">
+                         <span class="icon-nuvem-upload"></span>
+                     </label>
+                     <input type="file" name="imagens[]" accept="image/*" id="img-3" class="media-input">
+                </div>
+                <div class="media-card-pp3 image-card-pp3">
+                     <label for="img-4" class="media-label-pp3">
+                         <span class="icon-nuvem-upload"></span>
+                     </label>
+                     <input type="file" name="imagens[]" accept="image/*" id="img-4" class="media-input">
+                </div>
+            </div>
 
-        <div id="links">
-            <input type="url" name="links[]" placeholder="Link">
+            <div class="media-card-pp3 video-card-pp3 principal">
+                 <label for="video-link" class="video-label-pp3">
+                     <span class="icon-play"></span>
+                 </label>
+                 <input type="url" name="links_principais[]" placeholder="" id="video-link" class="media-link-input">
+            </div>
         </div>
-        <button type="button" onclick="addLink()">+ Adicionar Link</button>
+
+        <label class="links-externos-label-pp3">Links Externos</label>
+        
+        <div id="links" class="links-input-group-pp3">
+            <div class="link-input-row-pp3">
+                 <input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3">
+                 <button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>
+            </div>
+        </div>
+        
+        <button type="button" class="add-link-btn-pp3" onclick="addLinkPP3()">+ Adicionar Link</button>
     </div>
 
     <br>
-    <button type="submit">Cadastrar Projeto</button>
+    <div class="cadastro-footer">
+        <button type="submit" class="cadastrar-projeto-btn-pp3">Cadastrar Projeto</button>
+    </div>
 </form>
 
 <script>
+document.getElementById('arquivo-projeto').addEventListener('change', function() {
+    var fileName = this.files.length > 0 ? this.files[0].name : 'Selecionar Arquivo';
+    document.getElementById('file-name-display').textContent = fileName;
+});
+
 function addAutor() {
     const div = document.getElementById('autores');
     const novo = document.createElement('div');
     novo.classList.add('autor');
     novo.innerHTML = '<input type="text" name="autor_nome[]" placeholder="Nome" required> ' +
-                     '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required>';
+                     '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required> ' +
+                     '<select name="autor_tipo[]" required> <option value="">Selecionar Tipo</option> <option value="aluno">Aluno</option> <option value="servidor">Servidor</option> </select>' +
+                     '<button type="button" onclick="this.parentNode.remove()">X</button>';
     div.appendChild(novo);
 }
 
-function addObjetivo() {
-    const div = document.getElementById('objetivos');
-    const novo = document.createElement('textarea');
-    novo.name = 'objetivos[]';
-    novo.placeholder = 'Digite um objetivo';
-    div.appendChild(novo);
-}
-
-function addMetodologia() {
-    const div = document.getElementById('metodologias');
-    const novo = document.createElement('textarea');
-    novo.name = 'metodologias[]';
-    novo.placeholder = 'Digite uma metodologia';
-    div.appendChild(novo);
-}
-
-function addLink() {
+function addLinkPP3() {
     const div = document.getElementById('links');
-    const novo = document.createElement('input');
-    novo.type = 'url';
-    novo.name = 'links[]';
-    novo.placeholder = 'Link';
-    div.appendChild(novo);
+    const container = document.createElement('div');
+    container.classList.add('link-input-row-pp3');
+    container.innerHTML = '<input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3"> ' +
+                          '<button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>';
+    div.appendChild(container);
 }
-
-function addImagem() {
-    const div = document.getElementById('imagens');
-    const novo = document.createElement('input');
-    novo.type = 'file';
-    novo.name = 'imagens[]';
-    novo.accept = "image/*";
-    div.appendChild(novo);
-}
-
 </script>
 {% endblock %}
