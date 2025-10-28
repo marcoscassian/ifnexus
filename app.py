@@ -128,12 +128,14 @@ def criar_projeto():
         )
         db.session.add(novo_projeto)
         db.session.flush()
+
         arquivo = request.files.get('arquivo')
         if arquivo and arquivo.filename:
             nome_pdf = secure_filename(arquivo.filename)
             caminho_pdf = os.path.join(app.config['UPLOAD_FOLDER_PDF'], nome_pdf)
             arquivo.save(caminho_pdf)
             novo_projeto.arquivo = nome_pdf
+
         imagens = request.files.getlist('imagens[]')
         lista_imagens = []
 
@@ -146,12 +148,13 @@ def criar_projeto():
 
         novo_projeto.estrutura = ",".join(lista_imagens)
 
-    
         nomes_autores = request.form.getlist('autor_nome[]')
         matriculas_autores = request.form.getlist('autor_matricula[]')
-        for nome, matricula in zip(nomes_autores, matriculas_autores):
-            if nome.strip() and matricula.strip():
-                autor = Autor(nome=nome, matricula=matricula, projeto_id=novo_projeto.id)
+        tipos_autores = request.form.getlist('autor_tipo[]')
+
+        for nome, matricula, tipo in zip(nomes_autores, matriculas_autores, tipos_autores):
+            if nome.strip() and matricula.strip() and tipo.strip():
+                autor = Autor(nome=nome, matricula=matricula, tipo=tipo, projeto_id=novo_projeto.id)
                 db.session.add(autor)
 
         objetivos = request.form.getlist('objetivos[]')
@@ -164,17 +167,22 @@ def criar_projeto():
             if met.strip():
                 db.session.add(Metodologia(descricao=met, projeto_id=novo_projeto.id))
 
-        links = request.form.getlist('links[]')
-        for link in links:
+        links_principais = request.form.getlist('links_principais[]')
+        for link in links_principais:
+            if link.strip():
+                db.session.add(Link(url=link, projeto_id=novo_projeto.id))
+
+        links_extras = request.form.getlist('links[]')
+        for link in links_extras:
             if link.strip():
                 db.session.add(Link(url=link, projeto_id=novo_projeto.id))
 
         try:
             db.session.commit()
-            flash('Projeto cadastrado com sucesso com todos os dados!', 'success')
+            flash('Projeto cadastrado com sucesso!', 'success')
         except Exception as e:
             db.session.rollback()
-            flash(f'Erro ao cadastrar projeto: {str(e)}', 'error')
+            flash(f'Erro ao cadastrar projeto: {str(e)}', 'error') 
 
         return redirect(url_for('criar_projeto'))
 
@@ -187,7 +195,8 @@ def ver_projeto(id):
     if projeto:
         return render_template("listar_projeto.html", projeto=projeto)
     else:
-        pass
+        flash('Projeto não encontrado.', 'error')
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
