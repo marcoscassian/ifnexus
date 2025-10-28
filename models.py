@@ -1,4 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy #importa o sqlalchemy
+from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin
 db = SQLAlchemy()
 
@@ -34,6 +34,7 @@ class Autor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.Text, nullable=False)
     matricula = db.Column(db.Text, nullable=False)
+    tipo = db.Column(db.Text) 
     projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'), nullable=False)
 
 class Objetivo(db.Model):
