@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+.hero {
+    display: flex;
+    background-color: #30782B;
+    height: 349px;
+    justify-content: space-between;
+    
+}
+
 body {
     background-color: #F2F2F2;
 }
