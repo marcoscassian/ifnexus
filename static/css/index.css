@@ -1,3 +1,7 @@
+body {
+    overflow-y: overlay; 
+}
+
 .hero {
     display: flex;
     background-color: #30782B;

@@ -10,30 +10,32 @@
     <div class="container">
 
         <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="IFNexus Logo">
+            <img src="static/img/geral/ifnexus-logobranca.svg" alt="IFNexus Logo">
         </div>
+        
+        <div class="botoes">
+            <p>Crie sua conta e faça parte do IFNexus.</p>
 
-        <p>Crie sua conta e faça parte do IFNexus.</p>
-
-        <form action="{{ url_for('register') }}" method="post">
-            <div class="input-group">
-                <input type="text" name="name" placeholder="Nome de Usuário">
-                <span class="icon"></span>
-            </div>
-            <div class="input-group">
-                <input type="text" name="email" placeholder="Email">
-                <span class="icon"></span>
-            </div>
-            <div class="input-group">
-                <input type="password" name="password" placeholder="Senha">
-                <span class="icon"></span>
-            </div>
-            <div class="input-group">
-                <input type="password" name="confirm_password" placeholder="Confirme sua senha">
-                <span class="icon"></span>
-            </div>
-            <button>Cadastre-se</button>
-        </form>
+            <form action="{{ url_for('register') }}" method="post">
+                <div class="input-group">
+                    <input type="text" name="name" placeholder="Nome de Usuário">
+                    <span class="icon"></span>
+                </div>
+                <div class="input-group">
+                    <input type="text" name="email" placeholder="Email">
+                    <span class="icon"></span>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Senha">
+                    <span class="icon"></span>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="confirm_password" placeholder="Confirme sua senha">
+                    <span class="icon"></span>
+                </div>
+                <button>Cadastre-se</button>
+            </form>
+        </div>
     </div>
 
     <div class="subcontainer">

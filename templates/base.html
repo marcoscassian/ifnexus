@@ -17,7 +17,11 @@
 
 
     <header>
-        <h1 href="/" class="home">IFNexus</h1> <!-- a ser substituido pela img -->
+        <div class="logo">
+            <a href="/">
+                <img src="static/img/geral/ifnexus-logobranca.svg" alt="ifnexus-logobranca">
+            </a>
+        </div>
            
         <div class="botoes">
             {% if current_user.is_authenticated %}

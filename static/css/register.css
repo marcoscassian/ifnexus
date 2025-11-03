@@ -8,6 +8,7 @@ body {
     font-family: Arial, sans-serif;
     min-height: 100vh;
     color: white;
+    overflow: hidden;
 }
 
 .page-center {
@@ -20,18 +21,34 @@ body {
 
 
 .container {
+    position: relative;
     width: 400px;
+    height: 500px;
     background-color: #30782B;
     padding: 40px 30px;
     border-radius: 20px;
     box-shadow: 0 0 20px #30782B;
     text-align: center;
+    overflow: visible;
 }
 
 .container p {
     margin-bottom: 20px;
     font-size: 14px;
     color: white;
+}
+
+.container .botoes {
+    padding-left: 15px;
+    padding-top: 75px;
+}
+.container > .logo > img {
+    position: absolute;
+    width: 130px;
+    height: auto;
+    top: 13%;  
+    left: 50%; 
+    transform: translate(-50%, -50%); 
 }
 
 .input-group {
@@ -64,6 +81,7 @@ button {
     font-size: 16px;
     font-weight: bold;
     transition: 0.3s ease-in-out;
+    cursor: pointer;
 }
 
 button:hover {

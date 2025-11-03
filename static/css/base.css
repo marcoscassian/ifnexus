@@ -17,8 +17,13 @@ header {
     justify-content: space-between;
 }
 
-header > h1 {
-    padding-left: 20px;
+header > .logo > a > img {
+    width: 100px;
+    height: auto;
+}
+
+header > .logo {
+  padding-top: 10px;
 }
 
 .botoes {
