@@ -1,3 +1,4 @@
+#TESTE
 #responsavel por fazer os uploads dos pdfs dos arquivos ao banco de dados
 
 import os

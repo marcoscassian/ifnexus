@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="static/css/base.css">
     {% block estilos %}{% endblock %}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
 <body style="background-color: #F2F2F2;">
 
@@ -19,7 +19,7 @@
     <header>
         <div class="logo">
             <a href="/">
-                <img src="static/img/geral/ifnexus-logobranca.svg" alt="ifnexus-logobranca">
+                <img src="{{ url_for('static', filename='img/geral/ifnexus-logobranca.svg') }}" alt="ifnexus-logobranca">
             </a>
         </div>
            

@@ -92,7 +92,7 @@ header > .logo {
   }
  
   .dropdown-content a {
-    color: #555;            
+    color: #555 !important;           
     padding: 10px 16px;
     text-decoration: none;
     display: flex;

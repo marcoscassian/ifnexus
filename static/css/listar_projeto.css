@@ -30,9 +30,13 @@ body {
 }
 
 .left h1 {
-    font-size: 22px;
+    font-size: 30px;
     color: #0f6f29;
     margin-bottom: 15px;
+}
+
+.left .descricao {
+    padding-bottom: 5px;
 }
 
 .left .block2 h1,

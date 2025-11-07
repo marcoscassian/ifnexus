@@ -7,15 +7,18 @@
 {% endblock %}
 
 {% block conteudo %}
-<h1>Listar Projeto</h1>
 <div class="container">
     <div class="left">
         <div class="block1">
             <h1> {{projeto.titulo}} - {{projeto.subtitulo}}</h1>
-            <p> {{projeto.descricao}} </p>
-            <p><strong>Autores:</strong> 
-                {{ projeto.autores | map(attribute='nome') | join(', ') }}
-            </p>
+            <div class="descricao">
+                <p> {{projeto.descricao}} </p>
+            </div>
+            <div class="autores">
+                <p><strong>Autores:</strong> 
+                    {{ projeto.autores | map(attribute='nome') | join(', ') }}
+                </p>
+            </div>
             <hr>
 
         </div>
