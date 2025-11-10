@@ -198,6 +198,9 @@ def ver_projeto(id):
         flash('Projeto não encontrado.', 'error')
         return redirect(url_for('index'))
 
+@app.route("/projetoscurtidos")
+def projetos_curtidos():
+    return render_template("projetos_curtidos.html")
+    
 if __name__ == '__main__':
     app.run(debug=True)
-    

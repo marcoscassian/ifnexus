@@ -38,7 +38,7 @@ header > .logo {
     text-decoration: none;
 }
 
-/* Botão de login (quando não logado) */
+
 .botoes > .botoes_not_logged > .Login {
     background-color: transparent;
     color: white;

@@ -24,7 +24,7 @@ body {
 }
 
 .header-projeto h1 {
-    color: #004A21;
+    color: #30782B;
     font-size: 2.5em;
     margin-bottom: 5px;
 }
@@ -57,7 +57,7 @@ form {
     left: 0;
     width: 100%;
     height: 50px;
-    background-color: #00602E;
+    background-color: #30782B;
     border-radius: 10px 10px 0 0;
     z-index: 5;
 }
@@ -320,8 +320,8 @@ textarea {
     width: 200px; 
     float: right;
     background-color: #F0FFF5; 
-    color: #00602E; 
-    border: 1px solid #00602E; 
+    color:#30782B; 
+    border: 1px solid #30782B; 
     border-radius: 4px; 
     font-size: 1.1em;
     font-weight: 600;
