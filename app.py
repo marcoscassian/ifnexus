@@ -3,6 +3,14 @@ from flask_login import LoginManager, login_user, UserMixin, login_required, log
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import os
+import requests
+from urllib.parse import urlencode
+
+SUAP_CLIENT_ID = "G4IXTGHpxPafBmBGszCAuvxe6iBZgoK3W83HIUSE"
+SUAP_REDIRECT_URI = "http://127.0.0.1:5000/callback_suap"
+SUAP_AUTH_URL = "https://suap.ifrn.edu.br/o/authorize/"
+SUAP_TOKEN_URL = "https://suap.ifrn.edu.br/o/token/"
+SUAP_API_URL = "https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/"
 
 from models import (
     db,
@@ -201,6 +209,64 @@ def ver_projeto(id):
 @app.route("/projetoscurtidos")
 def projetos_curtidos():
     return render_template("projetos_curtidos.html")
-    
+
+@app.route("/login_suap")
+def login_suap():
+    params = {
+        "response_type": "code",
+        "client_id": SUAP_CLIENT_ID,
+        "redirect_uri": SUAP_REDIRECT_URI,
+        "scope": "identificacao email",
+    }
+
+    return redirect(f"{SUAP_AUTH_URL}?{urlencode(params)}")
+
+@app.route("/callback_suap")
+def callback_suap():
+
+    code = request.args.get("code")
+    if not code:
+        flash("Erro: nenhum código recebido do SUAP.", "error")
+        return redirect(url_for("login"))
+
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": SUAP_REDIRECT_URI,  # <-- corrigido
+        "client_id": SUAP_CLIENT_ID,
+    }
+
+    token_response = requests.post(SUAP_TOKEN_URL, data=data)
+
+    if token_response.status_code != 200:
+        flash(f"Erro ao obter token do SUAP: {token_response.text}", "error")
+        return redirect(url_for("login"))
+
+    access_token = token_response.json().get("access_token")
+
+    # Buscar dados do usuário
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user_info = requests.get(SUAP_API_URL, headers=headers).json()
+
+    email = user_info.get("email")
+    nome = user_info.get("nome_usual") or user_info.get("nome")
+
+    # Verificar se já existe no banco
+    usuario = Usuario.query.filter_by(email=email).first()
+
+    if not usuario:
+        # Criar um usuário automático
+        usuario = Usuario(
+            nome=nome,
+            email=email,
+            senha=bcrypt.generate_password_hash("suap_login").decode('utf-8')
+        )
+        db.session.add(usuario)
+        db.session.commit()
+
+    login_user(usuario)
+    flash("Login via SUAP realizado com sucesso!", "success")
+    return redirect(url_for("index"))
+
 if __name__ == '__main__':
     app.run(debug=True)
