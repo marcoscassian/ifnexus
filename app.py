@@ -232,7 +232,7 @@ def callback_suap():
     data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": SUAP_REDIRECT_URI,  # <-- corrigido
+        "redirect_uri": SUAP_REDIRECT_URI,
         "client_id": SUAP_CLIENT_ID,
     }
 
@@ -244,18 +244,18 @@ def callback_suap():
 
     access_token = token_response.json().get("access_token")
 
-    # Buscar dados do usuário
+    # buscar dados do usuário
     headers = {"Authorization": f"Bearer {access_token}"}
     user_info = requests.get(SUAP_API_URL, headers=headers).json()
 
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
 
-    # Verificar se já existe no banco
+    # verificar se já existe no banco
     usuario = Usuario.query.filter_by(email=email).first()
 
     if not usuario:
-        # Criar um usuário automático
+        # criar um usuário automático
         usuario = Usuario(
             nome=nome,
             email=email,
