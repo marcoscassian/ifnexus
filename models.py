@@ -9,6 +9,14 @@ class Usuario(db.Model, UserMixin):
     nome = db.Column(db.Text, nullable=False)
     email = db.Column(db.Text, unique=True, nullable=False)
     senha = db.Column(db.Text, nullable=False)
+    matricula = db.Column(db.Text, nullable=False)
+    data_nascimento = db.Column(db.Text, nullable=False)
+    cpf = db.Column(db.Text, nullable=False)
+    tipo_usuario = db.Column(db.Text, nullable=False)
+    curso = db.Column(db.Text, nullable=False)
+    campus = db.Column(db.Text, nullable=False)
+    foto = db.Column(db.Text, nullable=False)
+
 
 class Projeto(db.Model):
     __tablename__ = 'projetos'

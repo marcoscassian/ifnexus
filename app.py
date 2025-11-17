@@ -248,8 +248,19 @@ def callback_suap():
     headers = {"Authorization": f"Bearer {access_token}"}
     user_info = requests.get(SUAP_API_URL, headers=headers).json()
 
+    print(user_info)
+
+# matricula = db.Column(db.Text, nullable=True)
+# data_nascimento = db.Column(db.Date, nullable=True)
+# cpf = db.Column(db.Text, nullable=True)
+# tipo_usuario = db.Column(db.Text, nullable=True)
+# curso = db.Column(db.Text, nullable=True)
+# campus = db.Column(db.Text, nullable=True)
+# foto = db.Column(db.Text, nullable=True)
+
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
+
 
     # verificar se já existe no banco
     usuario = Usuario.query.filter_by(email=email).first()
@@ -259,7 +270,14 @@ def callback_suap():
         usuario = Usuario(
             nome=nome,
             email=email,
-            senha=bcrypt.generate_password_hash("suap_login").decode('utf-8')
+            senha=bcrypt.generate_password_hash("suap_login").decode('utf-8'),
+            data_nascimento = user_info.get("data_nascimento"),
+            cpf = user_info.get("cpf"),
+            tipo_usuario = user_info.get("tipo_vinculo"),
+            matricula = user_info.get("matricula"),
+            curso = user_info.get("curso"),#corrigir aqui, n ta enviando pro banco
+            campus = user_info.get("campus"),#corrigir aqui, n ta enviando pro banco
+            foto = user_info.get("url_foto_150x200")
         )
         db.session.add(usuario)
         db.session.commit()
