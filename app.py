@@ -205,8 +205,19 @@ def ver_projeto(id):
     else:
         flash('Projeto não encontrado.', 'error')
         return redirect(url_for('index'))
-
-@app.route("/projetoscurtidos")
+    
+#necessário garantir que só o usuário verá seu perfil
+@app.route("/perfil/<int:id>", methods=['POST'])
+def perfil(id):
+    perfil = Usuario.query.get(id)
+    if perfil:
+        return render_template("perfil.html", perfil=perfil)
+        
+    else:
+        flash('Usuário não encontrado', 'error')
+        return redirect (url_for('index'))
+    
+@app.route("/projetoscurtidos", methods=['POST'])
 def projetos_curtidos():
     return render_template("projetos_curtidos.html")
 
@@ -250,23 +261,16 @@ def callback_suap():
 
     print(user_info)
 
-# matricula = db.Column(db.Text, nullable=True)
-# data_nascimento = db.Column(db.Date, nullable=True)
-# cpf = db.Column(db.Text, nullable=True)
-# tipo_usuario = db.Column(db.Text, nullable=True)
-# curso = db.Column(db.Text, nullable=True)
-# campus = db.Column(db.Text, nullable=True)
-# foto = db.Column(db.Text, nullable=True)
-
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
 
-
     # verificar se já existe no banco
     usuario = Usuario.query.filter_by(email=email).first()
+    vinculo = user_info.get("vinculo", {})
 
     if not usuario:
         # criar um usuário automático
+        
         usuario = Usuario(
             nome=nome,
             email=email,
@@ -275,8 +279,8 @@ def callback_suap():
             cpf = user_info.get("cpf"),
             tipo_usuario = user_info.get("tipo_vinculo"),
             matricula = user_info.get("matricula"),
-            curso = user_info.get("curso"),#corrigir aqui, n ta enviando pro banco
-            campus = user_info.get("campus"),#corrigir aqui, n ta enviando pro banco
+            curso = vinculo.get("curso"),
+            campus = vinculo.get("campus"),
             foto = user_info.get("url_foto_150x200")
         )
         db.session.add(usuario)
