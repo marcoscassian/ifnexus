@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy 
 from flask_login import UserMixin
+from datetime import datetime
+
 db = SQLAlchemy()
 
 class Usuario(db.Model, UserMixin):
@@ -16,6 +18,7 @@ class Usuario(db.Model, UserMixin):
     curso = db.Column(db.Text, nullable=False)
     campus = db.Column(db.Text, nullable=False)
     foto = db.Column(db.Text, nullable=False)
+    comentarios = db.relationship('Comentario', backref='usuario', lazy=True, cascade="all, delete-orphan")
 
 
 class Projeto(db.Model):
@@ -29,13 +32,15 @@ class Projeto(db.Model):
     curso = db.Column(db.Text)
     estrutura = db.Column(db.Text)
     arquivo = db.Column(db.Text)
+    curtidas = db.Column(db.Integer, default=0)
+    
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-
     autores = db.relationship('Autor', backref='projeto', lazy=True, cascade="all, delete-orphan")
     objetivos = db.relationship('Objetivo', backref='projeto', lazy=True, cascade="all, delete-orphan")
     metodologias = db.relationship('Metodologia', backref='projeto', lazy=True, cascade="all, delete-orphan")
     links = db.relationship('Link', backref='projeto', lazy=True, cascade="all, delete-orphan")
-
+    comentarios = db.relationship('Comentario', backref='projeto', lazy=True, cascade="all, delete-orphan")
+    
 class Autor(db.Model):
     __tablename__ = 'autores'
 
@@ -64,4 +69,21 @@ class Link(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.Text, nullable=False)
+    projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'), nullable=False)
+
+class Comentario(db.Model):
+    __tablename__ = 'comentarios'
+
+    id = db.Column(db.Integer, primary_key=True)
+    conteudo = db.Column(db.Text, nullable=False)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'), nullable=False)
+
+class Curtida(db.Model):
+    __tablename__ = 'curtidas'
+
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'), nullable=False)

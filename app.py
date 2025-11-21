@@ -19,7 +19,8 @@ from models import (
     Autor,
     Objetivo,
     Metodologia,
-    Link
+    Link,
+    Comentario
 )
 
 
@@ -201,7 +202,8 @@ def criar_projeto():
 def ver_projeto(id):
     projeto = Projeto.query.get(id)
     if projeto:
-        return render_template("listar_projeto.html", projeto=projeto)
+        comentarios = Comentario.query.filter_by(projeto_id=projeto.id).order_by(Comentario.criado_em.desc()).all()
+        return render_template("listar_projeto.html", projeto=projeto, comentarios=comentarios)
     else:
         flash('Projeto não encontrado.', 'error')
         return redirect(url_for('index'))
@@ -216,10 +218,37 @@ def perfil(id):
     else:
         flash('Usuário não encontrado', 'error')
         return redirect (url_for('index'))
-    
+
+@app.route('/meu_perfil')
+@login_required
+def meu_perfil():
+    return render_template('perfil.html', perfil=current_user)
+
 @app.route("/projetoscurtidos", methods=['POST'])
 def projetos_curtidos():
     return render_template("projetos_curtidos.html")
+
+
+@app.route('/projeto/<int:id>/comentario', methods=['POST'])
+@login_required
+def adicionar_comentario(id):
+    projeto = Projeto.query.get_or_404(id)
+    conteudo = request.form.get('conteudo') or request.form.get('comentario')
+
+    if not conteudo or not conteudo.strip():
+        flash('Comentário vazio. Escreva algo antes de enviar.', 'error')
+        return redirect(url_for('ver_projeto', id=id))
+
+    comentario = Comentario(conteudo=conteudo.strip(), usuario_id=current_user.id, projeto_id=projeto.id)
+    try:
+        db.session.add(comentario)
+        db.session.commit()
+        flash('Comentário adicionado com sucesso!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao adicionar comentário: {str(e)}', 'error')
+
+    return redirect(url_for('ver_projeto', id=id))
 
 @app.route("/login_suap")
 def login_suap():

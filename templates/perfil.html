@@ -3,10 +3,31 @@
 {% block title %}Meu Perfil{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/meuperfil.css') }}">
 {% endblock %}
 
 {% block conteudo %}
 {% include 'componentes/erro.html' %}
-    
+    <div class="perfil-container">
+        <h2>Perfil de {{ perfil.nome }}</h2>
+        <div class="info-perfil">
+            <div class="foto">
+                {% if perfil.foto %}
+                    <img src="{{ perfil.foto }}" alt="Foto de {{ perfil.nome }}"/>
+                {% else %}
+                    </p>>Sem foto</div>
+                {% endif %}
+            </div>
+
+            <div class="dados">
+                <p><strong>Nome:</strong> {{ perfil.nome }}</p>
+                <p><strong>Email:</strong> {{ perfil.email }}</p>
+                <p><strong>Matrícula:</strong> {{ perfil.matricula }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ perfil.data_nascimento }}</p>
+                <p><strong>CPF:</strong> {{ perfil.cpf }}</p>
+                <p><strong>Tipo de Usuário:</strong> {{ perfil.tipo_usuario }}</p>
+                <p><strong>Curso:</strong> {{ perfil.curso }}</p>
+                <p><strong>Campus:</strong> {{ perfil.campus }}</p>
+            </div>
+        </div>
 {% endblock %}
