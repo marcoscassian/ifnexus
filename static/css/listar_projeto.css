@@ -144,3 +144,20 @@ ul li {
     object-fit: cover;
     border: 2px solid #ddd;
 }
+
+.share-button {
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+}
+
+.share-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+}

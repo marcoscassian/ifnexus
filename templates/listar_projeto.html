@@ -121,8 +121,14 @@
                     </form>
                 </div>
         </div>
-        <!-- Botao de Compartilhar -->
-    </div>
+
+        <div class="share">
+        <button id="share-btn" class="share-button">
+            <img src="{{ url_for('static', filename='img/interacoes/compartilhamento/share.png') }}" 
+                alt="Compartilhar" class="share-icon">
+            <span>Compartilhar Projeto</span>
+        </button>
+        </div>
 </div>
 
 <div class="comments-list">
@@ -149,7 +155,7 @@
 
         <div class="comment-meta">
             <strong>{{ comentario.usuario.nome }}</strong>
-            <span class="comment-date" data-ts="{{ comentario.criado_em.isoformat() }}">
+                <span class="comment-date" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">
                 {{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}
             </span>
         </div>
@@ -165,12 +171,12 @@
 <script>
     // Script para converter datas em "tempo atrás"
     document.addEventListener('DOMContentLoaded', function(){
-        function timeAgoFromISO(iso){
+        function timeAgoFromMs(ms){
             try{
-                var then = new Date(iso);
-                if(isNaN(then)) return iso;
+                var then = new Date(Number(ms));
+                if(isNaN(then)) return '';
                 var now = new Date();
-                var diff = now - then; // ms
+                var diff = now.getTime() - then.getTime(); // ms
                 var seconds = Math.floor(diff / 1000);
                 var minutes = Math.floor(seconds / 60);
                 var hours = Math.floor(minutes / 60);
@@ -195,15 +201,15 @@
                 }
                 return 'agora mesmo';
             }catch(err){
-                return iso;
+                return '';
             }
         }
 
-        var dateEls = document.querySelectorAll('.comment-date[data-ts]');
+        var dateEls = document.querySelectorAll('.comment-date[data-ts-ms]');
         dateEls.forEach(function(el){
-            var iso = el.getAttribute('data-ts');
-            var text = timeAgoFromISO(iso);
-            el.textContent = text;
+            var ms = el.getAttribute('data-ts-ms');
+            var text = timeAgoFromMs(ms);
+            if(text) el.textContent = text;
         });
     });
 
@@ -278,5 +284,24 @@
             });
         });
     })();
+
+    // Compartilhamento via Web Share API
+
+    document.getElementById("share-btn").addEventListener("click", function () {
+
+        if (navigator.share) {
+            navigator.share({
+                title: "Olha esse projeto!",
+                text: "Dá uma olhada nesse projeto do Nexus IF:",
+                url: window.location.href
+            })
+            .then(() => console.log("Compartilhado com sucesso"))
+            .catch((err) => console.log("Erro ao compartilhar:", err));
+
+        } else {
+            alert("Compartilhamento não suportado neste navegador.");
+        }
+    });
+
 </script>
 {% endblock %}
