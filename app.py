@@ -229,6 +229,13 @@ def projetos_curtidos():
     return render_template("projetos_curtidos.html")
 
 
+@app.route('/curtir_projeto/<int:id>', methods=['POST'])
+@login_required
+def curtir_projeto(id):
+    # Rota simples para curtir um projeto
+    return ('')
+
+
 @app.route('/projeto/<int:id>/comentario', methods=['POST'])
 @login_required
 def adicionar_comentario(id):

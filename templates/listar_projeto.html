@@ -68,4 +68,91 @@
 
     </div>
 </div>
+
+<div class="interactions">
+    <div class="comments-form">
+            <div class="comment-avatar">
+                {% if current_user.is_authenticated and current_user.foto %}
+                    {% set foto = current_user.foto %}
+                    {% if 'http' in foto %}
+                        <img src="{{ foto }}" alt="{{ current_user.nome }}" class="comment-avatar-img">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/img/' + foto) }}" alt="{{ current_user.nome }}" class="comment-avatar-img">
+                    {% endif %}
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
+                {% endif %}
+            </div>
+            <form id="comment-form" action="{{ url_for('adicionar_comentario', id=projeto.id) }}" method="post" class="comment">
+                <textarea id="comment-textarea" name="conteudo" rows="3" placeholder="O que você achou desse projeto?"></textarea>
+                <div class="comment-actions">
+                    <button type="submit" class="btn-submit">Enviar comentário</button>
+                </div>
+            </form>
+    </div>
+    <div class="others">
+        <!-- Botão de curtir -->
+        <!-- Botao de Compartilhar -->
+    </div>
+</div>
+
+<div class="comments-list">
+    {% for comentario in comentarios %}
+    <div class="comment-item">
+        <div class="comment-meta">
+            <strong>{{ comentario.usuario.nome }}</strong>
+            <span class="comment-date" data-ts="{{ comentario.criado_em.isoformat() }}">{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}</span>
+        </div>
+        <div class="comment-body">
+            <p>{{ comentario.conteudo }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Script para converter datas em "tempo atrás"
+    document.addEventListener('DOMContentLoaded', function(){
+        function timeAgoFromISO(iso){
+            try{
+                var then = new Date(iso);
+                if(isNaN(then)) return iso;
+                var now = new Date();
+                var diff = now - then; // ms
+                var seconds = Math.floor(diff / 1000);
+                var minutes = Math.floor(seconds / 60);
+                var hours = Math.floor(minutes / 60);
+                var days = Math.floor(hours / 24);
+                var months = Math.floor(days / 30);
+                var years = Math.floor(days / 365);
+
+                if(years >= 1){
+                    return then.toLocaleDateString();
+                }
+                if(months >= 1){
+                    return 'há ' + months + (months === 1 ? ' mês' : ' meses');
+                }
+                if(days >= 1){
+                    return 'há ' + days + (days === 1 ? ' dia' : ' dias');
+                }
+                if(hours >= 1){
+                    return 'há ' + hours + (hours === 1 ? ' hora' : ' horas');
+                }
+                if(minutes >= 1){
+                    return 'há ' + minutes + (minutes === 1 ? ' minuto' : ' minutos');
+                }
+                return 'agora mesmo';
+            }catch(err){
+                return iso;
+            }
+        }
+
+        var dateEls = document.querySelectorAll('.comment-date[data-ts]');
+        dateEls.forEach(function(el){
+            var iso = el.getAttribute('data-ts');
+            var text = timeAgoFromISO(iso);
+            el.textContent = text;
+        });
+    });
+</script>
 {% endblock %}
