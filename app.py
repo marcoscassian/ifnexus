@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, flash, redirect
+from flask import Flask, render_template, url_for, request, flash, redirect, jsonify
 from flask_login import LoginManager, login_user, UserMixin, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
@@ -22,6 +22,7 @@ from models import (
     Link,
     Comentario
 )
+from models import Curtida
 
 
 app = Flask(__name__)
@@ -203,7 +204,33 @@ def ver_projeto(id):
     projeto = Projeto.query.get(id)
     if projeto:
         comentarios = Comentario.query.filter_by(projeto_id=projeto.id).order_by(Comentario.criado_em.desc()).all()
-        return render_template("listar_projeto.html", projeto=projeto, comentarios=comentarios)
+
+        # verifica se o usuário atual já curtiu este projeto (se estiver logado)
+        liked = False
+        try:
+            if current_user and getattr(current_user, 'is_authenticated', False):
+                liked = Curtida.query.filter_by(usuario_id=current_user.id, projeto_id=projeto.id).first() is not None
+        except Exception:
+            liked = False
+
+        # caminhos dos ícones
+        heart_liked_path = os.path.join(BASE_DIR, 'static', 'img', 'interacoes', 'curtidas', 'heartliked.png')
+        heart_path = os.path.join(BASE_DIR, 'static', 'img', 'interacoes', 'curtidas', 'heart.png')
+        heart_hover_path = os.path.join(BASE_DIR, 'static', 'img', 'interacoes', 'curtidas', 'hearthover.png')
+
+        heart_liked_exists = os.path.exists(heart_liked_path)
+        heart_exists = os.path.exists(heart_path)
+        heart_hover_exists = os.path.exists(heart_hover_path)
+
+        return render_template(
+            "listar_projeto.html",
+            projeto=projeto,
+            comentarios=comentarios,
+            liked=liked,
+            heart_liked_exists=heart_liked_exists,
+            heart_exists=heart_exists,
+            heart_hover_exists=heart_hover_exists
+        )
     else:
         flash('Projeto não encontrado.', 'error')
         return redirect(url_for('index'))
@@ -229,18 +256,33 @@ def projetos_curtidos():
     return render_template("projetos_curtidos.html")
 
 
-@app.route('/curtir_projeto/<int:id>', methods=['POST'])
+@app.route('/projeto/<int:id>/curtir_projeto/', methods=['POST'])
 @login_required
 def curtir_projeto(id):
-    # Rota simples para curtir um projeto
-    return ('')
+    projeto = Projeto.query.get_or_404(id)
+    existente = Curtida.query.filter_by(usuario_id=current_user.id, projeto_id=projeto.id).first()
+    try:
+        if existente:
+            db.session.delete(existente)
+            projeto.curtidas = max((projeto.curtidas or 0) - 1, 0)
+            db.session.commit()
+            return jsonify({'liked': False, 'curtidas': projeto.curtidas}), 200
+
+        nova = Curtida(usuario_id=current_user.id, projeto_id=projeto.id)
+        projeto.curtidas = (projeto.curtidas or 0) + 1
+        db.session.add(nova)
+        db.session.commit()
+        return jsonify({'liked': True, 'curtidas': projeto.curtidas}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/projeto/<int:id>/comentario', methods=['POST'])
 @login_required
 def adicionar_comentario(id):
     projeto = Projeto.query.get_or_404(id)
-    conteudo = request.form.get('conteudo') or request.form.get('comentario')
+    conteudo = request.form.get('conteudo')
 
     if not conteudo or not conteudo.strip():
         flash('Comentário vazio. Escreva algo antes de enviar.', 'error')

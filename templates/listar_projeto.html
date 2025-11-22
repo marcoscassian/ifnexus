@@ -91,7 +91,36 @@
             </form>
     </div>
     <div class="others">
-        <!-- Botão de curtir -->
+        <div class="enjoy">
+                <div class="like-row">
+                    <form id="like-form" action="{{ url_for('curtir_projeto', id=projeto.id) }}" method="post">
+                        <button type="submit" id="like-btn" class="like-btn" aria-label="Curtir projeto">
+                                {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}
+                                {% set unliked_src = (url_for('static', filename='img/interacoes/curtidas/heart.png') if heart_exists else '') %}
+                                {% set hover_src = (url_for('static', filename='img/interacoes/curtidas/hearthover.png') if heart_hover_exists else '') %}
+
+                                {% if liked %}
+                                    <img id="like-img"
+                                        src="{{ liked_src }}"
+                                        alt="curtido"
+                                        data-liked="1"
+                                        data-liked-src="{{ liked_src }}"
+                                        data-unliked-src="{{ unliked_src }}"
+                                        data-hover-src="{{ hover_src }}">
+                                {% else %}
+                                    <img id="like-img"
+                                        src="{{ unliked_src }}"
+                                        alt="curtir"
+                                        data-liked="0"
+                                        data-liked-src="{{ liked_src }}"
+                                        data-unliked-src="{{ unliked_src }}"
+                                        data-hover-src="{{ hover_src }}">
+                                {% endif %}
+                                <span id="like-count">{{ projeto.curtidas or 0 }} Curtidas</span>
+                        </button>
+                    </form>
+                </div>
+        </div>
         <!-- Botao de Compartilhar -->
     </div>
 </div>
@@ -99,16 +128,39 @@
 <div class="comments-list">
     {% for comentario in comentarios %}
     <div class="comment-item">
+        
+        <div class="comment-avatar">
+            {% if comentario.usuario.foto %}
+                {% if 'http' in comentario.usuario.foto %}
+                    <img src="{{ comentario.usuario.foto }}" 
+                         alt="{{ comentario.usuario.nome }}" 
+                         class="comment-avatar-img">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/img/' + comentario.usuario.foto) }}" 
+                         alt="{{ comentario.usuario.nome }}" 
+                         class="comment-avatar-img">
+                {% endif %}
+            {% else %}
+                <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}"
+                     alt="Avatar" 
+                     class="comment-avatar-img">
+            {% endif %}
+        </div>
+
         <div class="comment-meta">
             <strong>{{ comentario.usuario.nome }}</strong>
-            <span class="comment-date" data-ts="{{ comentario.criado_em.isoformat() }}">{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}</span>
+            <span class="comment-date" data-ts="{{ comentario.criado_em.isoformat() }}">
+                {{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}
+            </span>
         </div>
+
         <div class="comment-body">
             <p>{{ comentario.conteudo }}</p>
         </div>
     </div>
     {% endfor %}
 </div>
+
 
 <script>
     // Script para converter datas em "tempo atrás"
@@ -154,5 +206,77 @@
             el.textContent = text;
         });
     });
+
+    // Hover do ícone de curtida e submissão AJAX
+    (function(){
+        var likeForm = document.getElementById('like-form');
+        var likeImg = document.getElementById('like-img');
+        var likeCount = document.getElementById('like-count');
+        if(!likeImg) return;
+
+        function applyHover(){
+            var newImg = likeImg.cloneNode(true);
+            likeImg.parentNode.replaceChild(newImg, likeImg);
+            likeImg = newImg;
+
+            var originalSrc = likeImg.getAttribute('src');
+            var hoverSrc = likeImg.dataset.hoverSrc || null;
+            var liked = likeImg.dataset.liked === '1';
+
+            if(!liked && hoverSrc){
+                likeImg.addEventListener('mouseenter', function(){
+                    likeImg.setAttribute('src', hoverSrc);
+                });
+                likeImg.addEventListener('mouseleave', function(){
+                    likeImg.setAttribute('src', originalSrc);
+                });
+            }
+        }
+
+        applyHover();
+
+        if(!likeForm) return;
+
+        likeForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            var btn = likeForm.querySelector('button[type="submit"]');
+            if(btn) btn.disabled = true;
+
+            fetch(likeForm.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(function(resp){
+                return resp.json().then(function(data){ return {status: resp.status, body: data}; });
+            }).then(function(res){
+                if(res.status === 200 && res.body){
+                    var liked = !!res.body.liked;
+                    var curtidas = res.body.curtidas;
+
+                    var likedSrc = likeImg.dataset.likedSrc || '';
+                    var unlikedSrc = likeImg.dataset.unlikedSrc || '';
+                    if(liked && likedSrc){
+                        likeImg.setAttribute('src', likedSrc);
+                        likeImg.dataset.liked = '1';
+                    } else {
+                        if(unlikedSrc) likeImg.setAttribute('src', unlikedSrc);
+                        likeImg.dataset.liked = '0';
+                    }
+                    if(likeCount) likeCount.textContent = curtidas + " Curtidas";
+                    applyHover();
+                } else {
+                    console.error('Erro ao curtir:', res.body && res.body.error ? res.body.error : res);
+                    alert('Erro ao atualizar curtida.');
+                }
+            }).catch(function(err){
+                console.error(err);
+                alert('Erro de rede ao curtir.');
+            }).finally(function(){
+                if(btn) btn.disabled = false;
+            });
+        });
+    })();
 </script>
 {% endblock %}
