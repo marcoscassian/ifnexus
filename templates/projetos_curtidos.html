@@ -7,6 +7,39 @@
 {% endblock %}
 
 {% block conteudo %}
-    <h1>Futuramente - projetos curtidos</h1>
-    <p>Em desenvolvimento...</p>
+    <h1 class="page-title">Projetos Curtidos</h1>
+    {% if projetos and projetos|length > 0 %}
+    <div class="cards">
+        {% for projeto in projetos %}
+            <div class="card">
+                {# obter primeira imagem da estrutura, se existir #}
+                {% set thumb = None %}
+                {% if projeto.estrutura %}
+                    {% set parts = projeto.estrutura.split(',') %}
+                    {% if parts and parts[0] %}
+                        {% set thumb = parts[0].strip() %}
+                    {% endif %}
+                {% endif %}
+
+                {% if thumb %}
+                    <img class="card-img" src="{{ url_for('static', filename='uploads/img/' ~ thumb) }}" alt="{{ projeto.titulo }}">
+                {% else %}
+                    <div class="card-img" aria-hidden="true"></div>
+                {% endif %}
+
+                <div class="content">
+                    <h3>{{ projeto.titulo }}</h3>
+                    {% if projeto.subtitulo %}<h4>{{ projeto.subtitulo }}</h4>{% endif %}
+                    <p class="card-desc">{{ projeto.descricao }}</p>
+                    <div class="card-actions">
+                        <a class="btn" href="{{ url_for('ver_projeto', id=projeto.id) }}">Ver projeto</a>
+                        <span class="card-like-count">{{ projeto.curtidas or 0 }} curtidas</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Você ainda não curtiu nenhum projeto.</p>
+    {% endif %}
 {% endblock %}

@@ -162,10 +162,6 @@ ul li {
     display: block;
 }
 
-/* -----------------------
-   NOVAS REGRAS: área de comentário e lista
-   ----------------------- */
-
 .comment-compose {
     width: 100%;
     display: flex;
