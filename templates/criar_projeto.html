@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Cadastrar Projeto{% endblock %}
+{% block title %}{{ header_title | default('Cadastrar Projeto') }}{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/criar_projeto.css') }}">
@@ -10,11 +10,11 @@
 {% include 'componentes/erro.html' %}
 
 <div class="header-projeto">
-    <h1>Cadastrar Novo Projeto</h1>
-    <p>Preencha os dados abaixo para publicar seu projeto na vitrine do IF.</p>
+    <h1>{{ header_title | default('Cadastrar Novo Projeto') }}</h1>
+    <p>{{ header_subtitle | default('Preencha os dados abaixo para publicar seu projeto na vitrine do IF.') }}</p>
 </div>
 
-<form action="{{ url_for('criar_projeto') }}" method="POST" enctype="multipart/form-data">
+<form action="{{ action_url | default(url_for('criar_projeto')) }}" method="POST" enctype="multipart/form-data">
 
     <div class="sessao green-header">
         <legend>Informações Gerais do Projeto</legend>
@@ -22,21 +22,24 @@
         <div class="form-row">
             <div class="form-group large">
                 <label>Título do Projeto</label>
-                <input type="text" name="titulo" required>
+                <input type="text" name="titulo" value="{{ titulo }}" required>
             </div>
             
             <div class="form-group small autores-group">
                 <label>Autores</label>
                 <div id="autores" class="autor-input-group">
+                    {% for autor in autores %}
                     <div class="autor">
-                        <input type="text" name="autor_nome[]" placeholder="Nome" required>
-                        <input type="text" name="autor_matricula[]" placeholder="Matrícula" required>
+                        <input type="text" name="autor_nome[]" placeholder="Nome" value="{{ autor.nome }}" required>
+                        <input type="text" name="autor_matricula[]" placeholder="Matrícula" value="{{ autor.matricula }}" required>
                         <select name="autor_tipo[]" required>
                             <option value="">Selecionar Tipo</option>
-                            <option value="aluno">Aluno</option>
-                            <option value="servidor">Servidor</option>
+                            <option value="aluno" {% if autor.tipo == 'aluno' %}selected{% endif %}>Aluno</option>
+                            <option value="servidor" {% if autor.tipo == 'servidor' %}selected{% endif %}>Servidor</option>
                         </select>
+                        {% if not loop.first %}<button type="button" onclick="this.parentNode.remove()">X</button>{% endif %}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -44,7 +47,7 @@
         <div class="form-row">
             <div class="form-group large">
                 <label>Subtítulo do Projeto</label>
-                <input type="text" name="subtitulo">
+                <input type="text" name="subtitulo" value="{{ subtitulo }}">
             </div>
             
             <div class="form-group small right-align">
@@ -53,26 +56,26 @@
         </div>
 
         <label>Resumo/Descrição</label>
-        <textarea name="descricao" required></textarea>
+        <textarea name="descricao" required>{{ descricao }}</textarea>
 
         <div class="form-row-small">
              <div class="form-group-small">
                 <label>Tipo</label>
                 <select name="tipo" required>
                     <option value="">Selecionar Tipo</option>
-                    <option value="pesquisa">Pesquisa</option>
-                    <option value="extensao">Extensão</option>
-                    <option value="ensino">Ensino</option>
+                    <option value="pesquisa" {% if tipo == 'pesquisa' %}selected{% endif %}>Pesquisa</option>
+                    <option value="extensao" {% if tipo == 'extensao' %}selected{% endif %}>Extensão</option>
+                    <option value="ensino" {% if tipo == 'ensino' %}selected{% endif %}>Ensino</option>
                 </select>
             </div>
             <div class="form-group-small">
                 <label>Curso</label>
                 <select name="curso" required>
                     <option value="">Selecionar Curso</option>
-                    <option value="informatica">Informática</option>
-                    <option value="textil">Têxtil</option>
-                    <option value="vestuario">Vestuário</option>
-                    <option value="eletro">Eletrotécnica</option>
+                    <option value="informatica" {% if curso == 'informatica' %}selected{% endif %}>Informática</option>
+                    <option value="textil" {% if curso == 'textil' %}selected{% endif %}>Têxtil</option>
+                    <option value="vestuario" {% if curso == 'vestuario' %}selected{% endif %}>Vestuário</option>
+                    <option value="eletro" {% if curso == 'eletro' %}selected{% endif %}>Eletrotécnica</option>
                 </select>
             </div>
         </div>
@@ -86,27 +89,27 @@
             <div class="form-group-col">
                 <label>Objetivos do Projeto</label>
                 <div id="objetivos" class="input-list">
-                    <input type="text" name="objetivos[]" placeholder="" required>
-                    <input type="text" name="objetivos[]" placeholder="" required>
-                    <input type="text" name="objetivos[]" placeholder="" required>
+                    {% for objetivo in objetivos %}
+                    <input type="text" name="objetivos[]" placeholder="" value="{{ objetivo.descricao }}" required>
+                    {% endfor %}
                 </div>
             </div>
             
             <div class="form-group-col">
                 <label>Metodologias</label>
                 <div id="metodologias" class="input-list">
-                    <input type="text" name="metodologias[]" placeholder="" required>
-                    <input type="text" name="metodologias[]" placeholder="" required>
-                    <input type="text" name="metodologias[]" placeholder="" required>
+                    {% for metodologia in metodologias %}
+                    <input type="text" name="metodologias[]" placeholder="" value="{{ metodologia.descricao }}" required>
+                    {% endfor %}
                 </div>
             </div>
         </div>
         
-        <label>Adicione aqui o arquivo do seu Projeto.</label>
+        <label>Adicione aqui o arquivo do seu Projeto. (Arquivo atual: **{{ arquivo_nome or 'Nenhum' }}**)</label>
         <div class="file-upload-container">
             <input type="file" name="arquivo" accept=".pdf,.doc,.docx" id="arquivo-projeto" class="hidden-file-input">
             <label for="arquivo-projeto" class="custom-file-label">
-                <span id="file-name-display">Selecionar Arquivo</span>
+                <span id="file-name-display">{{ arquivo_nome or 'Selecionar Arquivo' }}</span>
                 <span class="dropdown-arrow"></span>
             </label>
         </div>
@@ -118,47 +121,44 @@
         <div class="media-gallery-pp3">
             
             <div class="media-small-grid">
+                {% for i in range(4) %}
+                {% set img_file = imagens[i] if loop.index0 < imagens|length else '' %}
+                {% set img_url = url_for('static', filename='uploads/img/' + img_file) if img_file %}
                 <div class="media-card-pp3 image-card-pp3">
-                     <label for="img-1" class="media-label-pp3">
-                         <span class="icon-nuvem-upload"></span>
-                     </label>
-                     <input type="file" name="imagens[]" accept="image/*" id="img-1" class="media-input">
+                    <label for="img-{{ i+1 }}" class="media-label-pp3">
+                        <span class="icon-nuvem-upload"></span>
+                         {% if img_file %}
+                            <img src="{{ img_url }}" class="uploaded-img" alt="Imagem atual">
+                         {% endif %}
+                    </label>
+                    <input type="file" name="imagens[]" accept="image/*" id="img-{{ i+1 }}" class="media-input">
                 </div>
-                <div class="media-card-pp3 image-card-pp3">
-                     <label for="img-2" class="media-label-pp3">
-                         <span class="icon-nuvem-upload"></span>
-                     </label>
-                     <input type="file" name="imagens[]" accept="image/*" id="img-2" class="media-input">
-                </div>
-                <div class="media-card-pp3 image-card-pp3">
-                     <label for="img-3" class="media-label-pp3">
-                         <span class="icon-nuvem-upload"></span>
-                     </label>
-                     <input type="file" name="imagens[]" accept="image/*" id="img-3" class="media-input">
-                </div>
-                <div class="media-card-pp3 image-card-pp3">
-                     <label for="img-4" class="media-label-pp3">
-                         <span class="icon-nuvem-upload"></span>
-                     </label>
-                     <input type="file" name="imagens[]" accept="image/*" id="img-4" class="media-input">
-                </div>
+                {% endfor %}
             </div>
 
             <div class="media-card-pp3 video-card-pp3 principal">
                  <label for="video-link" class="video-label-pp3">
                      <span class="icon-play"></span>
                  </label>
-                 <input type="url" name="links_principais[]" placeholder="" id="video-link" class="media-link-input">
+                 <input type="url" name="links_principais[]" placeholder="Link do Vídeo" id="video-link" class="media-link-input" value="{{ link_principal }}">
             </div>
         </div>
 
         <label class="links-externos-label-pp3">Links Externos</label>
         
         <div id="links" class="links-input-group-pp3">
+            {% for link in links_extras %}
+            <div class="link-input-row-pp3">
+                 <input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3" value="{{ link }}">
+                 <button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>
+            </div>
+            {% endfor %}
+            {% if not links_extras %}
             <div class="link-input-row-pp3">
                  <input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3">
                  <button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>
             </div>
+            {% endif %}
         </div>
         
         <button type="button" class="add-link-btn-pp3" onclick="addLinkPP3()">+ Adicionar Link</button>
@@ -166,34 +166,73 @@
 
     <br>
     <div class="cadastro-footer">
-        <button type="submit" class="cadastrar-projeto-btn-pp3">Cadastrar Projeto</button>
+        <button type="submit" class="cadastrar-projeto-btn-pp3">{{ submit_text | default('Cadastrar Projeto') }}</button>
     </div>
 </form>
 
 <script>
-document.getElementById('arquivo-projeto').addEventListener('change', function() {
-    var fileName = this.files.length > 0 ? this.files[0].name : 'Selecionar Arquivo';
-    document.getElementById('file-name-display').textContent = fileName;
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.media-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const label = this.closest('.media-card-pp3').querySelector('.media-label-pp3');
+            let img = label.querySelector('.uploaded-img');
+            
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.classList.add('uploaded-img');
+                        img.alt = "Pré-visualização";
+                        label.appendChild(img);
+                    }
+                    img.src = e.target.result;
+                    label.querySelector('.icon-nuvem-upload').style.display = 'none';
+                }
+                reader.readAsDataURL(this.files[0]);
+            } else if (img) { 
+                 img.remove();
+                 const initialImg = label.querySelector('.uploaded-img[data-initial-src]');
+                 if (initialImg) initialImg.style.display = 'block';
+                 else label.querySelector('.icon-nuvem-upload').style.display = 'block';
+            }
+        });
+        
+        const label = input.closest('.media-card-pp3').querySelector('.media-label-pp3');
+        const initialImg = label.querySelector('.uploaded-img');
+        if (initialImg) {
+             label.querySelector('.icon-nuvem-upload').style.display = 'none';
+             initialImg.setAttribute('data-initial-src', initialImg.src);
+        }
+    });
+
+    document.getElementById('arquivo-projeto').addEventListener('change', function() {
+        var fileName = this.files.length > 0 ? this.files[0].name : 'Selecionar Arquivo';
+        document.getElementById('file-name-display').textContent = fileName;
+    });
+
+    function addAutor() {
+        const div = document.getElementById('autores');
+        const novo = document.createElement('div');
+        novo.classList.add('autor');
+        novo.innerHTML = '<input type="text" name="autor_nome[]" placeholder="Nome" required> ' +
+                         '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required> ' +
+                         '<select name="autor_tipo[]" required> <option value="">Selecionar Tipo</option> <option value="aluno">Aluno</option> <option value="servidor">Servidor</option> </select>' +
+                         '<button type="button" onclick="this.parentNode.remove()">X</button>';
+        div.appendChild(novo);
+    }
+    window.addAutor = addAutor;
+
+    function addLinkPP3() {
+        const div = document.getElementById('links');
+        const container = document.createElement('div');
+        container.classList.add('link-input-row-pp3');
+        container.innerHTML = '<input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3"> ' +
+                              '<button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>';
+        div.appendChild(container);
+    }
+    window.addLinkPP3 = addLinkPP3;
+
 });
-
-function addAutor() {
-    const div = document.getElementById('autores');
-    const novo = document.createElement('div');
-    novo.classList.add('autor');
-    novo.innerHTML = '<input type="text" name="autor_nome[]" placeholder="Nome" required> ' +
-                     '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required> ' +
-                     '<select name="autor_tipo[]" required> <option value="">Selecionar Tipo</option> <option value="aluno">Aluno</option> <option value="servidor">Servidor</option> </select>' +
-                     '<button type="button" onclick="this.parentNode.remove()">X</button>';
-    div.appendChild(novo);
-}
-
-function addLinkPP3() {
-    const div = document.getElementById('links');
-    const container = document.createElement('div');
-    container.classList.add('link-input-row-pp3');
-    container.innerHTML = '<input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3"> ' +
-                          '<button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>';
-    div.appendChild(container);
-}
 </script>
 {% endblock %}

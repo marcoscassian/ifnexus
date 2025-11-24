@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus Projetos{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/meus_projetos.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="container-projetos">
+    <h1>Meus Projetos</h1>
+
+    {% if projetos %}
+        <div class="projetos-grid">
+            {% for projeto in projetos %}
+                <div class="card-projeto">
+                    <h2>{{ projeto.titulo }}</h2>
+                    <p class="sub">{{ projeto.subtitulo }}</p>
+                    <p><strong>Curso:</strong> {{ projeto.curso }}</p>
+
+                    <div class="card-actions">
+                        <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn ver">👁️ Ver</a>
+                        <a href="{{ url_for('editar_projeto', id=projeto.id) }}" class="btn editar">✏️ Editar</a>
+                        <form action="{{ url_for('excluir_projeto', id=projeto.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este projeto?');">
+                            <button type="submit" class="btn excluir">🗑️ Excluir</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Você ainda não cadastrou nenhum projeto.</p>
+    {% endif %}
+</div>
+{% endblock %}
