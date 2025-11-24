@@ -1,0 +1,112 @@
+
+.page-header {
+    max-width: 900px;
+    margin: 40px auto 20px;
+    padding: 0 20px;
+}
+
+.page-header h1 {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.page-header p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.projetos-grid {
+    max-width: 900px;
+    margin: 0 auto 50px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column; /* Lista vertical */
+    gap: 15px; /* Espaço entre os cards */
+}
+
+.card-projeto-meus {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-projeto-meus h2 {
+    color: #30782B; /* Cor verde do IF */
+    font-size: 1.5em;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.card-projeto-meus .curso {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Botões de Ação (Ver, Editar, Excluir) */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.action-btn {
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    border: none;
+}
+
+.action-btn i {
+    margin-right: 5px;
+}
+
+/* Estilo para o botão 'Ver' */
+.action-btn.ver {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.action-btn.ver:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo para o botão 'Editar' */
+.action-btn.editar {
+    background-color: #30782B; /* Verde */
+    color: #ffffff;
+}
+.action-btn.editar:hover {
+    background-color: #255a21;
+}
+
+/* Estilo para o botão 'Excluir' */
+.action-btn.excluir {
+    background-color: #e74c3c; /* Vermelho */
+    color: #ffffff;
+}
+.action-btn.excluir:hover {
+    background-color: #c0392b;
+}
+
+/* Estilo para o empty-state (se não houver projetos) */
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: #fff;
+}
