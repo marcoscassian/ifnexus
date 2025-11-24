@@ -67,11 +67,11 @@
     </div>
 
     </div>
-</div>
+    </div>
 
-<div class="interactions">
-    <div class="comments-form">
-            <div class="comment-avatar">
+    <div class="interactions">
+        <div class="comment-compose">
+            <div class="avatar-col">
                 {% if current_user.is_authenticated and current_user.foto %}
                     {% set foto = current_user.foto %}
                     {% if 'http' in foto %}
@@ -83,89 +83,82 @@
                     <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
                 {% endif %}
             </div>
-            <form id="comment-form" action="{{ url_for('adicionar_comentario', id=projeto.id) }}" method="post" class="comment">
-                <textarea id="comment-textarea" name="conteudo" rows="3" placeholder="O que você achou desse projeto?"></textarea>
-                <div class="comment-actions">
-                    <button type="submit" class="btn-submit">Enviar comentário</button>
-                </div>
-            </form>
-    </div>
-    <div class="others">
-        <div class="enjoy">
-                <div class="like-row">
+
+            <div class="input-col">
+                <form id="comment-form" action="{{ url_for('adicionar_comentario', id=projeto.id) }}" method="post" class="comment-form">
+                    <textarea id="comment-textarea" name="conteudo" rows="3" placeholder="O que você achou desse projeto?"></textarea>
+                    <div style="margin-top:8px; text-align:right;">
+                        <button type="submit" class="btn-submit">Enviar comentário</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="divider-vertical" aria-hidden="true"></div>
+
+            <div class="meta-col">
+                <div class="meta-row like-counter">
                     <form id="like-form" action="{{ url_for('curtir_projeto', id=projeto.id) }}" method="post">
                         <button type="submit" id="like-btn" class="like-btn" aria-label="Curtir projeto">
-                                {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}
-                                {% set unliked_src = (url_for('static', filename='img/interacoes/curtidas/heart.png') if heart_exists else '') %}
-                                {% set hover_src = (url_for('static', filename='img/interacoes/curtidas/hearthover.png') if heart_hover_exists else '') %}
+                            {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}
+                            {% set unliked_src = (url_for('static', filename='img/interacoes/curtidas/heart.png') if heart_exists else '') %}
+                            {% set hover_src = (url_for('static', filename='img/interacoes/curtidas/hearthover.png') if heart_hover_exists else '') %}
 
-                                {% if liked %}
-                                    <img id="like-img"
-                                        src="{{ liked_src }}"
-                                        alt="curtido"
-                                        data-liked="1"
-                                        data-liked-src="{{ liked_src }}"
-                                        data-unliked-src="{{ unliked_src }}"
-                                        data-hover-src="{{ hover_src }}">
-                                {% else %}
-                                    <img id="like-img"
-                                        src="{{ unliked_src }}"
-                                        alt="curtir"
-                                        data-liked="0"
-                                        data-liked-src="{{ liked_src }}"
-                                        data-unliked-src="{{ unliked_src }}"
-                                        data-hover-src="{{ hover_src }}">
-                                {% endif %}
-                                <span id="like-count">{{ projeto.curtidas or 0 }} Curtidas</span>
+                            {% if liked %}
+                                <img id="like-img"
+                                    src="{{ liked_src }}"
+                                    alt="curtido"
+                                    data-liked="1"
+                                    data-liked-src="{{ liked_src }}"
+                                    data-unliked-src="{{ unliked_src }}"
+                                    data-hover-src="{{ hover_src }}">
+                            {% else %}
+                                <img id="like-img"
+                                    src="{{ unliked_src }}"
+                                    alt="curtir"
+                                    data-liked="0"
+                                    data-liked-src="{{ liked_src }}"
+                                    data-unliked-src="{{ unliked_src }}"
+                                    data-hover-src="{{ hover_src }}">
+                            {% endif %}
+                            <span id="like-count">{{ projeto.curtidas or 0 }} Curtidas</span>
                         </button>
                     </form>
                 </div>
+
+                <div class="meta-row share-action">
+                    <button id="share-btn" class="share-button">
+                        <img src="{{ url_for('static', filename='img/interacoes/compartilhamento/share.png') }}" 
+                            alt="Compartilhar" class="share-icon">
+                        <span>Compartilhar Projeto</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="share">
-        <button id="share-btn" class="share-button">
-            <img src="{{ url_for('static', filename='img/interacoes/compartilhamento/share.png') }}" 
-                alt="Compartilhar" class="share-icon">
-            <span>Compartilhar Projeto</span>
-        </button>
-        </div>
-</div>
+        <div class="comments-list">
+            {% for comentario in comentarios %}
+            <div class="comment-item">
+                <div class="ci-avatar">
+                    {% if comentario.usuario.foto %}
+                        {% if 'http' in comentario.usuario.foto %}
+                            <img src="{{ comentario.usuario.foto }}" alt="{{ comentario.usuario.nome }}" class="comment-avatar-img">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/img/' + comentario.usuario.foto) }}" alt="{{ comentario.usuario.nome }}" class="comment-avatar-img">
+                        {% endif %}
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
+                    {% endif %}
+                </div>
 
-<div class="comments-list">
-    {% for comentario in comentarios %}
-    <div class="comment-item">
-        
-        <div class="comment-avatar">
-            {% if comentario.usuario.foto %}
-                {% if 'http' in comentario.usuario.foto %}
-                    <img src="{{ comentario.usuario.foto }}" 
-                         alt="{{ comentario.usuario.nome }}" 
-                         class="comment-avatar-img">
-                {% else %}
-                    <img src="{{ url_for('static', filename='uploads/img/' + comentario.usuario.foto) }}" 
-                         alt="{{ comentario.usuario.nome }}" 
-                         class="comment-avatar-img">
-                {% endif %}
-            {% else %}
-                <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}"
-                     alt="Avatar" 
-                     class="comment-avatar-img">
-            {% endif %}
-        </div>
-
-        <div class="comment-meta">
-            <strong>{{ comentario.usuario.nome }}</strong>
-                <span class="comment-date" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">
-                {{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}
-            </span>
-        </div>
-
-        <div class="comment-body">
-            <p>{{ comentario.conteudo }}</p>
+                <div class="ci-body">
+                    <div class="ci-author">{{ comentario.usuario.nome }}</div>
+                    <div class="ci-meta" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+                    <div class="ci-text">{{ comentario.conteudo }}</div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
-    {% endfor %}
-</div>
 
 
 <script>
