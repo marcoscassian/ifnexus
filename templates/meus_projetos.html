@@ -3,33 +3,54 @@
 {% block title %}Meus Projetos{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/meus_projetos.css') }}">
-{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/meus_projetos.css') }}?v=1.1">
+    {% endblock %}
 
 {% block conteudo %}
-<div class="container-projetos">
-    <h1>Meus Projetos</h1>
-
-    {% if projetos %}
-        <div class="projetos-grid">
-            {% for projeto in projetos %}
-                <div class="card-projeto">
-                    <h2>{{ projeto.titulo }}</h2>
-                    <p class="sub">{{ projeto.subtitulo }}</p>
-                    <p><strong>Curso:</strong> {{ projeto.curso }}</p>
-
-                    <div class="card-actions">
-                        <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn ver">👁️ Ver</a>
-                        <a href="{{ url_for('editar_projeto', id=projeto.id) }}" class="btn editar">✏️ Editar</a>
-                        <form action="{{ url_for('excluir_projeto', id=projeto.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este projeto?');">
-                            <button type="submit" class="btn excluir">🗑️ Excluir</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>Você ainda não cadastrou nenhum projeto.</p>
-    {% endif %}
+<div class="page-header">
+    <h1><i class="fas fa-project-diagram"></i> Meus Projetos Publicados</h1>
+    <p>Gerencie seus projetos, edite informações ou exclua projetos antigos.</p>
 </div>
+
+{% include 'componentes/erro.html' %}
+
+{% if projetos %}
+    <div class="projetos-grid">
+        {% for projeto in projetos %}
+        <div class="card-projeto-meus">
+            <div class="card-body">
+                <h2>{{ projeto.titulo }}</h2>
+                <p class="curso">Curso: <strong>{{ projeto.curso }}</strong></p>
+                <hr>
+                
+                <div class="card-actions">
+                    
+                    <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn action-btn ver">
+                        <i class="fas fa-eye"></i> Ver
+                    </a>
+
+                    <a href="{{ url_for('editar_projeto', id=projeto.id) }}" class="btn action-btn editar">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+
+                    <form action="{{ url_for('excluir_projeto', id=projeto.id) }}" method="POST" 
+                          onsubmit="return confirm('ATENÇÃO: Você tem certeza que deseja excluir o projeto \'{{ projeto.titulo }}\'? Esta ação é irreversível.');"
+                          style="display: inline;">
+                        <button type="submit" class="btn action-btn excluir">
+                            <i class="fas fa-trash-alt"></i> Excluir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>Você ainda não cadastrou nenhum projeto.</p>
+        <a href="{{ url_for('criar_projeto') }}" class="btn-principal-v2">
+            <i class="fas fa-plus-circle"></i> Cadastrar Meu Primeiro Projeto
+        </a>
+    </div>
+{% endif %}
 {% endblock %}
