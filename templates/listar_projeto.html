@@ -7,70 +7,77 @@
 {% endblock %}
 
 {% block conteudo %}
-<div class="container">
-    <div class="left">
-        <div class="block1">
-            <h1> {{projeto.titulo}} - {{projeto.subtitulo}}</h1>
-            <div class="descricao">
-                <p> {{projeto.descricao}} </p>
+
+<div class="page-wrapper">
+
+    <div class="container">
+
+        <div class="left">
+            <div class="block1">
+                <h1> {{projeto.titulo}} - {{projeto.subtitulo}}</h1>
+
+                <div class="descricao">
+                    <p> {{projeto.descricao}} </p>
+                </div>
+
+                <div class="autores">
+                    <p><strong>Autores:</strong> 
+                        {{ projeto.autores | map(attribute='nome') | join(', ') }}
+                    </p>
+                </div>
+
+                <hr>
             </div>
-            <div class="autores">
-                <p><strong>Autores:</strong> 
-                    {{ projeto.autores | map(attribute='nome') | join(', ') }}
-                </p>
+
+            <div class="block2">
+                <h1> Objetivos </h1>
+                <ul>
+                    {% for objetivo in projeto.objetivos %}
+                    <li>{{ objetivo.descricao }}</li>
+                    {% endfor %}
+                </ul>
             </div>
-            <hr>
 
-        </div>
+            <div class="block3">
+                <h1> Metodologias </h1>
+                <ul>
+                    {% for metodologia in projeto.metodologias %}
+                    <li>{{ metodologia.descricao }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
 
-        <div class="block2">
-            <h1> Objetivos </h1>
-            <ul>
-                {% for objetivo in projeto.objetivos %}
-                <li>{{ objetivo.descricao }}</li>
-                {% endfor %}
-            </ul>
+            <div class="block4">
+                <h1> Links e Materias Coplementares </h1>
+                <ul>
+                    {% for link in projeto.links %}
+                    <li>{{ link.url }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-
-        <div class="block3">
-            <h1> Metodologias </h1>
-            <ul>
-                {% for metodologia in projeto.metodologias %}
-                <li>{{ metodologia.descricao }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="block4">
-            <h1> Links e Materias Coplementares </h1>
-            <ul>
-                {% for link in projeto.links %}
-                <li>{{ link.url }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
 
         <div class="right">
             <div class="media-block">
-              <i class="fas fa-play"></i>
-        </div>
+                <i class="fas fa-play"></i>
+            </div>
             <div class="media-block">
                 <i class="fas fa-camera"></i>
-        </div>
+            </div>
             <div class="media-block">
                 <i class="fas fa-camera"></i>
-        </div>
+            </div>
             <div class="media-block">
                 <i class="fas fa-camera"></i>
+            </div>
         </div>
-    </div>
 
-    </div>
     </div>
 
     <div class="interactions">
+
         <div class="comment-compose">
+
             <div class="avatar-col">
                 {% if current_user.is_authenticated and current_user.foto %}
                     {% set foto = current_user.foto %}
@@ -96,9 +103,11 @@
             <div class="divider-vertical" aria-hidden="true"></div>
 
             <div class="meta-col">
+
                 <div class="meta-row like-counter">
                     <form id="like-form" action="{{ url_for('curtir_projeto', id=projeto.id) }}" method="post">
                         <button type="submit" id="like-btn" class="like-btn" aria-label="Curtir projeto">
+
                             {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}
                             {% set unliked_src = (url_for('static', filename='img/interacoes/curtidas/heart.png') if heart_exists else '') %}
                             {% set hover_src = (url_for('static', filename='img/interacoes/curtidas/hearthover.png') if heart_hover_exists else '') %}
@@ -132,12 +141,14 @@
                         <span>Compartilhar Projeto</span>
                     </button>
                 </div>
+
             </div>
         </div>
 
         <div class="comments-list">
             {% for comentario in comentarios %}
             <div class="comment-item">
+
                 <div class="ci-avatar">
                     {% if comentario.usuario.foto %}
                         {% if 'http' in comentario.usuario.foto %}
@@ -152,59 +163,22 @@
 
                 <div class="ci-body">
                     <div class="ci-author">{{ comentario.usuario.nome }}</div>
-                    <div class="ci-meta" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}</div>
+                    <div class="ci-meta" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">
+                        {{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
                     <div class="ci-text">{{ comentario.conteudo }}</div>
                 </div>
+
             </div>
             {% endfor %}
         </div>
+
     </div>
+
+</div>
 
 
 <script>
-    // Script para converter datas em "tempo atrás"
-    document.addEventListener('DOMContentLoaded', function(){
-        function timeAgoFromMs(ms){
-            try{
-                var then = new Date(Number(ms));
-                if(isNaN(then)) return '';
-                var now = new Date();
-                var diff = now.getTime() - then.getTime(); // ms
-                var seconds = Math.floor(diff / 1000);
-                var minutes = Math.floor(seconds / 60);
-                var hours = Math.floor(minutes / 60);
-                var days = Math.floor(hours / 24);
-                var months = Math.floor(days / 30);
-                var years = Math.floor(days / 365);
-
-                if(years >= 1){
-                    return then.toLocaleDateString();
-                }
-                if(months >= 1){
-                    return 'há ' + months + (months === 1 ? ' mês' : ' meses');
-                }
-                if(days >= 1){
-                    return 'há ' + days + (days === 1 ? ' dia' : ' dias');
-                }
-                if(hours >= 1){
-                    return 'há ' + hours + (hours === 1 ? ' hora' : ' horas');
-                }
-                if(minutes >= 1){
-                    return 'há ' + minutes + (minutes === 1 ? ' minuto' : ' minutos');
-                }
-                return 'agora mesmo';
-            }catch(err){
-                return '';
-            }
-        }
-
-        var dateEls = document.querySelectorAll('.comment-date[data-ts-ms]');
-        dateEls.forEach(function(el){
-            var ms = el.getAttribute('data-ts-ms');
-            var text = timeAgoFromMs(ms);
-            if(text) el.textContent = text;
-        });
-    });
 
     // Hover do ícone de curtida e submissão AJAX
     (function(){

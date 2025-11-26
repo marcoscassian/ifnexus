@@ -29,12 +29,12 @@
                 <a href="/" class="Incio">Início</a>
                 <a href="/" class="Projetos">Projetos</a>
                 <a href="/" class="Sobre">Sobre</a>
-                <a href="{{ url_for('meus_projetos') }}"> Meus Projetos</a>
                 <div class="dropdown" tabindex="0">
                     <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
                     <div class="dropdown-content">
                       <div class="user-name">Olá, {{ current_user.nome }}</div>
                       <a href="/meu_perfil">Meu Perfil</a>
+                      <a href="{{ url_for('meus_projetos') }}"> Meus Projetos</a>
                       <a href="/criarprojeto">＋ Cadastrar Projeto</a>
                       <a href="/projetoscurtidos">♡ Projetos Curtidos</a>
                       <a href="/logout">↩ Sair</a>
@@ -53,8 +53,6 @@
        
         </div>
     </header>
-        <!-- definiremos as rotas dos ngcs aq em cima apos a criacao das pags-->
-
 
     <h1>
         {% block pagina %}
