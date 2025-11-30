@@ -84,7 +84,16 @@
                     {% if 'http' in foto %}
                         <img src="{{ foto }}" alt="{{ current_user.nome }}" class="comment-avatar-img">
                     {% else %}
-                        <img src="{{ url_for('static', filename='uploads/img/' + foto) }}" alt="{{ current_user.nome }}" class="comment-avatar-img">
+                        {% if current_user.foto %}
+                            {% if 'http' in current_user.foto %}
+                                <img src="{{ current_user.foto }}" class="comment-avatar-img">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/img/users/' ~ current_user.id ~ '.jpg') }}" class="comment-avatar-img">
+                            {% endif %}
+                        {% else %}
+                            <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" class="comment-avatar-img">
+                        {% endif %}
+
                     {% endif %}
                 {% else %}
                     <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
@@ -154,7 +163,11 @@
                         {% if 'http' in comentario.usuario.foto %}
                             <img src="{{ comentario.usuario.foto }}" alt="{{ comentario.usuario.nome }}" class="comment-avatar-img">
                         {% else %}
-                            <img src="{{ url_for('static', filename='uploads/img/' + comentario.usuario.foto) }}" alt="{{ comentario.usuario.nome }}" class="comment-avatar-img">
+                            {% if 'http' in comentario.usuario.foto %}
+                                <img src="{{ comentario.usuario.foto }}" class="comment-avatar-img">
+                            {% else %}
+                                <img src="{{ url_for('static', filename='uploads/img/users/' ~ comentario.usuario.id ~ '.jpg') }}" class="comment-avatar-img">
+                            {% endif %}
                         {% endif %}
                     {% else %}
                         <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">

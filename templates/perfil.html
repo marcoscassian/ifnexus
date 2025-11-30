@@ -28,12 +28,20 @@
             <input type="file" name="foto" id="fotoInput" style="display:none;" accept="image/*" onchange="document.getElementById('formFoto').submit()">
         </form>
 
-
         <div class="nome-info">
             <h2>{{ perfil.nome }}</h2>
-            <p class="curso">{{ perfil.curso }}</p>
+            {% if perfil.tipo_usuario in ['Aluno', 'Docente'] %}
+                <p class="curso">{{ perfil.curso }}</p>
+            {% endif %}
             <span class="badge tipo">{{ perfil.tipo_usuario }}</span>
+
+            <div class="suap-auth">
+                {% if perfil.tipo_usuario not in ['Aluno', 'Docente'] %}
+                    <a href="{{ url_for('login_suap') }}" class="btn-suap">Autenticar conta via SUAP</a>
+                {% endif %}
+            </div>
         </div>
+
 
     </div>
 

@@ -6,12 +6,14 @@
 }
 
 .page-header h1 {
-    color: #333;
+    text-align: center;
+    color: #30782B;
     font-size: 2em;
     margin-bottom: 5px;
 }
 
 .page-header p {
+    text-align: center;
     color: #666;
     margin-bottom: 20px;
 }
@@ -21,8 +23,8 @@
     margin: 0 auto 50px;
     padding: 0 20px;
     display: flex;
-    flex-direction: column; /* Lista vertical */
-    gap: 15px; /* Espaço entre os cards */
+    flex-direction: column; 
+    gap: 15px;
 }
 
 .card-projeto-meus {
@@ -36,7 +38,7 @@
 }
 
 .card-projeto-meus h2 {
-    color: #30782B; /* Cor verde do IF */
+    color: #30782B;
     font-size: 1.5em;
     margin-top: 0;
     margin-bottom: 10px;
@@ -48,7 +50,6 @@
     margin-bottom: 15px;
 }
 
-/* Botões de Ação (Ver, Editar, Excluir) */
 .card-actions {
     display: flex;
     gap: 10px;
@@ -72,7 +73,6 @@
     margin-right: 5px;
 }
 
-/* Estilo para o botão 'Ver' */
 .action-btn.ver {
     background-color: #f0f0f0;
     color: #333;
@@ -82,31 +82,39 @@
     background-color: #e0e0e0;
 }
 
-/* Estilo para o botão 'Editar' */
 .action-btn.editar {
-    background-color: #30782B; /* Verde */
+    background-color: #30782B;
     color: #ffffff;
 }
 .action-btn.editar:hover {
     background-color: #255a21;
 }
 
-/* Estilo para o botão 'Excluir' */
 .action-btn.excluir {
-    background-color: #e74c3c; /* Vermelho */
+    background-color: #e74c3c;
     color: #ffffff;
 }
 .action-btn.excluir:hover {
     background-color: #c0392b;
 }
 
-/* Estilo para o empty-state (se não houver projetos) */
 .empty-state {
     text-align: center;
     padding: 50px;
-    border: 1px dashed #ccc;
-    border-radius: 8px;
+    border: 2px dashed #30782B;
+    border-radius: 15px;
     max-width: 600px;
     margin: 40px auto;
     background-color: #fff;
+}
+
+.empty-state a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #30782B;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
 }

@@ -123,3 +123,23 @@ body {
 .card strong {
     color: #1e1e1e;
 }
+.suap-auth {
+    margin-top: 8px;
+}
+
+.btn-suap {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #2f6f39;
+    color: #ffffff;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: 0.2s;
+}
+
+.btn-suap:hover {
+    background-color: #3d8f47;
+    transform: scale(1.03);
+}

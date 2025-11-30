@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import os
 import requests
 from urllib.parse import urlencode
+from decorator import suap_required
 
 SUAP_CLIENT_ID = "G4IXTGHpxPafBmBGszCAuvxe6iBZgoK3W83HIUSE"
 SUAP_REDIRECT_URI = "http://127.0.0.1:5000/callback_suap"
@@ -139,7 +140,6 @@ def ver_projeto(id):
 @app.route("/projetoscurtidos")
 @login_required
 def projetos_curtidos():
-    # busca projetos curtidos pelo usuário atual
     projetos = Projeto.query.join(Curtida, Curtida.projeto_id == Projeto.id).filter(Curtida.usuario_id == current_user.id).all()
     return render_template("projetos_curtidos.html", projetos=projetos)
 
@@ -156,7 +156,6 @@ def login_suap():
 
 @app.route("/callback_suap")
 def callback_suap():
-    
     code = request.args.get("code")
     if not code:
         flash("Erro: nenhum código recebido do SUAP.", "error")
@@ -176,35 +175,45 @@ def callback_suap():
         return redirect(url_for("login"))
 
     access_token = token_response.json().get("access_token")
-
     headers = {"Authorization": f"Bearer {access_token}"}
     user_info = requests.get(SUAP_API_URL, headers=headers).json()
 
-    print(user_info)
-
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
-
-    usuario = Usuario.query.filter_by(email=email).first()
     vinculo = user_info.get("vinculo", {})
 
-    if not usuario:
-        usuario = Usuario(
+    suap_usuario = Usuario.query.filter_by(email=email).first()
+    if not suap_usuario:
+        suap_usuario = Usuario(
             nome=nome,
             email=email,
             senha=bcrypt.generate_password_hash("suap_login_default_123").decode('utf-8'),
-            data_nascimento = user_info.get("data_nascimento"),
-            cpf = user_info.get("cpf"),
-            tipo_usuario = user_info.get("tipo_vinculo"),
-            matricula = user_info.get("matricula"),
-            curso = vinculo.get("curso"),
-            campus = vinculo.get("campus"),
-            foto = user_info.get("url_foto_150x200")
+            data_nascimento=user_info.get("data_nascimento"),
+            cpf=user_info.get("cpf"),
+            tipo_usuario=user_info.get("tipo_vinculo"),
+            matricula=user_info.get("matricula"),
+            curso=vinculo.get("curso"),
+            campus=vinculo.get("campus"),
+            foto=user_info.get("url_foto_150x200")
         )
-        db.session.add(usuario)
+        db.session.add(suap_usuario)
         db.session.commit()
-    
-    login_user(usuario)
+
+    # se houver um usuário antigo logado diferente da conta SUAP, migramos os dados
+    if current_user.is_authenticated and current_user.id != suap_usuario.id:
+        antigo = current_user
+
+        for comentario in Comentario.query.filter_by(usuario_id=antigo.id).all():
+            comentario.usuario_id = suap_usuario.id
+
+        for curtida in Curtida.query.filter_by(usuario_id=antigo.id).all():
+            curtida.usuario_id = suap_usuario.id
+
+        db.session.commit()
+        db.session.delete(antigo)
+        db.session.commit()
+
+    login_user(suap_usuario)
     flash("Login via SUAP realizado com sucesso!", "success")
     return redirect(url_for("index"))
 
@@ -217,9 +226,10 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/criarprojeto', methods=['GET','POST'], endpoint='criar_projeto')
+@suap_required
 
 @app.route('/editarprojeto/<int:id>', methods=['GET','POST'], endpoint='editar_projeto')
-@login_required
+@suap_required
 def gerenciar_projeto(id=None):
     
     projeto = None
@@ -360,7 +370,7 @@ def gerenciar_projeto(id=None):
     return render_template('criar_projeto.html', **dados_projeto)
 
 @app.route('/projeto/<int:id>/excluir', methods=['POST'])
-@login_required
+@suap_required
 def excluir_projeto(id):
     
     projeto = Projeto.query.get_or_404(id)

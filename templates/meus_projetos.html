@@ -8,7 +8,7 @@
 
 {% block conteudo %}
 <div class="page-header">
-    <h1><i class="fas fa-project-diagram"></i> Meus Projetos Publicados</h1>
+    <h1> Meus Projetos Publicados</h1>
     <p>Gerencie seus projetos, edite informações ou exclua projetos antigos.</p>
 </div>
 
@@ -20,6 +20,7 @@
         <div class="card-projeto-meus">
             <div class="card-body">
                 <h2>{{ projeto.titulo }}</h2>
+                <p>{{ projeto.descricao }}</p>
                 <p class="curso">Curso: <strong>{{ projeto.curso }}</strong></p>
                 <hr>
                 
@@ -49,7 +50,7 @@
     <div class="empty-state">
         <p>Você ainda não cadastrou nenhum projeto.</p>
         <a href="{{ url_for('criar_projeto') }}" class="btn-principal-v2">
-            <i class="fas fa-plus-circle"></i> Cadastrar Meu Primeiro Projeto
+            Cadastrar Meu Primeiro Projeto
         </a>
     </div>
 {% endif %}
