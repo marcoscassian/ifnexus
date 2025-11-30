@@ -203,7 +203,7 @@ def callback_suap():
         )
         db.session.add(usuario)
         db.session.commit()
-
+    
     login_user(usuario)
     flash("Login via SUAP realizado com sucesso!", "success")
     return redirect(url_for("index"))
@@ -449,7 +449,26 @@ def meu_perfil():
     
     return render_template('perfil.html', perfil=current_user)
 
+@app.route("/alterar_foto", methods=["POST"])
+@login_required
+def alterar_foto():
+    foto = request.files.get("foto")
+
+    if not foto:
+        flash("Nenhuma imagem enviada.", "error")
+        return redirect(url_for("perfil"))
+
+    caminho = f"static/uploads/img/users/{current_user.id}.jpg"
+    foto.save(caminho)
+
+    current_user.foto = "/" + caminho
+    db.session.commit()
+
+    flash("Foto atualizada com sucesso!", "success")
+    return redirect(url_for("meu_perfil"))
+
 @app.route("/perfil/<int:id>")
+@login_required
 def ver_perfil(id):
     
     perfil = Usuario.query.get(id)

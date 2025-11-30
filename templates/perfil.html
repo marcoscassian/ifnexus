@@ -8,25 +8,56 @@
 
 {% block conteudo %}
 {% include 'componentes/erro.html' %}
-    <div class="perfil-container">
-        <h2>Perfil de {{ perfil.nome }}</h2>
-        <div class="info-perfil">
-            <div class="foto">
-                {% if perfil.foto %}
-                    <img src="{{ perfil.foto }}" alt="Foto de {{ perfil.nome }}"/>
-                {% else %}
-                    </p>>Sem foto</div>
-                {% endif %}
-            </div>
 
-            <div class="dados">
-                <p><strong>Nome:</strong> {{ perfil.nome }}</p>
-                <p><strong>Email:</strong> {{ perfil.email }}</p>
-                <p><strong>Matrícula:</strong> {{ perfil.matricula }}</p>
-                <p><strong>Data de Nascimento:</strong> {{ perfil.data_nascimento }}</p>
-                <p><strong>Tipo de Usuário:</strong> {{ perfil.tipo_usuario }}</p>
-                <p><strong>Curso:</strong> {{ perfil.curso }}</p>
-                <p><strong>Campus:</strong> {{ perfil.campus }}</p>
-            </div>
+<div class="perfil-container">
+
+    <div class="info-perfil">
+        
+        <div class="foto" onclick="document.getElementById('fotoInput').click()">
+
+            {% if perfil.foto %}
+                <img id="fotoPreview" src="{{ perfil.foto }}" alt="Foto de {{ perfil.nome }}">
+            {% else %}
+                <img id="fotoPreview" src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Sem foto">
+            {% endif %}
+            <div class="foto-overlay">Alterar foto</div>
+
         </div>
+
+        <form id="formFoto" action="{{ url_for('alterar_foto') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="foto" id="fotoInput" style="display:none;" accept="image/*" onchange="document.getElementById('formFoto').submit()">
+        </form>
+
+
+        <div class="nome-info">
+            <h2>{{ perfil.nome }}</h2>
+            <p class="curso">{{ perfil.curso }}</p>
+            <span class="badge tipo">{{ perfil.tipo_usuario }}</span>
+        </div>
+
+    </div>
+
+    <div class="card-grid">
+
+        <div class="card">
+            <h3 class="card-title">Identificação</h3>
+            <p><strong>Matrícula:</strong> {{ perfil.matricula }}</p>
+            <p><strong>Campus:</strong> {{ perfil.campus }}</p>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Outras Informações</h3>
+            <p><strong>Data de Nascimento:</strong> {{ perfil.data_nascimento }}</p>
+            <p><strong>Email:</strong> {{ perfil.email }}</p>
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}
+
+<script>
+    function selecionarFoto() {
+        document.getElementById("fotoInput").click();
+    }
+</script>
