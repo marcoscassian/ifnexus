@@ -91,6 +91,7 @@ def register():
         email = request.form.get('email')
         senha = request.form.get('password')
         confirm = request.form.get('confirm_password')
+        tipo_usuario = 'Visitante'
 
         if senha != confirm:
             flash("As senhas não coincidem.", "error")
@@ -101,7 +102,7 @@ def register():
             return redirect(url_for('register'))
 
         senha_hash = bcrypt.generate_password_hash(senha).decode('utf-8')
-        novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash) 
+        novo_usuario = Usuario(nome=nome, email=email, senha=senha_hash, tipo_usuario=tipo_usuario) 
         db.session.add(novo_usuario)
         db.session.commit()
 
