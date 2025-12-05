@@ -175,19 +175,35 @@ def callback_suap():
         return redirect(url_for("login"))
 
     access_token = token_response.json().get("access_token")
-    headers = {"Authorization": f"Bearer {access_token}"}
-    user_info = requests.get(SUAP_API_URL, headers=headers).json()
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
+
+    # ✅ URL CORRETA
+    SUAP_API_URL = "https://suap.ifrn.edu.br/api/eu/"
+    response = requests.get(SUAP_API_URL, headers=headers)
+
+    if response.status_code != 200:
+        print("STATUS SUAP:", response.status_code)
+        print("RESPOSTA SUAP:", response.text)
+        flash("Erro ao buscar dados do usuário no SUAP.", "error")
+        return redirect(url_for("login"))
+
+    user_info = response.json()
 
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
     vinculo = user_info.get("vinculo", {})
 
     suap_usuario = Usuario.query.filter_by(email=email).first()
+
     if not suap_usuario:
         suap_usuario = Usuario(
             nome=nome,
             email=email,
-            senha=bcrypt.generate_password_hash("suap_login_default_123").decode('utf-8'),
+            senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
             data_nascimento=user_info.get("data_nascimento"),
             cpf=user_info.get("cpf"),
             tipo_usuario=user_info.get("tipo_vinculo"),
@@ -196,10 +212,10 @@ def callback_suap():
             campus=vinculo.get("campus"),
             foto=user_info.get("url_foto_150x200")
         )
+
         db.session.add(suap_usuario)
         db.session.commit()
 
-    # se houver um usuário antigo logado diferente da conta SUAP, migramos os dados
     if current_user.is_authenticated and current_user.id != suap_usuario.id:
         antigo = current_user
 
