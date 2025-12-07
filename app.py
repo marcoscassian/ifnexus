@@ -3,9 +3,12 @@ from flask_login import LoginManager, login_user, UserMixin, login_required, log
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 import os
+import shutil
 import requests
 from urllib.parse import urlencode
 from decorator import suap_required
+from datetime import datetime
+
 
 SUAP_CLIENT_ID = "G4IXTGHpxPafBmBGszCAuvxe6iBZgoK3W83HIUSE"
 SUAP_REDIRECT_URI = "http://127.0.0.1:5000/callback_suap"
@@ -28,13 +31,19 @@ from models import (
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app.config['UPLOAD_FOLDER_PDF'] = os.path.join(BASE_DIR, 'static', 'uploads', 'pdf')
-app.config['UPLOAD_FOLDER_IMG'] = os.path.join(BASE_DIR, 'static', 'uploads', 'img')
+def criar_pastas_projeto(titulo):
+    nome_pasta = secure_filename(titulo.lower().replace(" ", "-"))
+    
+    base = os.path.join(BASE_DIR, "static", "uploads", "projetos", nome_pasta)
+    pasta_imagens = os.path.join(base, "imagens")
+    pasta_pdfs = os.path.join(base, "pdfs")
+
+    os.makedirs(pasta_imagens, exist_ok=True)
+    os.makedirs(pasta_pdfs, exist_ok=True)
+
+    return base, pasta_imagens, pasta_pdfs, nome_pasta
 
 ALLOWED_IMG_EXT = {'png', 'jpg', 'jpeg'}
-
-os.makedirs(app.config['UPLOAD_FOLDER_PDF'], exist_ok=True)
-os.makedirs(app.config['UPLOAD_FOLDER_IMG'], exist_ok=True)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///banco.db'
 app.secret_key = 'ifnexus'
@@ -126,15 +135,53 @@ def ver_projeto(id):
     heart_liked_exists = os.path.exists(os.path.join(static_path, 'heartliked.png'))
     heart_exists = os.path.exists(os.path.join(static_path, 'heart.png'))
     heart_hover_exists = os.path.exists(os.path.join(static_path, 'hearthover.png'))
+    # Prepara lista de imagens para o template (paths relativos dentro de `static/`)
+    imagens = []
+    if getattr(projeto, 'estrutura', None):
+        imagens = [p for p in projeto.estrutura.split(',') if p]
+
+    imagens_urls = []
+    for img in imagens:
+        try:
+            imagens_urls.append(url_for('static', filename=img))
+        except Exception:
+            # ignora qualquer path inválido
+            continue
+
+    # Calcula tempo relativo para cada comentário no servidor (usa UTC)
+    comentarios_relativos = {}
+    now = datetime.utcnow()
+    for c in comentarios:
+        if getattr(c, 'criado_em', None):
+            diff = now - c.criado_em
+            diff_seconds = int(diff.total_seconds())
+            if diff_seconds < 60:
+                rel = 'agora'
+            elif diff_seconds < 3600:
+                mins = diff_seconds // 60
+                rel = f"há {mins} minuto{'s' if mins > 1 else ''}"
+            elif diff_seconds < 86400:
+                hrs = diff_seconds // 3600
+                rel = f"há {hrs} hora{'s' if hrs > 1 else ''}"
+            elif diff_seconds < 604800:
+                days = diff_seconds // 86400
+                rel = f"há {days} dia{'s' if days > 1 else ''}"
+            else:
+                rel = c.criado_em.strftime('%d/%m/%Y %H:%M')
+        else:
+            rel = 'data indisponível'
+        comentarios_relativos[c.id] = rel
 
     return render_template(
         'listar_projeto.html', 
         projeto=projeto, 
         comentarios=comentarios, 
+        comentarios_relativos=comentarios_relativos,
         liked=liked,
         heart_liked_exists=heart_liked_exists,
         heart_exists=heart_exists,
-        heart_hover_exists=heart_hover_exists
+        heart_hover_exists=heart_hover_exists,
+        imagens=imagens_urls
     )
 
 @app.route("/projetoscurtidos")
@@ -235,7 +282,7 @@ def callback_suap():
 
 @app.route('/logout')
 @login_required
-def logout():
+def logout():   
     
     logout_user()
     flash('Logout realizado com sucesso!', 'success')
@@ -294,21 +341,38 @@ def gerenciar_projeto(id=None):
 
             arquivo = request.files.get('arquivo')
             if arquivo and arquivo.filename:
+                _, _, pasta_pdfs, nome_pasta = criar_pastas_projeto(titulo)
+
                 nome_pdf = secure_filename(arquivo.filename)
-                caminho_pdf = os.path.join(app.config['UPLOAD_FOLDER_PDF'], nome_pdf)
+                caminho_pdf = os.path.join(pasta_pdfs, nome_pdf)
                 arquivo.save(caminho_pdf)
-                projeto.arquivo = nome_pdf
+
+                projeto.arquivo = f"uploads/projetos/{nome_pasta}/pdfs/{nome_pdf}"
             
             imagens = request.files.getlist('imagens[]')
-            lista_imagens = []
-            if any(img.filename for img in imagens):
-                for img in imagens:
-                    if img and img.filename:
-                        nome_img = secure_filename(img.filename)
-                        caminho_img = os.path.join(app.config['UPLOAD_FOLDER_IMG'], nome_img)
-                        img.save(caminho_img)
-                        lista_imagens.append(nome_img)
+        
+            if projeto and projeto.estrutura:
+                lista_imagens = [img for img in projeto.estrutura.split(',') if img.strip()]
+            else:
+                lista_imagens = []
+                
+            novas_imagens = [img for img in imagens if img and img.filename]
+            
+            if novas_imagens:
+                _, pasta_imagens, _, nome_pasta = criar_pastas_projeto(titulo)
+
+                for img in novas_imagens:
+                    nome_img = secure_filename(img.filename)
+                    caminho_img = os.path.join(pasta_imagens, nome_img)
+                    img.save(caminho_img)
+
+                    lista_imagens.append(
+                        f"uploads/projetos/{nome_pasta}/imagens/{nome_img}"
+                    )
+                        
+            if lista_imagens:
                 projeto.estrutura = ",".join(lista_imagens)
+
             nomes_autores = request.form.getlist('autor_nome[]')
             matriculas_autores = request.form.getlist('autor_matricula[]')
             tipos_autores = request.form.getlist('autor_tipo[]')
@@ -395,6 +459,14 @@ def excluir_projeto(id):
         return redirect(url_for('meus_projetos'))
     
     try:
+        try:
+            nome_pasta = secure_filename(projeto.titulo.lower().replace(" ", "-"))
+            pasta_projeto = os.path.join(BASE_DIR, "static", "uploads", "projetos", nome_pasta)
+            if os.path.exists(pasta_projeto):
+                shutil.rmtree(pasta_projeto)
+        except Exception as fs_err:
+            flash(f"Aviso: falha ao remover arquivos do projeto: {fs_err}", 'error')
+
         Autor.query.filter_by(projeto_id=id).delete()
         Objetivo.query.filter_by(projeto_id=id).delete()
         Metodologia.query.filter_by(projeto_id=id).delete()
@@ -484,7 +556,7 @@ def alterar_foto():
         flash("Nenhuma imagem enviada.", "error")
         return redirect(url_for("perfil"))
 
-    caminho = f"static/uploads/img/users/{current_user.id}.jpg"
+    caminho = f"static/uploads/users/{current_user.id}.jpg"
     foto.save(caminho)
 
     current_user.foto = "/" + caminho

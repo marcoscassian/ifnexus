@@ -219,15 +219,37 @@ textarea {
 .media-card-pp3 {
     background-color: #2D3934;
     border-radius: 8px;
+    width: 300px;
+    height: 150px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
     position: relative;
     overflow: hidden;
     cursor: pointer;
 }
 
+/* O label NÃO pode ter padding nem margem */
+.media-label-pp3 {
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none;
+}
+
+/* A imagem agora cobre 100% real do card */
+.uploaded-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+    z-index: 20;
+    display: block;
+}
+
 .media-gallery-pp3 .video-card-pp3 {
-    height: 100%; 
-    min-height: 230px;
+    height: 316px;
 }
 
 .media-label-pp3, .video-label-pp3 {
@@ -332,3 +354,4 @@ textarea {
 .cadastrar-projeto-btn-pp3:hover {
     background-color: #e0f0e5; 
 }
+

@@ -123,11 +123,11 @@
             <div class="media-small-grid">
                 {% for i in range(4) %}
                 {% set img_file = imagens[i] if loop.index0 < imagens|length else '' %}
-                {% set img_url = url_for('static', filename='uploads/img/' + img_file) if img_file %}
+                {% set img_url = url_for('static', filename=img_file) if img_file and img_file != '' else '' %}
                 <div class="media-card-pp3 image-card-pp3">
                     <label for="img-{{ i+1 }}" class="media-label-pp3">
                         <span class="icon-nuvem-upload"></span>
-                         {% if img_file %}
+                         {% if img_file and img_url %}
                             <img src="{{ img_url }}" class="uploaded-img" alt="Imagem atual">
                          {% endif %}
                     </label>

@@ -58,18 +58,17 @@
         </div>
 
         <div class="right">
-            <div class="media-block">
-                <i class="fas fa-play"></i>
-            </div>
-            <div class="media-block">
-                <i class="fas fa-camera"></i>
-            </div>
-            <div class="media-block">
-                <i class="fas fa-camera"></i>
-            </div>
-            <div class="media-block">
-                <i class="fas fa-camera"></i>
-            </div>
+            {% if imagens and imagens|length > 0 %}
+                {% for img in imagens %}
+                <div class="media-block">
+                    <img src="{{ img }}" alt="Imagem do projeto" class="project-img">
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="media-block">
+                    <i class="fas fa-camera"></i>
+                </div>
+            {% endif %}
         </div>
 
     </div>
@@ -88,7 +87,7 @@
                             {% if 'http' in current_user.foto %}
                                 <img src="{{ current_user.foto }}" class="comment-avatar-img">
                             {% else %}
-                                <img src="{{ url_for('static', filename='uploads/img/users/' ~ current_user.id ~ '.jpg') }}" class="comment-avatar-img">
+                                <img src="{{ url_for('static', filename='uploads/users/' ~ current_user.id ~ '.jpg') }}" class="comment-avatar-img">
                             {% endif %}
                         {% else %}
                             <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" class="comment-avatar-img">
@@ -166,7 +165,7 @@
                             {% if 'http' in comentario.usuario.foto %}
                                 <img src="{{ comentario.usuario.foto }}" class="comment-avatar-img">
                             {% else %}
-                                <img src="{{ url_for('static', filename='uploads/img/users/' ~ comentario.usuario.id ~ '.jpg') }}" class="comment-avatar-img">
+                                <img src="{{ url_for('static', filename='uploads/users/' ~ comentario.usuario.id ~ '.jpg') }}" class="comment-avatar-img">
                             {% endif %}
                         {% endif %}
                     {% else %}
@@ -176,8 +175,12 @@
 
                 <div class="ci-body">
                     <div class="ci-author">{{ comentario.usuario.nome }}</div>
-                    <div class="ci-meta" data-ts-ms="{{ (comentario.criado_em.timestamp() * 1000)|int }}">
-                        {{ comentario.criado_em.strftime('%d/%m/%Y %H:%M') }}
+                    <div class="ci-meta">
+                        {% if comentario.criado_em %}
+                            <span title="{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M:%S') }}">{{ comentarios_relativos[comentario.id] }}</span>
+                        {% else %}
+                            Data indisponível
+                        {% endif %}
                     </div>
                     <div class="ci-text">{{ comentario.conteudo }}</div>
                 </div>
@@ -192,8 +195,38 @@
 
 
 <script>
+    (function(){
+        function getRelativeTime(tsMs){
+            var now = Date.now();
+            var diffMs = now - tsMs;
+            if(diffMs < 0 || isNaN(diffMs)){
+                return 'data inválida';
+            }
+            
+            var diffSec = Math.floor(diffMs / 1000);
+            var diffMin = Math.floor(diffSec / 60);
+            var diffHour = Math.floor(diffMin / 60);
+            var diffDay = Math.floor(diffHour / 24);
+            
+            if(diffSec < 60) return 'agora';
+            if(diffMin < 60) return 'há ' + diffMin + ' minuto' + (diffMin > 1 ? 's' : '');
+            if(diffHour < 24) return 'há ' + diffHour + ' hora' + (diffHour > 1 ? 's' : '');
+            if(diffDay < 7) return 'há ' + diffDay + ' dia' + (diffDay > 1 ? 's' : '');
 
-    // Hover do ícone de curtida e submissão AJAX
+            var date = new Date(tsMs);
+            return date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+        }
+    
+        var metaElements = document.querySelectorAll('.ci-meta[data-ts-ms]');
+        metaElements.forEach(function(el){
+            var tsMs = parseInt(el.getAttribute('data-ts-ms'), 10);
+            if(!isNaN(tsMs) && tsMs > 0){
+                el.textContent = getRelativeTime(tsMs);
+                el.title = new Date(tsMs).toLocaleString('pt-BR');
+            }
+        });
+    })();
+
     (function(){
         var likeForm = document.getElementById('like-form');
         var likeImg = document.getElementById('like-img');
@@ -283,5 +316,58 @@
         }
     });
 
+</script>
+
+<!-- modal para visualização ampliada das imagens -->
+
+<div id="img-modal" class="img-modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+        <button class="close-btn" id="img-modal-close" aria-label="Fechar">✕</button>
+        <img id="img-modal-img" class="modal-img" src="" alt="Imagem ampliada">
+    </div>
+</div>
+
+<script>
+    (function(){
+        var modal = document.getElementById('img-modal');
+        var modalImg = document.getElementById('img-modal-img');
+        var closeBtn = document.getElementById('img-modal-close');
+
+        function openModal(src, alt){
+            if(!modal || !modalImg) return;
+            modalImg.src = src;
+            modalImg.alt = alt || 'Imagem do projeto';
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            // trava o scroll de fundo
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(){
+            if(!modal) return;
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+            modalImg.src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Delegação: atribui clique em cada imagem de projeto
+        var thumbs = document.querySelectorAll('.project-img');
+        thumbs.forEach(function(img){
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', function(e){
+                openModal(img.src, img.alt || 'Imagem do projeto');
+            });
+        });
+
+        // Fechar por botão, clique no backdrop ou ESC
+        if(closeBtn) closeBtn.addEventListener('click', closeModal);
+        if(modal) modal.addEventListener('click', function(e){
+            if(e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function(e){
+            if(e.key === 'Escape') closeModal();
+        });
+    })();
 </script>
 {% endblock %}
