@@ -1,17 +1,28 @@
-<link rel="stylesheet" href="static/css/card.css">
+<article class="projeto-card">
+    <div class="projeto-image">
+        {% if card.imagem and card.imagem != '/static/img1.jpg' %}
+            <img src="{{ url_for('static', filename=card.imagem.lstrip('/')) }}" alt="{{ card.titulo }}" class="card-img">
+        {% else %}
+            <div class="card-img-placeholder">
+                <i class="fas fa-image"></i>
+            </div>
+        {% endif %}
+        
+        <div class="card-curso-badge card-curso-{{ card.tag|lower|replace(' ', '-') }}">
+            {{ card.tag|capitalize }}
+        </div>
+    </div>
+    <div class="projeto-content">
 
-<div class="card">
-    <div class="imgcard">
-        <!--<img src="{{ card.imagem }}" alt="Imagem do {{ card.titulo }}"> ativaremos aq dps-->
+        <h3 class="card-title">{{ card.titulo }}</h3>
+
+        {% if card.descricao %}
+        <p class="card-description">{{ card.descricao[:80] }}{% if card.descricao|length > 80 %}...{% endif %}</p>
+        {% endif %}
+
+        <a href="{{ url_for('ver_projeto', id=card.id) }}" class="btn-ver-mais">
+            Ver Projeto
+            <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
-    <div class="content">
-        <div class="tag">
-            <p>{{ card.tag }}</p>
-        </div>
-        <h3>{{ card.titulo }}</h3>
-        <p>{{ card.descricao }}</p>
-        <div class="saibamais">
-            <a href="#">Saiba mais</a>
-        </div>
-    </div>
-</div>
+</article>

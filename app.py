@@ -65,14 +65,99 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
+    projetos_top = Projeto.query.order_by(Projeto.curtidas.desc()).limit(4).all()
     
-    cards = [
-        { "id": 1, "titulo": "IFNexus", "descricao": "O IFNexus é uma vitrine digital desenvolvida para divulgar e valorizar os projetos criados por estudantes e servidores do IFRN.", "imagem": "/static/img1.jpg", "tag": "Informática" },
-        { "id": 2, "titulo": "SIMER", "descricao": "Sistema que monitora o consumo de energia em tempo real, identifica os maiores gastos e sugere formas de economizar.", "imagem": "/static/img2.jpg", "tag": "Eletrotécnica" },
-        { "id": 3, "titulo": "EcoFios", "descricao": "Projeto voltado à produção de fios ecológicos reutilizando sobras de tecido. Busca reduzir o desperdício na indústria têxtil.", "imagem": "/static/img3.jpg", "tag": "Têxtil" },
-        { "id": 4, "titulo": "Modus", "descricao": "Criação de roupas sustentáveis usando materiais ecológicos para reduzir o impacto ambiental da moda.", "imagem": "/static/img4.jpg", "tag": "Vestuário" },
-    ]
+    cards = []
+    for projeto in projetos_top:
+        imgs = projeto.estrutura.split(',') if projeto.estrutura else []
+        img_url = imgs[0] if imgs and imgs[0] else "/static/img1.jpg"
+        
+        cards.append({
+            "id": projeto.id,
+            "titulo": projeto.titulo,
+            "descricao": projeto.descricao,
+            "imagem": img_url,
+            "tag": projeto.curso or "Sem curso"
+        })
+    
+    # se houver menos de 4 projetos, preencher com dados padrão
+    if len(cards) < 4:
+        cards_padrao = [
+            { "id": 1, "titulo": "IFNexus", "descricao": "O IFNexus é uma vitrine digital desenvolvida para divulgar e valorizar os projetos criados por estudantes e servidores do IFRN.", "tag": "Informatica" },
+            { "id": 2, "titulo": "SIMER", "descricao": "Sistema que monitora o consumo de energia em tempo real, identifica os maiores gastos e sugere formas de economizar.", "tag": "eletro" },
+            { "id": 3, "titulo": "EcoFios", "descricao": "Projeto voltado à produção de fios ecológicos reutilizando sobras de tecido. Busca reduzir o desperdício na indústria têxtil.", "tag": "textil" },
+            { "id": 4, "titulo": "Modus", "descricao": "Criação de roupas sustentáveis usando materiais ecológicos para reduzir o impacto ambiental da moda.", "tag": "vestuario" },
+        ]
+        cards.extend(cards_padrao[len(cards):4])
+    
     return render_template('index.html', cards=cards)
+
+@app.route('/projetos')
+def projetos():
+    """Exibe vitrine com todos os projetos com paginação (12 por página)"""
+    curso_filtro = request.args.get('curso', '').strip()
+    tipo_filtro = request.args.get('tipo', '').strip()
+    ordenacao = request.args.get('ordenacao', 'recente').strip()
+    q = request.args.get('q', '').strip()
+    pagina = request.args.get('pagina', 1, type=int)
+
+    query = Projeto.query
+    
+    if curso_filtro and curso_filtro != 'todos':
+        query = query.filter_by(curso=curso_filtro)
+    
+    if tipo_filtro and tipo_filtro != 'todos':
+        query = query.filter_by(tipo=tipo_filtro)
+
+    if q:
+        like_q = f"%{q}%"
+        query = query.outerjoin(Autor).filter(
+            db.or_(
+                Projeto.titulo.ilike(like_q),
+                Projeto.descricao.ilike(like_q),
+                Autor.nome.ilike(like_q)
+            )
+        ).distinct()
+
+    if ordenacao == 'curtidas':
+        query = query.order_by(Projeto.curtidas.desc(), Projeto.id.desc())
+    else:
+        query = query.order_by(Projeto.id.desc())
+
+    total_projetos = query.count()
+    projetos_por_pagina = 12
+    total_paginas = (total_projetos + projetos_por_pagina - 1) // projetos_por_pagina
+
+    pagina = max(1, min(pagina, max(1, total_paginas)))
+    offset = (pagina - 1) * projetos_por_pagina
+    
+    projetos_lista = query.offset(offset).limit(projetos_por_pagina).all()
+
+    usuario_curtidas = set()
+    if current_user.is_authenticated:
+        curtidas = Curtida.query.filter_by(usuario_id=current_user.id).all()
+        usuario_curtidas = set(c.projeto_id for c in curtidas)
+    
+    for projeto in projetos_lista:
+        projeto.user_liked = projeto.id in usuario_curtidas
+    
+    cursos = [p.curso for p in Projeto.query.distinct(Projeto.curso).all() if p.curso]
+    tipos = [p.tipo for p in Projeto.query.distinct(Projeto.tipo).all() if p.tipo]
+    
+    return render_template(
+        'projetos.html',
+        projetos=projetos_lista,
+        cursos=cursos,
+        tipos=tipos,
+        curso_filtro=curso_filtro,
+        tipo_filtro=tipo_filtro,
+        ordenacao=ordenacao,
+        q=q,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total_projetos=total_projetos
+    )
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -135,7 +220,6 @@ def ver_projeto(id):
     heart_liked_exists = os.path.exists(os.path.join(static_path, 'heartliked.png'))
     heart_exists = os.path.exists(os.path.join(static_path, 'heart.png'))
     heart_hover_exists = os.path.exists(os.path.join(static_path, 'hearthover.png'))
-    # Prepara lista de imagens para o template (paths relativos dentro de `static/`)
     imagens = []
     if getattr(projeto, 'estrutura', None):
         imagens = [p for p in projeto.estrutura.split(',') if p]
@@ -145,10 +229,8 @@ def ver_projeto(id):
         try:
             imagens_urls.append(url_for('static', filename=img))
         except Exception:
-            # ignora qualquer path inválido
             continue
 
-    # Calcula tempo relativo para cada comentário no servidor (usa UTC)
     comentarios_relativos = {}
     now = datetime.utcnow()
     for c in comentarios:
@@ -228,7 +310,6 @@ def callback_suap():
         "Accept": "application/json"
     }
 
-    # ✅ URL CORRETA
     SUAP_API_URL = "https://suap.ifrn.edu.br/api/eu/"
     response = requests.get(SUAP_API_URL, headers=headers)
 
@@ -575,6 +656,10 @@ def ver_perfil(id):
     else:
         flash('Usuário não encontrado', 'error')
         return redirect (url_for('index'))
+
+@app.route("/sobre")
+def sobre():
+    return render_template("sobre.html")
 
 if __name__ == '__main__':
     app.run(debug=True)

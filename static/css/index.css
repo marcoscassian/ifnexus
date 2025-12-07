@@ -1,5 +1,6 @@
 body {
-    overflow-y: overlay; 
+    overflow-y: overlay;
+    background: #F2F2F2 !important;
 }
 
 .hero {
@@ -25,7 +26,8 @@ body {
     font-size: 20px;
 }
 
-button {
+.btn-hero {
+    display: inline-block;
     margin-top: 20px;
     font-size: 19px;
     font-weight: bold;
@@ -36,6 +38,12 @@ button {
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-hero:hover {
+    background-color: white;
+    color: #30782B;
 }
 
 .hero-rigth {
@@ -48,15 +56,19 @@ button {
     height: 340px;
 }
 
-button:hover {
-    background-color: white;
-    color: #30782B;
-}
-
 .content > h2 {
     margin-top: 10px;
     margin-bottom: 10px;
     color: #30782B;
     font-size: 30px;
     text-align: center;
+}
+
+.content .projetos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }

@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Projetos - IFNexus{% endblock %}
+
+{% block estilos %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos.css') }}">
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="projetos-wrapper">
+    <section class="projetos-header">
+        <div class="header-content">
+            <h1 class="header-title"><span class="titulo-verde">Explore</span> os Projetos acadêmicos do IFRN</h1>
+        </div>
+    </section>
+
+    <div class="projetos-container">
+
+        <main class="projetos-main">
+
+            <div class="filtros-top">
+                <form id="filtros-form" class="filtro-inline" method="GET">
+
+                    <div class="filtro-inline-group filtro-busca-group">
+                        <label for="busca">Buscar</label>
+                        <input id="busca" name="q" type="search" class="search-input" placeholder="Buscar por título, autor, ou palavra-chave" value="{{ request.args.get('q', '') }}">
+                    </div>
+                    <div class="filtro-inline-group">
+                        <label for="filtro-curso">Curso</label>
+                        <select id="filtro-curso" name="curso" class="filtro-select filtro-inline-select">
+                            <option value="">Todos os cursos</option>
+                            {% for curso in cursos|unique %}
+                                <option value="{{ curso }}" {% if curso_filtro == curso %}selected{% endif %}>{{ curso|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filtro-inline-group">
+                        <label for="filtro-tipo">Tipo</label>
+                        <select id="filtro-tipo" name="tipo" class="filtro-select filtro-inline-select">
+                            <option value="">Todos os tipos</option>
+                            {% for tipo in tipos|unique %}
+                                <option value="{{ tipo }}" {% if tipo_filtro == tipo %}selected{% endif %}>{{ tipo|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filtro-inline-group">
+                        <label for="ordenacao">Ordenar</label>
+                        <select id="ordenacao" name="ordenacao" class="filtro-select filtro-inline-select">
+                            <option value="recente" {% if ordenacao == 'recente' %}selected{% endif %}>Mais Recentes</option>
+                            <option value="curtidas" {% if ordenacao == 'curtidas' %}selected{% endif %}>Mais Curtidos</option>
+                        </select>
+                    </div>
+
+                    <div class="filtro-inline-actions">
+                        <button type="submit" class="btn-filtrar">Aplicar</button>
+                        <a href="{{ url_for('projetos') }}" class="btn-limpar">Limpar</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Indicador de quantidade -->
+            <div class="projetos-info">
+                <p class="projetos-count">
+                    {% if projetos|length == 0 %}
+                        Nenhum projeto encontrado
+                    {% elif projetos|length == 1 %}
+                        1 projeto encontrado
+                    {% else %}
+                        {{ projetos|length }} projetos encontrados
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if projetos|length > 0 %}
+                <div class="projetos-grid">
+                    {% for projeto in projetos %}
+                    <article class="projeto-card">
+                        <div class="projeto-image">
+                            {% if projeto.estrutura %}
+                                {% set imgs = projeto.estrutura.split(',') %}
+                                {% if imgs|length > 0 and imgs[0] %}
+                                    <img src="{{ url_for('static', filename=imgs[0]) }}" 
+                                         alt="{{ projeto.titulo }}" 
+                                         class="card-img">
+                                {% else %}
+                                    <div class="card-img-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="card-img-placeholder">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-curso-badge card-curso-{{ projeto.curso|lower|replace(' ', '-') }}">
+                                {{ projeto.curso|capitalize }}
+                            </div>
+                        </div>
+
+                        <div class="projeto-content">
+    
+                            <h3 class="card-title">{{ projeto.titulo }}</h3>
+
+                            {% if projeto.subtitulo %}
+                            <p class="card-subtitle">{{ projeto.subtitulo }}</p>
+                            {% endif %}
+                            
+                            {% if projeto.descricao %}
+                            <p class="card-description">{{ projeto.descricao[:80] }}{% if projeto.descricao|length > 80 %}...{% endif %}</p>
+                            {% endif %}
+
+                            <div class="card-meta">
+                                <span class="card-tipo">{{ projeto.tipo|capitalize }}</span>
+                            </div>
+
+                            <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn-ver-mais">
+                                Ver Projeto
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+
+                {% if total_paginas > 1 %}
+                <div class="paginacao">
+                    {% if pagina > 1 %}
+                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=1) }}" class="pag-btn">« Primeira</a>
+                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina-1) }}" class="pag-btn">‹ Anterior</a>
+                    {% endif %}
+                    
+                    <div class="pag-info">
+                        Página <strong>{{ pagina }}</strong> de <strong>{{ total_paginas }}</strong>
+                    </div>
+                    
+                    {% if pagina < total_paginas %}
+                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina+1) }}" class="pag-btn">Próxima ›</a>
+                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=total_paginas) }}" class="pag-btn">Última »</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            {% else %}
+                <div class="estado-vazio">
+                    <div class="vazio-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="vazio-title">Nenhum projeto encontrado</h3>
+                    <p class="vazio-text">
+                        {% if curso_filtro or tipo_filtro %}
+                            Tente ajustar seus filtros para encontrar o projeto que procura.
+                        {% else %}
+                            Ainda não há projetos cadastrados na plataforma.
+                        {% endif %}
+                    </p>
+                    {% if curso_filtro or tipo_filtro %}
+                    <a href="{{ url_for('projetos') }}" class="btn-voltar">Limpar Filtros</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.filtro-select').forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('filtros-form').submit();
+        });
+    });
+
+    // Remover filtros ao clicar no badge
+    document.querySelectorAll('.badge-filtro').forEach(badge => {
+        badge.addEventListener('click', function() {
+            const text = this.textContent.trim();
+            const filtro = text.replace(' ✕', '').toLowerCase();
+            
+            if (document.getElementById('filtro-curso').value.toLowerCase() === filtro) {
+                document.getElementById('filtro-curso').value = '';
+            } else if (document.getElementById('filtro-tipo').value.toLowerCase() === filtro) {
+                document.getElementById('filtro-tipo').value = '';
+            }
+            
+            document.getElementById('filtros-form').submit();
+        });
+    });
+
+    // Busca: submit no Enter + debounce enquanto digita
+    (function(){
+        const busca = document.getElementById('busca');
+        if (!busca) return;
+
+        // Função debounce
+        function debounce(fn, wait) {
+            let t;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            }
+        }
+
+        // Submete o formulário
+        function submitForm() {
+            document.getElementById('filtros-form').submit();
+        }
+
+        // Submete ao teclar Enter
+        busca.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitForm();
+            }
+        });
+
+        // Submete automaticamente após digitar (debounce)
+        busca.addEventListener('input', debounce(function() {
+            submitForm();
+        }, 700));
+    })();
+
+</script>
+
+{% endblock %}

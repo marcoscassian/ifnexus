@@ -27,8 +27,8 @@
             {% if current_user.is_authenticated %}
             <nav class="botoes_logged">
                 <a href="/" class="Incio">Início</a>
-                <a href="/" class="Projetos">Projetos</a>
-                <a href="/" class="Sobre">Sobre</a>
+                <a href="/projetos" class="Projetos">Projetos</a>
+                <a href="/sobre" class="Sobre">Sobre</a>
                 <div class="dropdown" tabindex="0">
                     <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
                     <div class="dropdown-content">
@@ -45,8 +45,8 @@
         {% else %}
             <nav class="botoes_not_logged">
                 <a href="/" class="Incio">Início</a>
-                <a href="/" class="Projetos">Projetos</a>
-                <a href="/" class="Sobre">Sobre</a>
+                <a href="/projetos" class="Projetos">Projetos</a>
+                <a href="/sobre" class="Sobre">Sobre</a>
                 <a href="/login" class="Login">Login</a>
             </nav>
         {% endif %}

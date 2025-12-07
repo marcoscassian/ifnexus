@@ -4,6 +4,7 @@
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -12,7 +13,7 @@
         <h1>Ideias que conectam. </h1>
         <h1>Projetos que transformam.</h1>
         <p>Um portal para explorar, divulgar e se inspirar com os projetos do IF.</p>
-        <button>Explorar Projetos</button>
+        <a href="/projetos" class="btn-hero">Explorar Projetos</a>
     </div>
 
     <div class="hero-rigth">
@@ -22,7 +23,7 @@
 <div class="content">
     <h2>Projetos em Destaque</h2>
     <!-- loop para mostrar os cards -->
-    <div class="cards">
+    <div class="projetos-grid">
         {% for card in cards %}
             {% include '_card.html' %}
         {% endfor %}
