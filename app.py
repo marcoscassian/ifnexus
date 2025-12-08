@@ -94,10 +94,9 @@ def index():
 
 @app.route('/projetos')
 def projetos():
-    """Exibe vitrine com todos os projetos com paginação (12 por página)"""
     curso_filtro = request.args.get('curso', '').strip()
     tipo_filtro = request.args.get('tipo', '').strip()
-    ordenacao = request.args.get('ordenacao', 'recente').strip()
+    ordenacao = request.args.get('ordenacao', 'curtidas').strip()
     q = request.args.get('q', '').strip()
     pagina = request.args.get('pagina', 1, type=int)
 

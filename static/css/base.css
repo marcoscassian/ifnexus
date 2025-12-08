@@ -101,6 +101,13 @@ header > .logo {
     font-size: 15px;
     font-weight: 500;
   }
+
+/* ícones no dropdown */
+.dropdown-content a .dropdown-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
  
 .dropdown-content a:hover {
     background-color: #f2f2f2;

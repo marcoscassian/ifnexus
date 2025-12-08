@@ -63,6 +63,7 @@ form {
 }
 
 .sessao legend {
+    padding-top: 8px;
     top: 5px;
     left: 20px;
     font-size: 1.2em;

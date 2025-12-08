@@ -12,6 +12,7 @@
     {% block estilos %}{% endblock %}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body style="background-color: #F2F2F2;">
 
@@ -29,17 +30,32 @@
                 <a href="/" class="Incio">Início</a>
                 <a href="/projetos" class="Projetos">Projetos</a>
                 <a href="/sobre" class="Sobre">Sobre</a>
-                <div class="dropdown" tabindex="0">
-                    <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
-                    <div class="dropdown-content">
-                      <div class="user-name">Olá, {{ current_user.nome }}</div>
-                      <a href="/meu_perfil">Meu Perfil</a>
-                      <a href="{{ url_for('meus_projetos') }}"> Meus Projetos</a>
-                      <a href="/criarprojeto">＋ Cadastrar Projeto</a>
-                      <a href="/projetoscurtidos">♡ Projetos Curtidos</a>
-                      <a href="/logout">↩ Sair</a>
-                    </div>
-                </div>
+                                <div class="dropdown" tabindex="0">
+                                        <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
+                                        <div class="dropdown-content">
+                                            <div class="user-name">Olá, {{ current_user.nome }}</div>
+                                            <a href="/meu_perfil">
+                                                <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/user.png') }}" alt="Usuário">
+                                                Meu Perfil
+                                            </a>
+                                            <a href="{{ url_for('meus_projetos') }}">
+                                                <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/projetos.png') }}" alt="Projetos">
+                                                Meus Projetos
+                                            </a>
+                                            <a href="/criarprojeto">
+                                                <i class="fa-regular fa-folder-plus" style="color: #333;"></i>
+                                                Cadastrar Projeto
+                                            </a>
+                                            <a href="/projetoscurtidos">
+                                                <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/projetos.png') }}" alt="Curtidos">
+                                                Projetos Curtidos
+                                            </a>
+                                            <a href="/logout">
+                                                <i class="fa-solid fa-arrow-right-from-bracket" style="color: #bc0101;"></i>
+                                                Sair
+                                            </a>
+                                        </div>
+                                </div>
                  
             </nav>
         {% else %}
