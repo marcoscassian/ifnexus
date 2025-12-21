@@ -27,19 +27,25 @@
             
             <div class="form-group small autores-group">
                 <label>Autores</label>
-                <div id="autores" class="autor-input-group">
-                    {% for autor in autores %}
-                    <div class="autor">
-                        <input type="text" name="autor_nome[]" placeholder="Nome" value="{{ autor.nome }}" required>
-                        <input type="text" name="autor_matricula[]" placeholder="Matrícula" value="{{ autor.matricula }}" required>
-                        <select name="autor_tipo[]" required>
-                            <option value="">Selecionar Tipo</option>
-                            <option value="aluno" {% if autor.tipo == 'aluno' %}selected{% endif %}>Aluno</option>
-                            <option value="servidor" {% if autor.tipo == 'servidor' %}selected{% endif %}>Servidor</option>
-                        </select>
-                        {% if not loop.first %}<button type="button" onclick="this.parentNode.remove()">X</button>{% endif %}
+                <div class="autor-input-group">
+
+                    <input type="text" id="busca-autor" placeholder="Digite o nome do autor">
+
+                    <div id="resultado-autores" class="resultado-autores"></div>
+
+                    <div id="autores-selecionados">
+                        {% for autor in autores %}
+                        {% if autor.usuario %}
+                        <div class="autor">
+                            <strong>{{ autor.usuario.nome }}</strong> ({{ autor.usuario.matricula }})
+
+                            <input type="hidden" name="autores_ids[]" value="{{ autor.usuario.id }}">
+
+                            <button type="button" onclick="this.parentNode.remove()">X</button>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -48,10 +54,6 @@
             <div class="form-group large">
                 <label>Subtítulo do Projeto</label>
                 <input type="text" name="subtitulo" value="{{ subtitulo }}">
-            </div>
-            
-            <div class="form-group small right-align">
-                <button type="button" class="add-autor-btn" onclick="addAutor()">+ Adicionar Autor</button>
             </div>
         </div>
 
@@ -211,18 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('file-name-display').textContent = fileName;
     });
 
-    function addAutor() {
-        const div = document.getElementById('autores');
-        const novo = document.createElement('div');
-        novo.classList.add('autor');
-        novo.innerHTML = '<input type="text" name="autor_nome[]" placeholder="Nome" required> ' +
-                         '<input type="text" name="autor_matricula[]" placeholder="Matrícula" required> ' +
-                         '<select name="autor_tipo[]" required> <option value="">Selecionar Tipo</option> <option value="aluno">Aluno</option> <option value="servidor">Servidor</option> </select>' +
-                         '<button type="button" onclick="this.parentNode.remove()">X</button>';
-        div.appendChild(novo);
-    }
-    window.addAutor = addAutor;
-
     function addLinkPP3() {
         const div = document.getElementById('links');
         const container = document.createElement('div');
@@ -235,4 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
+
+<!-- live search de autores -->
+<script src="{{ url_for('static', filename='js/livesearch_autores.js') }}"></script>
+
 {% endblock %}

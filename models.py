@@ -15,7 +15,6 @@ class Usuario(db.Model, UserMixin):
     data_nascimento = db.Column(db.Text)
     cpf = db.Column(db.Text)
     tipo_usuario = db.Column(db.Text, nullable=False)
-    curso = db.Column(db.Text)
     campus = db.Column(db.Text)
     foto = db.Column(db.Text)
     comentarios = db.relationship('Comentario', backref='usuario', lazy=True, cascade="all, delete-orphan")
@@ -42,13 +41,13 @@ class Projeto(db.Model):
     comentarios = db.relationship('Comentario', backref='projeto', lazy=True, cascade="all, delete-orphan")
     
 class Autor(db.Model):
-    __tablename__ = 'autores'
-
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.Text, nullable=False)
-    matricula = db.Column(db.Text, nullable=False)
-    tipo = db.Column(db.Text) 
-    projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'), nullable=False)
+    tipo = db.Column(db.String(50))
+
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
+    projeto_id = db.Column(db.Integer, db.ForeignKey('projetos.id'))
+
+    usuario = db.relationship('Usuario')
 
 class Objetivo(db.Model):
     __tablename__ = 'objetivos'

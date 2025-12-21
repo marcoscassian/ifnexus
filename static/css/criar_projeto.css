@@ -152,17 +152,6 @@ textarea {
     text-align: right;
 }
 
-.add-autor-btn {
-    background-color: #666; 
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    margin-top: 10px;
-}
-
 .academic-row .form-group-col {
     flex: 1;
 }
@@ -354,5 +343,41 @@ textarea {
 }
 .cadastrar-projeto-btn-pp3:hover {
     background-color: #e0f0e5; 
+}
+
+.autor-input-group {
+    position: relative; /* base do dropdown */
+}
+
+.resultado-autores {
+    position: absolute;
+    top: 100%;           /* logo abaixo do input */
+    left: 0;
+    width: 100%;
+
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+
+    max-height: 200px;
+    overflow-y: auto;
+
+    z-index: 9999;       /* 🔥 sobre tudo */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+    display: none;       /* começa escondido */
+}
+
+.resultado-autores.ativo {
+    display: block;
+}
+
+.user-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.user-item:hover {
+    background-color: #f2f2f2;
 }
 

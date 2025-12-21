@@ -327,17 +327,17 @@ def callback_suap():
     suap_usuario = Usuario.query.filter_by(email=email).first()
 
     if not suap_usuario:
+        print(user_info)
         suap_usuario = Usuario(
             nome=nome,
             email=email,
             senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
-            data_nascimento=user_info.get("data_nascimento"),
+            data_nascimento=user_info.get("data_de_nascimento"),
             cpf=user_info.get("cpf"),
-            tipo_usuario=user_info.get("tipo_vinculo"),
-            matricula=user_info.get("matricula"),
-            curso=vinculo.get("curso"),
-            campus=vinculo.get("campus"),
-            foto=user_info.get("url_foto_150x200")
+            tipo_usuario=user_info.get("tipo_usuario"),
+            matricula=user_info.get("identificacao"),
+            campus=user_info.get("campus"),
+            foto=user_info.get("foto")
         )
 
         db.session.add(suap_usuario)
@@ -453,11 +453,18 @@ def gerenciar_projeto(id=None):
             if lista_imagens:
                 projeto.estrutura = ",".join(lista_imagens)
 
-            nomes_autores = request.form.getlist('autor_nome[]')
-            matriculas_autores = request.form.getlist('autor_matricula[]')
-            tipos_autores = request.form.getlist('autor_tipo[]')
+            autores_ids = request.form.getlist('autores_ids[]')
+            autores_tipos = request.form.getlist('autores_tipo[]')
 
-            for nome, matricula, tipo in zip(nomes_autores, matriculas_autores, tipos_autores):
+            for usuario_id, tipo in zip(autores_ids, autores_tipos):
+                autor = Autor(
+                    usuario_id=usuario_id,
+                    tipo=tipo,
+                    projeto_id=projeto.id
+                )
+                db.session.add(autor)
+
+            for nome, matricula, tipo in zip(autores_ids, autores_tipos):
                 if nome.strip() and matricula.strip() and tipo.strip():
                     autor = Autor(nome=nome, matricula=matricula, tipo=tipo, projeto_id=projeto.id)
                     db.session.add(autor)
@@ -515,7 +522,7 @@ def gerenciar_projeto(id=None):
         'arquivo_nome': projeto.arquivo if projeto else '',
         
         'imagens': (projeto.estrutura.split(',') if projeto and projeto.estrutura else []) + [''] * (4 - len(projeto.estrutura.split(',') if projeto and projeto.estrutura else [])),
-        'autores': projeto.autores if projeto and projeto.autores else [Autor(nome='', matricula='', tipo='')],
+        'autores': projeto.autores if projeto and projeto.autores else [],
         'objetivos': projeto.objetivos if projeto and projeto.objetivos else [Objetivo(descricao=''), Objetivo(descricao=''), Objetivo(descricao='')],
         'metodologias': projeto.metodologias if projeto and projeto.metodologias else [Metodologia(descricao=''), Metodologia(descricao=''), Metodologia(descricao='')],
         'link_principal': link_principal_val,
@@ -528,6 +535,27 @@ def gerenciar_projeto(id=None):
     }
 
     return render_template('criar_projeto.html', **dados_projeto)
+
+@app.route("/livesearch/usuarios")
+@suap_required
+def livesearch_usuarios():
+    q = request.args.get("q", "").strip()
+
+    if len(q) < 1:
+        return jsonify([])
+
+    usuarios = Usuario.query.filter(
+        Usuario.nome.ilike(f"%{q}%")
+    ).limit(8).all()
+
+    return jsonify([
+        {
+            "id": u.id,
+            "nome": u.nome,
+            "matricula": u.matricula
+        } for u in usuarios
+    ])
+
 
 @app.route('/projeto/<int:id>/excluir', methods=['POST'])
 @suap_required
