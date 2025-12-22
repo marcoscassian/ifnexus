@@ -8,7 +8,7 @@ import requests
 from urllib.parse import urlencode
 from decorator import suap_required
 from datetime import datetime
-
+from extensions import db
 
 SUAP_CLIENT_ID = "G4IXTGHpxPafBmBGszCAuvxe6iBZgoK3W83HIUSE"
 SUAP_REDIRECT_URI = "http://127.0.0.1:5000/callback_suap"
@@ -17,7 +17,6 @@ SUAP_TOKEN_URL = "https://suap.ifrn.edu.br/o/token/"
 SUAP_API_URL = "https://suap.ifrn.edu.br/api/v2/minhas-informacoes/meus-dados/"
 
 from models import (
-    db,
     Usuario,
     Projeto,
     Autor,
@@ -323,7 +322,7 @@ def callback_suap():
     email = user_info.get("email")
     nome = user_info.get("nome_usual") or user_info.get("nome")
     vinculo = user_info.get("vinculo", {})
-
+    print(user_info)
     suap_usuario = Usuario.query.filter_by(email=email).first()
 
     if not suap_usuario:
@@ -453,21 +452,17 @@ def gerenciar_projeto(id=None):
             if lista_imagens:
                 projeto.estrutura = ",".join(lista_imagens)
 
-            autores_ids = request.form.getlist('autores_ids[]')
-            autores_tipos = request.form.getlist('autores_tipo[]')
 
-            for usuario_id, tipo in zip(autores_ids, autores_tipos):
+            autores_ids = request.form.getlist('autores_ids[]')
+            print("AUTORES:", autores_ids)
+
+            for usuario_id in autores_ids:
                 autor = Autor(
-                    usuario_id=usuario_id,
-                    tipo=tipo,
+                    usuario_id=int(usuario_id),
                     projeto_id=projeto.id
                 )
                 db.session.add(autor)
 
-            for nome, matricula, tipo in zip(autores_ids, autores_tipos):
-                if nome.strip() and matricula.strip() and tipo.strip():
-                    autor = Autor(nome=nome, matricula=matricula, tipo=tipo, projeto_id=projeto.id)
-                    db.session.add(autor)
 
             objetivos = request.form.getlist('objetivos[]')
             for obj in objetivos:
@@ -494,7 +489,7 @@ def gerenciar_projeto(id=None):
             msg = 'Projeto atualizado com sucesso!' if is_edit else 'Projeto cadastrado com sucesso!'
             flash(msg, 'success')
             return redirect(url_for('ver_projeto', id=projeto.id))
-        
+
         except Exception as e:
             db.session.rollback()
             flash(f'Erro ao salvar projeto: {str(e)}', 'error')

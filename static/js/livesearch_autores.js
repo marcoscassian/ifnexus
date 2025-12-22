@@ -49,22 +49,24 @@ buscaAutor.addEventListener("input", () => {
 });
 
 function selecionarAutor(id, nome, matricula) {
-    if (document.querySelector(`input[value="${id}"]`)) return;
+    if (autoresSelecionados.querySelector(`input[name="autores_ids[]"][value="${id}"]`)) return;
 
-    autoresSelecionados.innerHTML += `
-        <div class="autor">
-            <strong>${nome}</strong> (${matricula})
+    const div = document.createElement("div");
+    div.classList.add("autor");
 
-            <input type="hidden" name="autores_ids[]" value="${id}">
-
-            <button type="button" onclick="this.parentNode.remove()">X</button>
-        </div>
+    div.innerHTML = `
+        <strong>${nome}</strong> (${matricula})
+        <input type="hidden" name="autores_ids[]" value="${id}">
+        <button type="button" onclick="this.parentNode.remove()">X</button>
     `;
+
+    autoresSelecionados.appendChild(div);
 
     buscaAutor.value = "";
     resultadoAutores.innerHTML = "";
     resultadoAutores.classList.remove("ativo");
 }
+    
 
 document.addEventListener("click", (e) => {
     if (!e.target.closest(".autor-input-group")) {

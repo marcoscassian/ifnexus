@@ -21,8 +21,10 @@
                 </div>
 
                 <div class="autores">
-                    <p><strong>Autores:</strong> 
-                        {{ projeto.autores | map(attribute='nome') | join(', ') }}
+                    <p><strong>Autores:</strong>
+                        {% for autor in projeto.autores %}
+                            {{ autor.usuario.nome }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
                     </p>
                 </div>
 
