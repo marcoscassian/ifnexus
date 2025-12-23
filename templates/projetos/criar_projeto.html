@@ -3,7 +3,7 @@
 {% block title %}{{ header_title | default('Cadastrar Projeto') }}{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/criar_projeto.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/criar_projeto.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -14,7 +14,7 @@
     <p>{{ header_subtitle | default('Preencha os dados abaixo para publicar seu projeto na vitrine do IF.') }}</p>
 </div>
 
-<form action="{{ action_url | default(url_for('criar_projeto')) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ action_url | default(url_for('projetos.criar_projeto')) }}" method="POST" enctype="multipart/form-data">
 
     <div class="sessao green-header">
         <legend>Informações Gerais do Projeto</legend>

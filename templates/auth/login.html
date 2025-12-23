@@ -12,20 +12,19 @@
 {% include 'componentes/erro.html' %}
 
 
-<link rel="stylesheet" href="static/css/login.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/login.css') }}">
 
 
 <div class="page-center">
     <div class="container">
 
-
         <div class="logo">
-            <img src="static/img/geral/ifnexus-logobranca.svg" alt="IFNexus Logo">
+            <img src="{{ url_for('static', filename='img/geral/ifnexus-logobranca.svg') }}" alt="IFNexus Logo">
         </div>
 
         <div class="botoes">
             <p>Entre com sua conta e explore os projetos do IFRN.</p>
-            <form action="{{ url_for('login') }}" method="post">
+            <form action="{{ url_for('auth.login') }}" method="post">
                 <div class="input-group">
                     <input type="text" name="email" placeholder="Email">
                     <span class="icon"></span>
@@ -37,7 +36,7 @@
                 <button>Entrar</button>
             </form>
             <div class="loginsuap">
-                <a href="/login_suap" class="btn-suap">Entrar com o <strong>SUAP</strong></a>
+                <a href="{{ url_for('auth.login_suap') }}" class="btn-suap">Entrar com o <strong>SUAP</strong></a>
             </div>
         </div>
     </div>
@@ -46,7 +45,7 @@
     <div class="subcontainer">
         <p>
             Ainda não tem uma conta?
-            <a href="{{ url_for('register') }}">Cadastre-se</a>
+            <a href="{{ url_for('auth.register') }}">Cadastre-se</a>
         </p>
     </div>
 </div>

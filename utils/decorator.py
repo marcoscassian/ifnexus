@@ -9,7 +9,7 @@ def suap_required(f):
     def decorated_function(*args, **kwargs):
         if current_user.tipo_usuario not in ['Aluno', 'Docente']:
             flash("Autentique sua conta com o SUAP por favor", "error")
-            return redirect(url_for('meu_perfil'))
+            return redirect(url_for('usuarios.meu_perfil'))
         return f(*args, **kwargs)
     return decorated_function
 

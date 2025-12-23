@@ -4,7 +4,7 @@
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/projetos.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -13,7 +13,7 @@
         <h1>Ideias que conectam. </h1>
         <h1>Projetos que transformam.</h1>
         <p>Um portal para explorar, divulgar e se inspirar com os projetos do IF.</p>
-        <a href="/projetos" class="btn-hero">Explorar Projetos</a>
+        <a href="{{ url_for('projetos.projetos') }}" class="btn-hero">Explorar Projetos</a>
     </div>
 
     <div class="hero-rigth">

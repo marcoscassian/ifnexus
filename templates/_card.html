@@ -20,7 +20,7 @@
         <p class="card-description">{{ card.descricao[:80] }}{% if card.descricao|length > 80 %}...{% endif %}</p>
         {% endif %}
 
-        <a href="{{ url_for('ver_projeto', id=card.id) }}" class="btn-ver-mais">
+        <a href="{{ url_for('projetos.ver_projeto', id=card.id) }}" class="btn-ver-mais">
             Ver Projeto
             <i class="fas fa-arrow-right"></i>
         </a>

@@ -8,7 +8,6 @@
             IFnexus
         {% endblock %}
     </title>
-    <link rel="stylesheet" href="static/css/base.css">
     {% block estilos %}{% endblock %}
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
@@ -27,31 +26,31 @@
         <div class="botoes">
             {% if current_user.is_authenticated %}
             <nav class="botoes_logged">
-                <a href="/" class="Incio">Início</a>
-                <a href="/projetos" class="Projetos">Projetos</a>
-                <a href="/sobre" class="Sobre">Sobre</a>
+                <a href="{{ url_for('main.index') }}" class="Incio">Início</a>
+                <a href="{{ url_for('projetos.projetos') }}" class="Projetos">Projetos</a>
+                <a href="{{ url_for('main.sobre') }}" class="Sobre">Sobre</a>
                                 <div class="dropdown" tabindex="0">
                                         <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
                                         <div class="dropdown-content">
                                             <div class="user-name">Olá, {{ current_user.nome }}</div>
-                                            <a href="/meu_perfil">
+                                            <a href="{{ url_for('usuarios.meu_perfil') }}">
                                                 <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/user.png') }}" alt="Usuário">
                                                 Meu Perfil
                                             </a>
-                                            <a href="{{ url_for('meus_projetos') }}">
+                                            <a href="{{ url_for('usuarios.meus_projetos') }}">
                                                 <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/projetos.png') }}" alt="Projetos">
                                                 Meus Projetos
                                             </a>
-                                            <a href="/criarprojeto">
+                                            <a href="{{ url_for('projetos.criar_projeto') }}">
                                                 <i class="fa-solid fa-plus"></i>
                                                 Cadastrar Projeto
                                             </a>
-                                            <a href="/projetoscurtidos">
+                                            <a href="{{ url_for('usuarios.projetos_curtidos') }}">
                                                 <i class="fa-regular fa-heart"></i>
                                                 Projetos Curtidos
                                             </a>
                                             <div class=""></div>
-                                            <a href="/logout">
+                                            <a href="{{ url_for('auth.logout') }}">
                                                 <i class="fa-solid fa-arrow-right-from-bracket" style="color: #bc0101;"></i>
                                                 Sair
                                             </a>
@@ -61,10 +60,10 @@
             </nav>
         {% else %}
             <nav class="botoes_not_logged">
-                <a href="/" class="Incio">Início</a>
-                <a href="/projetos" class="Projetos">Projetos</a>
-                <a href="/sobre" class="Sobre">Sobre</a>
-                <a href="/login" class="Login">Login</a>
+                <a href="{{ url_for ('main.index')}}" class="Incio">Início</a>
+                <a href="{{ url_for('projetos.projetos') }}" class="Projetos">Projetos</a>
+                <a href="{{ url_for ('main.sobre')}}" class="Sobre">Sobre</a>
+                <a href="{{ url_for('auth.login') }}" class="Login">Login</a>
             </nav>
         {% endif %}
        

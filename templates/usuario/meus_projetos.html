@@ -3,7 +3,7 @@
 {% block title %}Meus Projetos{% endblock %}
 
 {% block estilos %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/meus_projetos.css') }}?v=1.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuario/meus_projetos.css') }}?v=1.1">
     {% endblock %}
 
 {% block conteudo %}
@@ -26,15 +26,15 @@
                 
                 <div class="card-actions">
                     
-                    <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn action-btn ver">
+                    <a href="{{ url_for('projetos.ver_projeto', id=projeto.id) }}" class="btn action-btn ver">
                         <i class="fas fa-eye"></i> Ver
                     </a>
 
-                    <a href="{{ url_for('editar_projeto', id=projeto.id) }}" class="btn action-btn editar">
+                    <a href="{{ url_for('projetos.editar_projeto', id=projeto.id) }}" class="btn action-btn editar">
                         <i class="fas fa-edit"></i> Editar
                     </a>
 
-                    <form action="{{ url_for('excluir_projeto', id=projeto.id) }}" method="POST" 
+                    <form action="{{ url_for('projetos.excluir_projeto', id=projeto.id) }}" method="POST" 
                           onsubmit="return confirm('ATENÇÃO: Você tem certeza que deseja excluir o projeto \'{{ projeto.titulo }}\'? Esta ação é irreversível.');"
                           style="display: inline;">
                         <button type="submit" class="btn action-btn excluir">
@@ -49,7 +49,7 @@
 {% else %}
     <div class="empty-state">
         <p>Você ainda não cadastrou nenhum projeto.</p>
-        <a href="{{ url_for('criar_projeto') }}" class="btn-principal-v2">
+        <a href="{{ url_for('projetos.criar_projeto') }}" class="btn-principal-v2">
             Cadastrar Meu Primeiro Projeto
         </a>
     </div>

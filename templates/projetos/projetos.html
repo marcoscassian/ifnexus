@@ -3,7 +3,7 @@
 {% block title %}Projetos - IFNexus{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/projetos.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -56,7 +56,7 @@
 
                     <div class="filtro-inline-actions">
                         <button type="submit" class="btn-filtrar">Aplicar</button>
-                        <a href="{{ url_for('projetos') }}" class="btn-limpar">Limpar</a>
+                        <a href="{{ url_for('projetos.projetos') }}" class="btn-limpar">Limpar</a>
                     </div>
                 </form>
             </div>
@@ -117,7 +117,7 @@
                                 <span class="card-tipo">{{ projeto.tipo|capitalize }}</span>
                             </div>
 
-                            <a href="{{ url_for('ver_projeto', id=projeto.id) }}" class="btn-ver-mais">
+                            <a href="{{ url_for('projetos.ver_projeto', id=projeto.id) }}" class="btn-ver-mais">
                                 Ver Projeto
                                 <i class="fas fa-arrow-right"></i>
                             </a>
@@ -129,8 +129,8 @@
                 {% if total_paginas > 1 %}
                 <div class="paginacao">
                     {% if pagina > 1 %}
-                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=1) }}" class="pag-btn">« Primeira</a>
-                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina-1) }}" class="pag-btn">‹ Anterior</a>
+                        <a href="{{ url_for('projetos.projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=1) }}" class="pag-btn">« Primeira</a>
+                        <a href="{{ url_for('projetos.projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina-1) }}" class="pag-btn">‹ Anterior</a>
                     {% endif %}
                     
                     <div class="pag-info">
@@ -158,7 +158,7 @@
                         {% endif %}
                     </p>
                     {% if curso_filtro or tipo_filtro %}
-                    <a href="{{ url_for('projetos') }}" class="btn-voltar">Limpar Filtros</a>
+                    <a href="{{ url_for('projetos.projetos') }}" class="btn-voltar">Limpar Filtros</a>
                     {% endif %}
                 </div>
             {% endif %}

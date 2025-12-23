@@ -3,7 +3,7 @@
 {% block title %}Projetos Curtidos{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos_curtidos.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/usuario/projetos_curtidos.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -32,7 +32,7 @@
                     {% if projeto.subtitulo %}<h4>{{ projeto.subtitulo }}</h4>{% endif %}
                     <p class="card-desc">{{ projeto.descricao }}</p>
                     <div class="card-actions">
-                        <a class="btn" href="{{ url_for('ver_projeto', id=projeto.id) }}">Ver projeto</a>
+                        <a class="btn" href="{{ url_for('projetos.ver_projeto', id=projeto.id) }}">Ver projeto</a>
                         <span class="card-like-count">{{ projeto.curtidas or 0 }} curtidas</span>
                     </div>
                 </div>

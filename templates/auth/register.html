@@ -5,18 +5,20 @@
 {% block conteudo %}
 
 {% include 'componentes/erro.html' %}
-<link rel="stylesheet" href="static/css/register.css">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/register.css') }}">
+
 <div class="page-center">
     <div class="container">
 
         <div class="logo">
-            <img src="static/img/geral/ifnexus-logobranca.svg" alt="IFNexus Logo">
+            <img src="{{ url_for('static', filename='img/geral/ifnexus-logobranca.svg') }}" alt="IFNexus Logo">
         </div>
         
         <div class="botoes">
             <p>Crie sua conta e faça parte do IFNexus.</p>
 
-            <form action="{{ url_for('register') }}" method="post">
+            <form action="{{ url_for('auth.register') }}" method="post">
                 <div class="input-group">
                     <input type="text" name="name" placeholder="Nome de Usuário">
                     <span class="icon"></span>
@@ -35,7 +37,7 @@
                 </div>
                 <button>Cadastre-se</button>
                 <div class="loginsuap">
-                    <a href="/login_suap" class="btn-suap">Cadastrar-se com o <strong>SUAP</strong></a>
+                    <a href="{{ url_for('auth.login_suap') }}" class="btn-suap">Cadastrar-se com o <strong>SUAP</strong></a>
                 </div>
             </form>
         </div>
@@ -44,7 +46,7 @@
     <div class="subcontainer">
         <p>
             Já tem uma conta?
-            <a href="{{ url_for('login') }}">Conecte-se</a>
+            <a href="{{ url_for('auth.login') }}">Conecte-se</a>
         </p>
     </div>
 </div>

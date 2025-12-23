@@ -3,7 +3,7 @@
 {% block title %}Cadastrar Projeto{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/listar_projeto.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/listar_projeto.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -102,7 +102,7 @@
             </div>
 
             <div class="input-col">
-                <form id="comment-form" action="{{ url_for('adicionar_comentario', id=projeto.id) }}" method="post" class="comment-form">
+                <form id="comment-form" action="{{ url_for('projetos.adicionar_comentario', id=projeto.id) }}" method="post" class="comment-form">
                     <textarea id="comment-textarea" name="conteudo" rows="3" placeholder="O que você achou desse projeto?"></textarea>
                     <div style="margin-top:8px; text-align:right;">
                         <button type="submit" class="btn-submit">Enviar comentário</button>
@@ -115,7 +115,7 @@
             <div class="meta-col">
 
                 <div class="meta-row like-counter">
-                    <form id="like-form" action="{{ url_for('curtir_projeto', id=projeto.id) }}" method="post">
+                    <form id="like-form" action="{{ url_for('projetos.curtir_projeto', id=projeto.id) }}" method="post">
                         <button type="submit" id="like-btn" class="like-btn" aria-label="Curtir projeto">
 
                             {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}

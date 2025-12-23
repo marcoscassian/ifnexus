@@ -3,7 +3,7 @@
 {% block title %}Meu Perfil{% endblock %}
 
 {% block estilos %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/meuperfil.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/usuario/meuperfil.css') }}">
 {% endblock %}
 
 {% block conteudo %}
@@ -24,7 +24,7 @@
 
         </div>
 
-        <form id="formFoto" action="{{ url_for('alterar_foto') }}" method="POST" enctype="multipart/form-data">
+        <form id="formFoto" action="{{ url_for('usuarios.alterar_foto') }}" method="POST" enctype="multipart/form-data">
             <input type="file" name="foto" id="fotoInput" style="display:none;" accept="image/*" onchange="document.getElementById('formFoto').submit()">
         </form>
 
@@ -37,7 +37,7 @@
 
             <div class="suap-auth">
                 {% if perfil.tipo_usuario not in ['Aluno', 'Docente'] %}
-                    <a href="{{ url_for('login_suap') }}" class="btn-suap">Autenticar conta via SUAP</a>
+                    <a href="{{ url_for('auth.login_suap') }}" class="btn-suap">Autenticar conta via SUAP</a>
                 {% endif %}
             </div>
         </div>
