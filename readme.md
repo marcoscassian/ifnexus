@@ -1,7 +1,5 @@
 # 🌟 IF Nexus - Vitrine de Projetos do IFRN
 
-![IF Nexus Banner](https://via.placeholder.com/800x200.png?text=IF+Nexus+-+Vitrine+de+Projetos)
-
 **IF Nexus** é a vitrine oficial de projetos dos estudantes do IFRN! Aqui, você pode **publicar, gerenciar e compartilhar seus trabalhos acadêmicos** de forma prática, organizada e bonita.
 
 ---
@@ -94,3 +92,4 @@ Login via SUAP IFRN, para autenticação rápida e segura:
 1. Clique em **"Login com SUAP"**
 2. Autorize a aplicação no SUAP
 3. Seus dados são carregados automaticamente
+
