@@ -15,9 +15,9 @@
 🚀 **Para autores de projetos:**
 
 * Criar, editar e excluir projetos com facilidade
-* Upload de PDFs e imagens, com pastas organizadas automaticamente
+* Upload de PDFs e imagens
 * Adicionar autores, objetivos, metodologias e links
-* Feedback de sucesso/erro em tempo real com Flash Messages
+* Feedback a partir de comentários e curtidas de usuários
 
 ---
 
@@ -92,4 +92,5 @@ Login via SUAP IFRN, para autenticação rápida e segura:
 1. Clique em **"Login com SUAP"**
 2. Autorize a aplicação no SUAP
 3. Seus dados são carregados automaticamente
+
 
