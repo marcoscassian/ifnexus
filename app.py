@@ -143,7 +143,7 @@ def projetos():
     tipos = [p.tipo for p in Projeto.query.distinct(Projeto.tipo).all() if p.tipo]
     
     return render_template(
-        'projetos.html',
+        'projetos/projetos.html',
         projetos=projetos_lista,
         cursos=cursos,
         tipos=tipos,
@@ -174,7 +174,7 @@ def login():
             flash('Email ou senha inválidos.', 'error')
             return redirect(url_for('login'))
 
-    return render_template('login.html')
+    return render_template('auth/login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -202,7 +202,7 @@ def register():
         flash('Cadastro realizado com sucesso! Agora faça login.', 'success')
         return redirect(url_for('login'))
 
-    return render_template('register.html')
+    return render_template('auth/register.html')
 
 @app.route('/projeto/<int:id>')
 def ver_projeto(id):
@@ -253,7 +253,7 @@ def ver_projeto(id):
         comentarios_relativos[c.id] = rel
 
     return render_template(
-        'listar_projeto.html', 
+        'projetos/listar_projeto.html', 
         projeto=projeto, 
         comentarios=comentarios, 
         comentarios_relativos=comentarios_relativos,
@@ -268,7 +268,7 @@ def ver_projeto(id):
 @login_required
 def projetos_curtidos():
     projetos = Projeto.query.join(Curtida, Curtida.projeto_id == Projeto.id).filter(Curtida.usuario_id == current_user.id).all()
-    return render_template("projetos_curtidos.html", projetos=projetos)
+    return render_template("usuario/projetos_curtidos.html", projetos=projetos)
 
 @app.route("/login_suap")
 def login_suap():
@@ -529,7 +529,7 @@ def gerenciar_projeto(id=None):
         'header_subtitle': 'Altere os dados abaixo para atualizar seu projeto.' if id else 'Preencha os dados abaixo para publicar seu projeto na vitrine do IF.'
     }
 
-    return render_template('criar_projeto.html', **dados_projeto)
+    return render_template('projetos/criar_projeto.html', **dados_projeto)
 
 @app.route("/livesearch/usuarios")
 @suap_required
@@ -593,7 +593,7 @@ def excluir_projeto(id):
 def meus_projetos():
     
     projetos = Projeto.query.filter_by(usuario_id=current_user.id).all()
-    return render_template('meus_projetos.html', projetos=projetos)
+    return render_template('usuario/meus_projetos.html', projetos=projetos)
 
 
 @app.route('/projeto/<int:id>/comentario', methods=['POST'])
@@ -648,7 +648,7 @@ def curtir_projeto(id):
 @login_required
 def meu_perfil():
     
-    return render_template('perfil.html', perfil=current_user)
+    return render_template('usuario/perfil.html', perfil=current_user)
 
 @app.route("/alterar_foto", methods=["POST"])
 @login_required
@@ -674,7 +674,7 @@ def ver_perfil(id):
     
     perfil = Usuario.query.get(id)
     if perfil:
-        return render_template("perfil.html", perfil=perfil)
+        return render_template("usuario/perfil.html", perfil=perfil)
     else:
         flash('Usuário não encontrado', 'error')
         return redirect (url_for('index'))
