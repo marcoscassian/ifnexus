@@ -85,12 +85,6 @@ if-nexus/
 
 ---
 
-## 🔐 Integração SUAP
-
-Login via SUAP IFRN, para autenticação rápida e segura:
-
-1. Clique em **"Login com SUAP"**
-2. Autorize a aplicação no SUAP
-3. Seus dados são carregados automaticamente
-
+## Licença
+Este projeto está licenciado sob a licença MIT.
 
