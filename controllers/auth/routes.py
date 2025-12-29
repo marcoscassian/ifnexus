@@ -63,7 +63,7 @@ def logout():
     
     logout_user()
     flash('Logout realizado com sucesso!', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
 
 @auth_bp.route("/login_suap")

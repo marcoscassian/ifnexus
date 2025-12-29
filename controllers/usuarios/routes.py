@@ -1,8 +1,9 @@
 from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
+from sqlalchemy import or_
 
 from extensions import db
-from models import Projeto, Curtida, Usuario
+from models import Projeto, Curtida, Usuario, Autor
 
 from . import usuarios_bp
 
@@ -15,8 +16,15 @@ def projetos_curtidos():
 @usuarios_bp.route('/meus_projetos')
 @login_required
 def meus_projetos():
-    
-    projetos = Projeto.query.filter_by(usuario_id=current_user.id).all()
+
+    projetos = Projeto.query\
+        .outerjoin(Autor, Projeto.id == Autor.projeto_id)\
+        .filter(
+            or_(
+                Projeto.usuario_id == current_user.id,  # é o dono
+                Autor.usuario_id == current_user.id     # é coautor
+            )
+        ).distinct().all()
     return render_template('usuario/meus_projetos.html', projetos=projetos)
 
 @usuarios_bp.route('/meu_perfil')
