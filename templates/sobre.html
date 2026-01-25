@@ -1,11 +1,155 @@
 {% extends 'base.html' %}
 
-{% block title %}Sobre{% endblock %}
+{% block title %}Sobre - IF Nexus{% endblock %}
 
 {% block estilos %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sobre.css') }}?v=1.1">
-    {% endblock %}
+{% endblock %}
 
 {% block conteudo %}
-<h1>página em desenvolvimento</h1>
+
+<!-- Seção de Apresentação -->
+<section class="secao-apresentacao">
+    <div class="container">
+        <h1 class="titulo-principal">IF Nexus</h1>
+        <p class="subtitulo">Vitrine de Projetos do IFRN</p>
+        <p class="descricao">
+            O IF Nexus é uma plataforma moderna e intuitiva desenvolvida para publicar, gerenciar e divulgar 
+            projetos acadêmicos criados por estudantes do Instituto Federal do Rio Grande do Norte. 
+            Aqui, você pode compartilhar suas ideias, receber feedback da comunidade e explorar 
+            inovações tecnológicas desenvolvidas por seus colegas.
+        </p>
+    </div>
+</section>
+
+<!-- Seção de Funcionalidades -->
+<section class="secao-funcionalidades">
+    <div class="container">
+        <h2 class="titulo-secao">Funcionalidades Principais</h2>
+        <div class="grid-funcionalidades">
+            
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3>Login Seguro</h3>
+                <p>Autentique-se através do SUAP do IFRN ou crie uma conta própria com segurança garantida.</p>
+            </div>
+
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3>Gerenciamento de Projetos</h3>
+                <p>Publique, edite e gerencie seus projetos acadêmicos de forma simples e intuitiva.</p>
+            </div>
+
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <h3>Upload de Arquivos</h3>
+                <p>Compartilhe PDFs, imagens e documentação completa dos seus projetos.</p>
+            </div>
+
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3>Interação Comunitária</h3>
+                <p>Curta, comente e favoritize projetos que você acha interessantes.</p>
+            </div>
+
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h3>Perfis de Usuários</h3>
+                <p>Crie seu perfil, destaque suas competências e conecte-se com outros desenvolvedores.</p>
+            </div>
+
+            <div class="card-funcionalidade">
+                <div class="icon-funcionalidade">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Descoberta Fácil</h3>
+                <p>Encontre projetos por área de conhecimento, autor ou palavra-chave.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Seção de Equipe de Desenvolvimento -->
+<section class="secao-equipe">
+    <div class="container">
+        <h2 class="titulo-secao">Equipe de Desenvolvimento</h2>
+        <p class="subtitulo-secao">Profissionais dedicados a tornar o IF Nexus realidade</p>
+        
+        <div class="grid-equipe">
+            
+            <!-- Alex Bruno -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/alex.jpg') }}" 
+                         alt="Alex Bruno" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Alex Bruno</h3>
+                <p class="funcao-dev">Frontend Developer</p>
+            </div>
+
+            <!-- Kessya Cauanny -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/kessya.jpg') }}" 
+                         alt="Kessya Cauanny" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Kessya Cauanny</h3>
+                <p class="funcao-dev">Frontend Developer</p>
+            </div>
+
+            <!-- Ludimila Erika -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/ludimila.jpg') }}" 
+                         alt="Ludimila Erika" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Ludimila Erika</h3>
+                <p class="funcao-dev">Backend Developer</p>
+            </div>
+
+            <!-- Marcos Cassiano -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/marcos.jpg') }}" 
+                         alt="Marcos Cassiano" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Marcos Cassiano</h3>
+                <p class="funcao-dev">Fullstack & UX Designer</p>
+            </div>
+
+            <!-- Taynná Montel -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/taynna.jpg') }}" 
+                         alt="Taynná Montel" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Taynná Montel</h3>
+                <p class="funcao-dev">Technical Writer</p>
+            </div>
+
+            <!-- Max Miller -->
+            <div class="card-dev">
+                <div class="img-dev-container">
+                    <img src="{{ url_for('static', filename='img/geral/devs/max.jpg') }}" 
+                         alt="Max Miller" class="img-dev">
+                </div>
+                <h3 class="nome-dev">Max Miller</h3>
+                <p class="funcao-dev">Project Advisor</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 {% endblock %}

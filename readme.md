@@ -50,8 +50,8 @@ Equipe incrível que trouxe o IF Nexus à vida:
 
 ```bash
 # Clone o projeto
-git clone https://github.com/seu-usuario/if-nexus.git
-cd if-nexus
+git clone https://github.com/marcoscassian/ifnexus
+cd ifnexus
 
 # Ambiente virtual
 python -m venv env
