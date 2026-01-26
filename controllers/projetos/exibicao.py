@@ -1,6 +1,6 @@
 #ver todos os projetos e exibir um projeto específico
 
-from flask import render_template, request, url_for
+from flask import render_template, request, url_for, flash
 from flask_login import current_user
 from datetime import datetime
 
@@ -10,7 +10,7 @@ from models import Projeto
 from . import projetos_bp
 import os
 
-from models import Comentario, Curtida, Autor
+from models import Comentario, Curtida, Autor, Usuario
 
 @projetos_bp.route('/projeto/<int:id>')
 def ver_projeto(id):
@@ -91,11 +91,11 @@ def projetos():
 
     if q:
         like_q = f"%{q}%"
-        query = query.outerjoin(Autor).filter(
+        query = query.outerjoin(Usuario).filter(
             db.or_(
                 Projeto.titulo.ilike(like_q),
                 Projeto.descricao.ilike(like_q),
-                Autor.nome.ilike(like_q)
+                Usuario.nome.ilike(like_q)
             )
         ).distinct()
 

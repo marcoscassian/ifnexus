@@ -1,6 +1,6 @@
 #funcoes auxiliares
 
-from flask import jsonify, request
+from flask import jsonify, request, flash
 from . import projetos_bp
 
 from utils.decorator import suap_required

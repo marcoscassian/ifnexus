@@ -92,12 +92,12 @@
                                 <img src="{{ url_for('static', filename='uploads/users/' ~ current_user.id ~ '.jpg') }}" class="comment-avatar-img">
                             {% endif %}
                         {% else %}
-                            <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" class="comment-avatar-img">
+                            <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" class="comment-avatar-img">
                         {% endif %}
 
                     {% endif %}
                 {% else %}
-                    <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
+                    <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Avatar" class="comment-avatar-img">
                 {% endif %}
             </div>
 
@@ -171,7 +171,7 @@
                             {% endif %}
                         {% endif %}
                     {% else %}
-                        <img src="{{ url_for('static', filename='img/geral/default-avatar.png') }}" alt="Avatar" class="comment-avatar-img">
+                        <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Avatar" class="comment-avatar-img">
                     {% endif %}
                 </div>
 

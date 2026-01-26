@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, flash
 from models import Projeto
 from . import main_bp
 
