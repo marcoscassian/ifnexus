@@ -1,14 +1,10 @@
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 
-import requests
-from urllib.parse import urlencode
-
+import json
 from extensions import db, bcrypt
 from models import Usuario, Comentario, Curtida
 from . import auth_bp
-
-from services.suap_config import *
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -66,91 +62,72 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-@auth_bp.route("/login_suap")
+@auth_bp.route('/login_suap')
 def login_suap():
+    """Rota que redireciona para a página de autenticação do SUAP"""
+    # O JavaScript no login.html vai processar o retorno do SUAP
+    return render_template('auth/login.html')
+
+
+@auth_bp.route('/login_suap_js', methods=['POST'])
+def login_suap_js():
+    """Rota para processar login via SUAP através de JavaScript"""
+    try:
+        user_data = json.loads(request.form.get('user_data'))
+        
+        # Log dos dados recebidos
+        print("Dados recebidos do SUAP:", user_data)
+        
+        # Buscar email (pode estar em diferentes campos)
+        email = user_data.get("email") or user_data.get("email_institucional")
+        
+        # Buscar nome (pode estar em diferentes campos)
+        nome = (user_data.get("nome_usual") or 
+                user_data.get("nome_usu") or 
+                user_data.get("nome") or
+                user_data.get("apelido"))
+        
+        if not email or not nome:
+            return jsonify({'success': False, 'message': 'Email ou nome não encontrado nos dados do SUAP'})
+        
+        suap_usuario = Usuario.query.filter_by(email=email).first()
+        
+        if not suap_usuario:
+            # Criar novo usuário do SUAP
+            suap_usuario = Usuario(
+                nome=nome,
+                email=email,
+                senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
+                data_nascimento=user_data.get("data_de_nascimento") or user_data.get("data_nascimento"),
+                cpf=user_data.get("cpf"),
+                tipo_usuario="Aluno",  # Padrão para SUAP é Aluno
+                matricula=user_data.get("matricula") or user_data.get("identificacao"),
+                campus=user_data.get("campus") or user_data.get("unidade_organizacional"),
+                foto=user_data.get("foto") or user_data.get("foto_78x100")
+            )
+            db.session.add(suap_usuario)
+            db.session.commit()
+            print(f"Novo usuário criado: {email}")
+        
+        # Fazer merge de usuários se necessário
+        if current_user.is_authenticated and current_user.id != suap_usuario.id:
+            antigo = current_user
+            
+            for comentario in Comentario.query.filter_by(usuario_id=antigo.id).all():
+                comentario.usuario_id = suap_usuario.id
+            
+            for curtida in Curtida.query.filter_by(usuario_id=antigo.id).all():
+                curtida.usuario_id = suap_usuario.id
+            
+            db.session.commit()
+            db.session.delete(antigo)
+            db.session.commit()
+            print(f"Usuários mesclados: {antigo.id} -> {suap_usuario.id}")
+        
+        login_user(suap_usuario)
+        print(f"Usuário {email} autenticado com sucesso")
+        return jsonify({'success': True, 'message': 'Login via SUAP realizado com sucesso!'})
     
-    params = {
-        "response_type": "code",
-        "client_id": SUAP_CLIENT_ID,
-        "redirect_uri": SUAP_REDIRECT_URI,
-    }
-
-    return redirect(f"{SUAP_AUTH_URL}?{urlencode(params)}")
-
-@auth_bp.route("/callback_suap")
-def callback_suap():
-    code = request.args.get("code")
-    if not code:
-        flash("Erro: nenhum código recebido do SUAP.", "error")
-        return redirect(url_for("auth.login"))
-
-    data = {
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": SUAP_REDIRECT_URI,
-        "client_id": SUAP_CLIENT_ID,
-    }
-
-    token_response = requests.post(SUAP_TOKEN_URL, data=data)
-
-    if token_response.status_code != 200:
-        flash(f"Erro ao obter token do SUAP: {token_response.text}", "error")
-        return redirect(url_for("auth.login"))
-
-    access_token = token_response.json().get("access_token")
-
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "Accept": "application/json"
-    }
-
-    SUAP_API_URL = "https://suap.ifrn.edu.br/api/eu/"
-    response = requests.get(SUAP_API_URL, headers=headers)
-
-    if response.status_code != 200:
-        print("STATUS SUAP:", response.status_code)
-        print("RESPOSTA SUAP:", response.text)
-        flash("Erro ao buscar dados do usuário no SUAP.", "error")
-        return redirect(url_for("auth.login"))
-
-    user_info = response.json()
-
-    email = user_info.get("email")
-    nome = user_info.get("nome_usual") or user_info.get("nome")
-    vinculo = user_info.get("vinculo", {})
-    print(user_info)
-    suap_usuario = Usuario.query.filter_by(email=email).first()
-
-    if not suap_usuario:
-        print(user_info)
-        suap_usuario = Usuario(
-            nome=nome,
-            email=email,
-            senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
-            data_nascimento=user_info.get("data_de_nascimento"),
-            cpf=user_info.get("cpf"),
-            tipo_usuario=user_info.get("tipo_usuario"),
-            matricula=user_info.get("identificacao"),
-            campus=user_info.get("campus"),
-            foto=user_info.get("foto")
-        )
-
-        db.session.add(suap_usuario)
-        db.session.commit()
-
-    if current_user.is_authenticated and current_user.id != suap_usuario.id:
-        antigo = current_user
-
-        for comentario in Comentario.query.filter_by(usuario_id=antigo.id).all():
-            comentario.usuario_id = suap_usuario.id
-
-        for curtida in Curtida.query.filter_by(usuario_id=antigo.id).all():
-            curtida.usuario_id = suap_usuario.id
-
-        db.session.commit()
-        db.session.delete(antigo)
-        db.session.commit()
-
-    login_user(suap_usuario)
-    flash("Login via SUAP realizado com sucesso!", "success")
-    return redirect(url_for("main.index"))
+    except Exception as e:
+        print(f"Erro ao fazer login SUAP: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)})

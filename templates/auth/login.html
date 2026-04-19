@@ -32,7 +32,7 @@
                 <button>Entrar</button>
             </form>
             <div class="loginsuap">
-                <a href="{{ url_for('auth.login_suap') }}" class="btn-suap">Entrar com o <strong>SUAP</strong></a>
+                <a id="botao-login-suap" class="btn-suap" href="{{ url_for('auth.login_suap') }}">Entrar com o <strong>SUAP</strong></a>
             </div>
         </div>
     </div>
@@ -45,5 +45,67 @@
         </p>
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+<script src="{{ url_for('static', filename='js/settings.sample.js') }}"></script>
+<script src="{{ url_for('static', filename='js/suap_login.js') }}"></script>
+
+<script>
+      $(document).ready(function () {
+          // Gerar a URL de login SUAP corretamente
+          var loginUrl = getSuapLoginURL(SUAP_URL, CLIENT_ID, REDIRECT_URI, SCOPE);
+          $("#botao-login-suap").attr('href', loginUrl);
+          console.log('Login URL:', loginUrl);
+          
+          // Verificar se voltou do SUAP com token na URL
+          var hash = window.location.hash.substring(1);
+          console.log('Hash:', hash);
+          
+          if (hash) {
+              var params = new URLSearchParams(hash);
+              if (params.has('access_token')) {
+                  var token = params.get('access_token');
+                  console.log('Token recebido:', token);
+                  
+                  // Obter dados do usuário do SUAP usando endpoint correto
+                  $.ajax({
+                      url: SUAP_URL + '/api/rh/eu/',
+                      type: 'GET',
+                      headers: {
+                          'Authorization': 'Bearer ' + token,
+                          'Accept': 'application/json'
+                      },
+                      success: function(data) {
+                          console.log('Dados do SUAP obtidos com sucesso:', data);
+                          // Enviar dados para backend fazer login
+                          $.post('/auth/login_suap_js', {
+                              user_data: JSON.stringify(data)
+                          }, function(response) {
+                              console.log('Resposta do backend:', response);
+                              if (response.success) {
+                                  window.location.href = '/';
+                              } else {
+                                  alert('Erro ao fazer login: ' + response.message);
+                              }
+                          }).fail(function(error) {
+                              console.error('Erro na requisição POST:', error);
+                              alert('Erro ao fazer login com SUAP');
+                          });
+                      },
+                      error: function(xhr, status, error) {
+                          console.error('Erro ao obter dados do SUAP - Status:', xhr.status);
+                          console.error('Response:', xhr.responseText);
+                          console.error('Error:', error);
+                          alert('Erro ao obter dados do SUAP: ' + xhr.status + ' ' + error);
+                      }
+                  });
+                  
+                  // Limpar a URL
+                  window.history.replaceState({}, document.title, '/auth/login');
+              }
+          }
+      });
+</script>
 {% endblock %}
         
