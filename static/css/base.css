@@ -9,16 +9,16 @@ body {
 }
 
 header {
-    height: 88px;
-    display: flex;
+  height: 88px;
+  display: flex;
     background-color: #30782B;
     align-items: center;
     color: white;
-    justify-content: space-between;
+  justify-content: space-between;
 }
 
 header > .logo > a > img {
-    width: 100px;
+  width: 100px;
     height: auto;
 }
 
@@ -27,31 +27,31 @@ header > .logo {
 }
 
 .botoes {
-    padding-right: 20px;
+  padding-right: 20px;
 }
 
 .botoes nav a {
-    font-weight: bold;
-    font-size: 18px;
-    padding: 15px;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 15px;
     color: white;
     text-decoration: none;
 }
 
 
 .botoes > .botoes_not_logged > .Login {
-    background-color: transparent;
+  background-color: transparent;
     color: white;
-    border: 1px solid white;
-    padding: 5px 10px;
-    border-radius: 10px;
+  border: 1px solid white;
+  padding: 5px 10px;
+  border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .botoes > .botoes_not_logged > .Login:hover {
-    background-color: white;
-    color: #30782B;
+  background-color: white;
+  color: #30782B;
 }
 
 .dropdown {

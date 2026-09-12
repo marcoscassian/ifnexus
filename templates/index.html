@@ -15,19 +15,73 @@
         <p>Um portal para explorar, divulgar e se inspirar com os projetos do IF.</p>
         <a href="{{ url_for('projetos.projetos') }}" class="btn-hero">Explorar Projetos</a>
     </div>
-
     <div class="hero-rigth">
-        <img src="static/img/geral/imghero.jpg" alt="Imagem Hero"> <!-- imagem do hero>-->
+        <img src="static/img/geral/imghero.jpg" alt="Imagem Hero">
     </div>
 </div>
-<div class="content">
-    <h2>Projetos em Destaque</h2>
-    <!-- loop para mostrar os cards -->
-    <div class="projetos-grid">
-        {% for card in cards %}
-            {% include '_card.html' %}
-        {% endfor %}
+<div class="content projects-section">
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">Em destaque</span>
+                <h2 id="projects-title">Explore projetos do IFRN</h2>
+                <p>Conheça ideias desenvolvidas por estudantes de diferentes cursos.</p>
+            </div>
+            <a href="{{ url_for('projetos.projetos') }}" class="section-link desktop-link">Ver todos <span aria-hidden="true">→</span></a>
+        </div>
+
+        <div class="project-tools">
+            <label class="search-box" for="home-project-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="home-project-search" type="search" placeholder="Buscar projetos, áreas ou palavras-chave...">
+            </label>
+            <div class="project-filters" role="group" aria-label="Filtrar projetos por curso">
+                <button type="button" class="filter-chip is-active" data-filter="todos">Todos</button>
+                <button type="button" class="filter-chip filter-informatica" data-filter="informatica">Informática</button>
+                <button type="button" class="filter-chip filter-eletro" data-filter="eletro">Eletrotécnica</button>
+                <button type="button" class="filter-chip filter-textil" data-filter="textil">Têxtil</button>
+                <button type="button" class="filter-chip filter-vestuario" data-filter="vestuario">Vestuário</button>
+            </div>
+        </div>
+
+        <div class="projetos-grid" id="home-projects-grid">
+            {% for card in cards %}
+                {% include '_card.html' %}
+            {% endfor %}
+        </div>
+        <p class="projects-empty" hidden>Nenhum projeto corresponde à sua busca.</p>
+        <a href="{{ url_for('projetos.projetos') }}" class="section-link mobile-link">Ver todos os projetos <span aria-hidden="true">→</span></a>
     </div>
 </div>
 
+<script>
+    const searchInput = document.querySelector('#home-project-search');
+    const filterButtons = document.querySelectorAll('.filter-chip');
+    const projectCards = document.querySelectorAll('#home-projects-grid .projeto-card');
+    const emptyMessage = document.querySelector('.projects-empty');
+
+    function filterProjects() {
+        const query = (searchInput.value || '').toLowerCase().trim();
+        const activeFilter = document.querySelector('.filter-chip.is-active').dataset.filter;
+        let visibleProjects = 0;
+
+        projectCards.forEach((card) => {
+            const matchesFilter = activeFilter === 'todos' || card.dataset.category === activeFilter;
+            const matchesSearch = !query || card.textContent.toLowerCase().includes(query);
+            const visible = matchesFilter && matchesSearch;
+            card.hidden = !visible;
+            if (visible) visibleProjects += 1;
+        });
+
+        emptyMessage.hidden = visibleProjects > 0;
+    }
+
+    filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            filterButtons.forEach((item) => item.classList.remove('is-active'));
+            button.classList.add('is-active');
+            filterProjects();
+        });
+    });
+    searchInput.addEventListener('input', filterProjects);
+</script>
 {% endblock %}

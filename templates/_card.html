@@ -1,4 +1,16 @@
-<article class="projeto-card">
+{% set tag_lower = card.tag|lower %}
+{% if 'inform' in tag_lower %}
+    {% set category = 'informatica' %}
+{% elif 'eletro' in tag_lower %}
+    {% set category = 'eletro' %}
+{% elif 'text' in tag_lower %}
+    {% set category = 'textil' %}
+{% elif 'vest' in tag_lower %}
+    {% set category = 'vestuario' %}
+{% else %}
+    {% set category = tag_lower|replace(' ', '-') %}
+{% endif %}
+<article class="projeto-card" data-category="{{ category }}">
     <div class="projeto-image">
         {% if card.imagem and card.imagem != '/static/img1.jpg' %}
             <img src="{{ url_for('static', filename=card.imagem.lstrip('/')) }}" alt="{{ card.titulo }}" class="card-img">
@@ -8,7 +20,7 @@
             </div>
         {% endif %}
         
-        <div class="card-curso-badge card-curso-{{ card.tag|lower|replace(' ', '-') }}">
+        <div class="card-curso-badge card-curso-{{ category }}">
             {{ card.tag|capitalize }}
         </div>
     </div>
@@ -20,9 +32,9 @@
         <p class="card-description">{{ card.descricao[:80] }}{% if card.descricao|length > 80 %}...{% endif %}</p>
         {% endif %}
 
+        <p class="card-campus">IFRN <span>•</span> Campus Caicó</p>
         <a href="{{ url_for('projetos.ver_projeto', id=card.id) }}" class="btn-ver-mais">
-            Ver Projeto
-            <i class="fas fa-arrow-right"></i>
+            Ver projeto <span aria-hidden="true">→</span>
         </a>
     </div>
 </article>

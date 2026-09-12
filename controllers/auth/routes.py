@@ -73,22 +73,33 @@ def login_suap():
 def login_suap_js():
     """Rota para processar login via SUAP através de JavaScript"""
     try:
-        user_data = json.loads(request.form.get('user_data'))
+        raw_user_data = request.form.get('user_data')
+        if not raw_user_data and request.is_json:
+            raw_user_data = json.dumps(request.get_json(silent=True) or {})
+        user_data = json.loads(raw_user_data or '{}')
         
         # Log dos dados recebidos
         print("Dados recebidos do SUAP:", user_data)
         
         # Buscar email (pode estar em diferentes campos)
-        email = user_data.get("email") or user_data.get("email_institucional")
+        email = (user_data.get("email") or
+             user_data.get("email_preferencial") or
+             user_data.get("email_academico") or
+             user_data.get("email_institucional") or
+             user_data.get("email_secundario"))
         
         # Buscar nome (pode estar em diferentes campos)
-        nome = (user_data.get("nome_usual") or 
+        nome = (user_data.get("nome_usual") or
+                user_data.get("nome_social") or
+                user_data.get("nome_registro") or
                 user_data.get("nome_usu") or 
                 user_data.get("nome") or
                 user_data.get("apelido"))
         
-        if not email or not nome:
-            return jsonify({'success': False, 'message': 'Email ou nome não encontrado nos dados do SUAP'})
+        if not email:
+            return jsonify({'success': False, 'message': 'Email não encontrado nos dados retornados pelo SUAP'})
+        if not nome:
+            return jsonify({'success': False, 'message': 'Nome não encontrado nos dados retornados pelo SUAP'})
         
         suap_usuario = Usuario.query.filter_by(email=email).first()
         
@@ -100,7 +111,7 @@ def login_suap_js():
                 senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
                 data_nascimento=user_data.get("data_de_nascimento") or user_data.get("data_nascimento"),
                 cpf=user_data.get("cpf"),
-                tipo_usuario="Aluno",  # Padrão para SUAP é Aluno
+                tipo_usuario=user_data.get("tipo_usuario") or "Aluno",
                 matricula=user_data.get("matricula") or user_data.get("identificacao"),
                 campus=user_data.get("campus") or user_data.get("unidade_organizacional"),
                 foto=user_data.get("foto") or user_data.get("foto_78x100")
