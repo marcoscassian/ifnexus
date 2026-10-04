@@ -1,4 +1,5 @@
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from extensions import db, login_manager, bcrypt
 
 from controllers.auth import auth_bp
@@ -7,8 +8,10 @@ from controllers.projetos import projetos_bp
 from controllers.usuarios import usuarios_bp
 
 from models import Usuario
+from utils.db_migrations import ensure_project_schema
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 # configurações
 app.config.from_object("config.Config")
@@ -30,6 +33,7 @@ app.register_blueprint(usuarios_bp)
 
 with app.app_context():
     db.create_all()
+    ensure_project_schema()
 
 @login_manager.user_loader
 def load_user(user_id):

@@ -112,3 +112,16 @@
     font-size: 1.1em;
     margin-top: 40px;
 }
+
+@media (max-width: 720px) {
+    .page-title { margin: 26px 14px 18px; font-size: 1.65rem; }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 14px 36px; }
+    .card { width: 100%; }
+}
+
+@media (max-width: 520px) {
+    .cards { grid-template-columns: 1fr; }
+    .card .card-actions { align-items: flex-start; flex-direction: column; }
+    .card .btn { width: 100%; text-align: center; }
+    .card-like-count { margin-left: 0; }
+}

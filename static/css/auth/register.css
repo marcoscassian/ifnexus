@@ -8,7 +8,7 @@ body {
     font-family: Arial, sans-serif;
     min-height: 100vh;
     color: white;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 .page-center {
@@ -17,13 +17,14 @@ body {
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 80px);
+    padding: 32px 16px;
 }
 
 
 .container {
     position: relative;
-    width: 400px;
-    height: 500px;
+    width: min(100%, 400px);
+    min-height: 500px;
     background-color: #30782B;
     padding: 40px 30px;
     border-radius: 20px;
@@ -71,7 +72,7 @@ body {
     border-color: #22531e;
 }
 
-button {
+.page-center button {
     width: 100%;
     padding: 12px;
     border: none;
@@ -84,7 +85,7 @@ button {
     cursor: pointer;
 }
 
-button:hover {
+.page-center button:hover {
     transform: scale(1.05);
 }
 
@@ -116,4 +117,12 @@ button:hover {
 
 .botoes .loginsuap a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .page-center { min-height: calc(100dvh - 68px); padding: 22px 12px; justify-content: flex-start; }
+    .page-center .container { min-height: 0; padding: 34px 18px 26px; border-radius: 14px; }
+    .page-center .container .botoes { padding: 72px 0 0; }
+    .page-center .container > .logo > img { width: 110px; }
+    .subcontainer { text-align: center; }
 }

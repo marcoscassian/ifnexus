@@ -9,3 +9,8 @@ __pycache__
 # Ignorar arquivos temporários do sistema
 *.swp
 .DS_Store
+
+# Variáveis locais e segredos
+.env
+.env.*
+!.env.example

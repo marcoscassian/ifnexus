@@ -4,8 +4,11 @@ from .curtida import Curtida
 from .link import Link
 from .metodologia import Metodologia
 from .objetivo import Objetivo
-from .projeto import Projeto
+from .projeto import Projeto, projeto_tecnologias
 from .autor import Autor
+from .projeto_imagem import ProjetoImagem
+from .projeto_arquivo import ProjetoArquivo
+from .tecnologia import Tecnologia
 
 
 tabelas = [
@@ -16,5 +19,8 @@ tabelas = [
     "Metodologia",
     "Objetivo",
     "Projeto",
-    "Autor"
+    "Autor",
+    "ProjetoImagem",
+    "ProjetoArquivo",
+    "Tecnologia",
 ]

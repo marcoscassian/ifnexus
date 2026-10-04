@@ -2,6 +2,7 @@
 
 from flask import jsonify, request, flash
 from . import projetos_bp
+from extensions import db
 
 from utils.decorator import suap_required
 
@@ -17,12 +18,18 @@ def livesearch_usuarios():
 
     usuarios = Usuario.query.filter(
         Usuario.nome.ilike(f"%{q}%")
-    ).limit(8).all()
+    )
+    if request.args.get('tipo') == 'orientador':
+        usuarios = usuarios.filter(
+            db.func.lower(Usuario.tipo_usuario).in_(['docente', 'professor'])
+        )
+    usuarios = usuarios.limit(8).all()
 
     return jsonify([
         {
             "id": u.id,
             "nome": u.nome,
-            "matricula": u.matricula
+            "matricula": u.matricula,
+            "tipo_usuario": u.tipo_usuario
         } for u in usuarios
     ])

@@ -143,3 +143,14 @@ body {
     background-color: #3d8f47;
     transform: scale(1.03);
 }
+
+@media (max-width: 720px) {
+    .perfil-container { margin: 24px 14px 44px; padding: 22px 16px; border-radius: 14px; }
+    .info-perfil { align-items: center; flex-direction: column; gap: 16px; text-align: center; }
+    .foto { width: 120px; height: 120px; }
+    .nome-info { min-width: 0; max-width: 100%; }
+    .nome-info h2 { overflow-wrap: anywhere; font-size: 1.55rem; }
+    .card-grid { grid-template-columns: 1fr; gap: 14px; }
+    .card { padding: 19px 16px; border-radius: 13px; }
+    .card p { overflow-wrap: anywhere; line-height: 1.55; }
+}

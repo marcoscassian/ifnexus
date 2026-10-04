@@ -11,6 +11,9 @@ from models import Projeto, Comentario, Curtida
 def adicionar_comentario(id):
     
     projeto = Projeto.query.get_or_404(id)
+    if not projeto.publicado:
+        flash('Publique o projeto antes de receber comentários.', 'error')
+        return redirect(url_for('projetos.editar_projeto', id=id))
     conteudo = request.form.get('conteudo')
 
     if not conteudo or not conteudo.strip():
@@ -34,6 +37,8 @@ def adicionar_comentario(id):
 def curtir_projeto(id):
     
     projeto = Projeto.query.get_or_404(id)
+    if not projeto.publicado:
+        return jsonify({'error': 'Projeto ainda não publicado.'}), 404
     curtida = Curtida.query.filter_by(usuario_id=current_user.id, projeto_id=id).first()
     
     try:

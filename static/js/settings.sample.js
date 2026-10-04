@@ -1,4 +1,6 @@
-var CLIENT_ID = 'G4IXTGHpxPafBmBGszCAuvxe6iBZgoK3W83HIUSE';
-var REDIRECT_URI = 'http://127.0.0.1:5000/auth/login';
+// Arquivo legado mantido apenas como referência. A tela de login recebe o
+// CLIENT_ID do backend pela variável de ambiente SUAP_CLIENT_ID.
+var CLIENT_ID = '';
+var REDIRECT_URI = window.location.origin + '/auth/login';
 var SUAP_URL = 'https://suap.ifrn.edu.br';
 var SCOPE = 'identificacao email documentos_pessoais';

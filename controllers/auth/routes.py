@@ -1,10 +1,74 @@
-from flask import render_template, request, flash, redirect, url_for, jsonify
-from flask_login import login_user, logout_user, login_required, current_user
+from flask import current_app, render_template, request, flash, redirect, url_for, jsonify
+from flask_login import login_user, logout_user, login_required
 
-import json
+import secrets
+import requests
 from extensions import db, bcrypt
-from models import Usuario, Comentario, Curtida
+from models import Usuario
 from . import auth_bp
+
+
+def _suap_template_config():
+    redirect_uri = current_app.config.get('SUAP_REDIRECT_URI') or url_for('auth.login', _external=True)
+    return {
+        'client_id': current_app.config.get('SUAP_CLIENT_ID', ''),
+        'redirect_uri': redirect_uri,
+        'base_url': current_app.config.get('SUAP_BASE_URL', 'https://suap.ifrn.edu.br'),
+        'scope': current_app.config.get('SUAP_SCOPE', 'identificacao email'),
+        'process_url': url_for('auth.login_suap_js'),
+    }
+
+
+def _first_value(data, *keys):
+    for key in keys:
+        value = data.get(key)
+        if value not in (None, '', [], {}):
+            return value
+    return None
+
+
+def _text_value(value):
+    if isinstance(value, dict):
+        value = value.get('nome') or value.get('descricao') or value.get('sigla')
+    if isinstance(value, (list, tuple)):
+        value = ', '.join(str(item) for item in value if item)
+    return str(value).strip() if value not in (None, '') else None
+
+
+def _authenticate_suap_user(user_data):
+    email = _text_value(_first_value(
+        user_data, 'email', 'email_preferencial', 'email_academico',
+        'email_institucional', 'email_secundario'
+    ))
+    nome = _text_value(_first_value(
+        user_data, 'nome_usual', 'nome_social', 'nome_registro',
+        'nome_usu', 'nome', 'apelido'
+    ))
+
+    if not email or not nome:
+        return None, 'O SUAP não retornou nome e e-mail suficientes para concluir o login.'
+
+    email = email.lower()
+    usuario = Usuario.query.filter_by(email=email).first()
+    if not usuario:
+        usuario = Usuario(
+            nome=nome,
+            email=email,
+            senha=bcrypt.generate_password_hash(secrets.token_urlsafe(32)).decode('utf-8'),
+            tipo_usuario=_text_value(user_data.get('tipo_usuario')) or 'Aluno',
+        )
+        db.session.add(usuario)
+
+    usuario.nome = nome
+    usuario.data_nascimento = _text_value(_first_value(user_data, 'data_de_nascimento', 'data_nascimento'))
+    usuario.cpf = _text_value(user_data.get('cpf'))
+    usuario.matricula = _text_value(_first_value(user_data, 'matricula', 'identificacao'))
+    usuario.campus = _text_value(_first_value(user_data, 'campus', 'unidade_organizacional'))
+    usuario.foto = _text_value(_first_value(user_data, 'foto', 'foto_78x100'))
+
+    db.session.commit()
+    login_user(usuario)
+    return usuario, None
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -23,7 +87,7 @@ def login():
             flash('Email ou senha inválidos.', 'error')
             return redirect(url_for('auth.login'))
 
-    return render_template('auth/login.html')
+    return render_template('auth/login.html', suap_config=_suap_template_config())
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -64,81 +128,46 @@ def logout():
 
 @auth_bp.route('/login_suap')
 def login_suap():
-    """Rota que redireciona para a página de autenticação do SUAP"""
-    # O JavaScript no login.html vai processar o retorno do SUAP
-    return render_template('auth/login.html')
+    """Mantém compatibilidade com links antigos e inicia o fluxo pela tela de login."""
+    return redirect(url_for('auth.login'))
 
 
 @auth_bp.route('/login_suap_js', methods=['POST'])
 def login_suap_js():
-    """Rota para processar login via SUAP através de JavaScript"""
+    """Valida o token diretamente no SUAP antes de criar a sessão local."""
     try:
-        raw_user_data = request.form.get('user_data')
-        if not raw_user_data and request.is_json:
-            raw_user_data = json.dumps(request.get_json(silent=True) or {})
-        user_data = json.loads(raw_user_data or '{}')
-        
-        # Log dos dados recebidos
-        print("Dados recebidos do SUAP:", user_data)
-        
-        # Buscar email (pode estar em diferentes campos)
-        email = (user_data.get("email") or
-             user_data.get("email_preferencial") or
-             user_data.get("email_academico") or
-             user_data.get("email_institucional") or
-             user_data.get("email_secundario"))
-        
-        # Buscar nome (pode estar em diferentes campos)
-        nome = (user_data.get("nome_usual") or
-                user_data.get("nome_social") or
-                user_data.get("nome_registro") or
-                user_data.get("nome_usu") or 
-                user_data.get("nome") or
-                user_data.get("apelido"))
-        
-        if not email:
-            return jsonify({'success': False, 'message': 'Email não encontrado nos dados retornados pelo SUAP'})
-        if not nome:
-            return jsonify({'success': False, 'message': 'Nome não encontrado nos dados retornados pelo SUAP'})
-        
-        suap_usuario = Usuario.query.filter_by(email=email).first()
-        
-        if not suap_usuario:
-            # Criar novo usuário do SUAP
-            suap_usuario = Usuario(
-                nome=nome,
-                email=email,
-                senha=bcrypt.generate_password_hash("suap_login_default_123").decode("utf-8"),
-                data_nascimento=user_data.get("data_de_nascimento") or user_data.get("data_nascimento"),
-                cpf=user_data.get("cpf"),
-                tipo_usuario=user_data.get("tipo_usuario") or "Aluno",
-                matricula=user_data.get("matricula") or user_data.get("identificacao"),
-                campus=user_data.get("campus") or user_data.get("unidade_organizacional"),
-                foto=user_data.get("foto") or user_data.get("foto_78x100")
-            )
-            db.session.add(suap_usuario)
-            db.session.commit()
-            print(f"Novo usuário criado: {email}")
-        
-        # Fazer merge de usuários se necessário
-        if current_user.is_authenticated and current_user.id != suap_usuario.id:
-            antigo = current_user
-            
-            for comentario in Comentario.query.filter_by(usuario_id=antigo.id).all():
-                comentario.usuario_id = suap_usuario.id
-            
-            for curtida in Curtida.query.filter_by(usuario_id=antigo.id).all():
-                curtida.usuario_id = suap_usuario.id
-            
-            db.session.commit()
-            db.session.delete(antigo)
-            db.session.commit()
-            print(f"Usuários mesclados: {antigo.id} -> {suap_usuario.id}")
-        
-        login_user(suap_usuario)
-        print(f"Usuário {email} autenticado com sucesso")
-        return jsonify({'success': True, 'message': 'Login via SUAP realizado com sucesso!'})
-    
-    except Exception as e:
-        print(f"Erro ao fazer login SUAP: {str(e)}")
-        return jsonify({'success': False, 'message': str(e)})
+        payload = request.get_json(silent=True) or request.form
+        access_token = payload.get('access_token')
+        if not access_token:
+            return jsonify({'success': False, 'message': 'Token do SUAP ausente.'}), 400
+
+        suap_url = current_app.config.get('SUAP_BASE_URL', 'https://suap.ifrn.edu.br')
+        response = requests.get(
+            f"{suap_url}/api/rh/eu/",
+            headers={'Authorization': f'Bearer {access_token}', 'Accept': 'application/json'},
+            timeout=12,
+        )
+        if response.status_code in (401, 403):
+            return jsonify({'success': False, 'message': 'O SUAP recusou ou expirou a autenticação.'}), 401
+        response.raise_for_status()
+
+        user_data = response.json()
+        usuario, error = _authenticate_suap_user(user_data)
+        if error:
+            db.session.rollback()
+            return jsonify({'success': False, 'message': error}), 422
+
+        return jsonify({
+            'success': True,
+            'message': 'Login via SUAP realizado com sucesso!',
+            'redirect': url_for('main.index'),
+            'usuario_id': usuario.id,
+        })
+    except (requests.RequestException, ValueError):
+        db.session.rollback()
+        current_app.logger.exception('Falha ao validar o token no SUAP')
+        return jsonify({'success': False, 'message': 'Não foi possível validar sua conta no SUAP agora.'}), 502
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Erro inesperado no login SUAP')
+        return jsonify({'success': False, 'message': 'Não foi possível concluir o login via SUAP.'}), 500

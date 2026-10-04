@@ -4,12 +4,11 @@ from . import main_bp
 
 @main_bp.route('/')
 def index():
-    projetos_top = Projeto.query.order_by(Projeto.curtidas.desc()).limit(4).all()
+    projetos_top = Projeto.query.filter(Projeto.publicado.is_(True)).order_by(Projeto.curtidas.desc()).limit(4).all()
     
     cards = []
     for projeto in projetos_top:
-        imgs = projeto.estrutura.split(',') if projeto.estrutura else []
-        img_url = imgs[0] if imgs and imgs[0] else "/static/img1.jpg"
+        img_url = projeto.caminho_capa or "/static/img1.jpg"
         
         cards.append({
             "id": projeto.id,

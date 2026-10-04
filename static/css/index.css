@@ -13,6 +13,7 @@ body {
 .hero-left {
     margin-top: 50px;
     padding-left: 20px;
+    min-width: 0;
 }
 
 .hero-left > h1 {
@@ -233,11 +234,34 @@ body {
 }
 
 @media (max-width: 680px) {
+    .hero {
+        height: auto;
+        min-height: 0;
+        align-items: center;
+        flex-direction: column;
+        padding: 34px 16px 0;
+        text-align: center;
+    }
+    .hero-left { margin-top: 0; padding-left: 0; }
+    .hero-left > h1 { font-size: clamp(1.9rem, 9vw, 2.7rem); line-height: 1.12; }
+    .hero-left > p { margin-top: 14px; font-size: 1rem; line-height: 1.55; }
+    .btn-hero { margin-top: 18px; font-size: .95rem; padding: 9px 12px; }
+    .hero-rigth { display: flex; justify-content: center; width: 100%; margin-top: 24px; }
+    .hero-rigth > img { width: min(100%, 320px); height: auto; margin-right: 0; object-fit: contain; }
     .projects-section { padding: 38px 16px 46px; }
     .section-heading { align-items: start; }
+    .section-heading h2 { font-size: 1.65rem; }
+    .section-heading p { line-height: 1.55; }
     .desktop-link { display: none; }
     .mobile-link { display: inline-flex; margin-top: 26px; }
     .project-tools { display: block; }
     .project-filters { margin-top: 12px; }
+    .project-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+    .filter-chip { flex: 0 0 auto; }
     .projects-section .projetos-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 390px) {
+    .hero-rigth { display: none; }
+    .hero { padding-bottom: 36px; }
 }

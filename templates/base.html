@@ -1,86 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        {% block title %}
-            IFnexus
-        {% endblock %}
-    </title>
-    {% block estilos %}{% endblock %}
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+    <title>{% block title %}IFNexus{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% block estilos %}{% endblock %}
 </head>
-<body style="background-color: #F2F2F2;">
-
-
-    <header>
-        <div class="logo">
-            <a href="/">
-                <img src="{{ url_for('static', filename='img/geral/ifnexus-logobranca.svg') }}" alt="ifnexus-logobranca">
+<body>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-brand" href="{{ url_for('main.index') }}" aria-label="IFNexus — página inicial">
+                <img src="{{ url_for('static', filename='img/geral/ifnexus-logobranca.svg') }}" alt="IFNexus">
             </a>
-        </div>
-           
-        <div class="botoes">
-            {% if current_user.is_authenticated %}
-            <nav class="botoes_logged">
-                <a href="{{ url_for('main.index') }}" class="Incio">Início</a>
-                <a href="{{ url_for('projetos.projetos') }}" class="Projetos">Projetos</a>
-                <a href="{{ url_for('main.sobre') }}" class="Sobre">Sobre</a>
-                                <div class="dropdown" tabindex="0">
-                                        <button class="dropbtn">Olá, {{ current_user.nome }} ▼</button>
-                                        <div class="dropdown-content">
-                                            <div class="user-name">Olá, {{ current_user.nome }}</div>
-                                            <a href="{{ url_for('usuarios.meu_perfil') }}">
-                                                <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/user.png') }}" alt="Usuário">
-                                                Meu Perfil
-                                            </a>
-                                            <a href="{{ url_for('usuarios.meus_projetos') }}">
-                                                <img class="dropdown-icon" src="{{ url_for('static', filename='img/dropdown/projetos.png') }}" alt="Projetos">
-                                                Meus Projetos
-                                            </a>
-                                            <a href="{{ url_for('projetos.criar_projeto') }}">
-                                                <i class="fa-solid fa-plus"></i>
-                                                Cadastrar Projeto
-                                            </a>
-                                            <a href="{{ url_for('usuarios.projetos_curtidos') }}">
-                                                <i class="fa-regular fa-heart"></i>
-                                                Projetos Curtidos
-                                            </a>
-                                            <div class=""></div>
-                                            <a href="{{ url_for('auth.logout') }}">
-                                                <i class="fa-solid fa-arrow-right-from-bracket" style="color: #bc0101;"></i>
-                                                Sair
-                                            </a>
-                                        </div>
-                                </div>
-                 
-            </nav>
-        {% else %}
-            <nav class="botoes_not_logged">
-                <a href="{{ url_for ('main.index')}}" class="Incio">Início</a>
-                <a href="{{ url_for('projetos.projetos') }}" class="Projetos">Projetos</a>
-                <a href="{{ url_for ('main.sobre')}}" class="Sobre">Sobre</a>
-                <a href="{{ url_for('auth.login') }}" class="Login">Login</a>
-            </nav>
-        {% endif %}
-       
+
+            <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="site-header-menu" aria-label="Abrir menu">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+
+            <div class="site-header-right" id="site-header-menu">
+                <nav class="site-nav" aria-label="Navegação principal">
+                    <a href="{{ url_for('main.index') }}" {% if request.endpoint == 'main.index' %}aria-current="page"{% endif %}>Início</a>
+                    <a href="{{ url_for('projetos.projetos') }}" {% if request.blueprint == 'projetos' %}aria-current="page"{% endif %}>Projetos</a>
+                    <a href="{{ url_for('main.sobre') }}" {% if request.endpoint == 'main.sobre' %}aria-current="page"{% endif %}>Sobre</a>
+                </nav>
+
+                <div class="site-account">
+                    {% if current_user.is_authenticated %}
+                    <div class="dropdown" tabindex="0">
+                        <button class="account-button" type="button" aria-label="Abrir menu do usuário">
+                            <span class="header-avatar">
+                                {% if current_user.foto %}
+                                    {% if current_user.foto.startswith('http') or current_user.foto.startswith('/static/') %}
+                                        <img src="{{ current_user.foto }}" alt="">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='uploads/users/' ~ current_user.id ~ '.jpg') }}" alt="">
+                                    {% endif %}
+                                {% else %}
+                                    <span>{{ current_user.nome[:2]|upper }}</span>
+                                {% endif %}
+                            </span>
+                            <span>Olá, <strong>{{ current_user.nome }}</strong></span>
+                            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <div class="user-name">{{ current_user.nome }}</div>
+                            <a href="{{ url_for('usuarios.meu_perfil') }}"><i class="fa-regular fa-user"></i> Meu perfil</a>
+                            <a href="{{ url_for('usuarios.meus_projetos') }}"><i class="fa-regular fa-folder-open"></i> Meus projetos</a>
+                            <a href="{{ url_for('projetos.criar_projeto') }}"><i class="fa-solid fa-plus"></i> Cadastrar projeto</a>
+                            <a href="{{ url_for('usuarios.projetos_curtidos') }}"><i class="fa-regular fa-heart"></i> Projetos curtidos</a>
+                            <a href="{{ url_for('auth.logout') }}" class="logout-link"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sair</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="login-link">Entrar</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </header>
 
     {% include 'componentes/erro.html' %}
-
-    <h1>
-        {% block pagina %}
-       
-        {% endblock %}
-    </h1>
-
-    {% block conteudo %}
-
-    {% endblock %}
-
+    {% block pagina %}{% endblock %}
+    {% block conteudo %}{% endblock %}
+    <script>
+    (() => {
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const menu = document.getElementById('site-header-menu');
+        if (!toggle || !menu) return;
+        const closeMenu = () => {
+            menu.classList.remove('is-open');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', 'Abrir menu');
+            toggle.querySelector('i').className = 'fa-solid fa-bars';
+        };
+        toggle.addEventListener('click', () => {
+            const open = menu.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+            toggle.querySelector('i').className = `fa-solid ${open ? 'fa-xmark' : 'fa-bars'}`;
+        });
+        menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+        document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+    })();
+    </script>
 </body>
 </html>

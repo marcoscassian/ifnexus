@@ -1,14 +1,12 @@
 #ver todos os projetos e exibir um projeto específico
 
-from flask import render_template, request, url_for, flash
+from flask import abort, render_template, request, url_for
 from flask_login import current_user
 from datetime import datetime
 
-from utils.paths import BASE_DIR
 from extensions import db
 from models import Projeto
 from . import projetos_bp
-import os
 
 from models import Comentario, Curtida, Autor, Usuario
 
@@ -16,18 +14,23 @@ from models import Comentario, Curtida, Autor, Usuario
 def ver_projeto(id):
     
     projeto = Projeto.query.get_or_404(id)
+    pode_ver_rascunho = current_user.is_authenticated and (
+        projeto.usuario_id == current_user.id
+        or any(autor.usuario_id == current_user.id for autor in projeto.autores)
+    )
+    if not projeto.publicado and not pode_ver_rascunho:
+        abort(404)
     comentarios = Comentario.query.filter_by(projeto_id=id).order_by(Comentario.criado_em.desc()).all()
     
     liked = False
     if current_user.is_authenticated:
         liked = Curtida.query.filter_by(usuario_id=current_user.id, projeto_id=id).first() is not None
 
-    static_path = os.path.join(BASE_DIR, 'static', 'img', 'interacoes', 'curtidas')
-    heart_liked_exists = os.path.exists(os.path.join(static_path, 'heartliked.png'))
-    heart_exists = os.path.exists(os.path.join(static_path, 'heart.png'))
-    heart_hover_exists = os.path.exists(os.path.join(static_path, 'hearthover.png'))
-    imagens = []
-    if getattr(projeto, 'estrutura', None):
+    imagens = [imagem.caminho for imagem in projeto.imagens]
+    capa = projeto.caminho_capa
+    if capa and capa in imagens:
+        imagens = [capa] + [imagem for imagem in imagens if imagem != capa]
+    elif not imagens and getattr(projeto, 'estrutura', None):
         imagens = [p for p in projeto.estrutura.split(',') if p]
 
     imagens_urls = []
@@ -66,9 +69,6 @@ def ver_projeto(id):
         comentarios=comentarios, 
         comentarios_relativos=comentarios_relativos,
         liked=liked,
-        heart_liked_exists=heart_liked_exists,
-        heart_exists=heart_exists,
-        heart_hover_exists=heart_hover_exists,
         imagens=imagens_urls
     )
 
@@ -81,7 +81,7 @@ def projetos():
     q = request.args.get('q', '').strip()
     pagina = request.args.get('pagina', 1, type=int)
 
-    query = Projeto.query
+    query = Projeto.query.filter(Projeto.publicado.is_(True))
     
     if curso_filtro and curso_filtro != 'todos':
         query = query.filter_by(curso=curso_filtro)
@@ -91,7 +91,9 @@ def projetos():
 
     if q:
         like_q = f"%{q}%"
-        query = query.outerjoin(Usuario).filter(
+        query = query.outerjoin(Autor, Projeto.id == Autor.projeto_id).outerjoin(
+            Usuario, Autor.usuario_id == Usuario.id
+        ).filter(
             db.or_(
                 Projeto.titulo.ilike(like_q),
                 Projeto.descricao.ilike(like_q),
@@ -121,8 +123,8 @@ def projetos():
     for projeto in projetos_lista:
         projeto.user_liked = projeto.id in usuario_curtidas
     
-    cursos = [p.curso for p in Projeto.query.distinct(Projeto.curso).all() if p.curso]
-    tipos = [p.tipo for p in Projeto.query.distinct(Projeto.tipo).all() if p.tipo]
+    cursos = [row[0] for row in db.session.query(Projeto.curso).filter(Projeto.publicado.is_(True), Projeto.curso.isnot(None)).distinct().all()]
+    tipos = [row[0] for row in db.session.query(Projeto.tipo).filter(Projeto.publicado.is_(True), Projeto.tipo.isnot(None)).distinct().all()]
     
     return render_template(
         'projetos/projetos.html',

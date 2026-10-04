@@ -79,17 +79,10 @@
                     {% for projeto in projetos %}
                     <article class="projeto-card">
                         <div class="projeto-image">
-                            {% if projeto.estrutura %}
-                                {% set imgs = projeto.estrutura.split(',') %}
-                                {% if imgs|length > 0 and imgs[0] %}
-                                    <img src="{{ url_for('static', filename=imgs[0]) }}" 
+                            {% if projeto.caminho_capa %}
+                                    <img src="{{ url_for('static', filename=projeto.caminho_capa) }}"
                                          alt="{{ projeto.titulo }}" 
                                          class="card-img">
-                                {% else %}
-                                    <div class="card-img-placeholder">
-                                        <i class="fas fa-image"></i>
-                                    </div>
-                                {% endif %}
                             {% else %}
                                 <div class="card-img-placeholder">
                                     <i class="fas fa-image"></i>
@@ -138,8 +131,8 @@
                     </div>
                     
                     {% if pagina < total_paginas %}
-                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina+1) }}" class="pag-btn">Próxima ›</a>
-                        <a href="{{ url_for('projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=total_paginas) }}" class="pag-btn">Última »</a>
+                        <a href="{{ url_for('projetos.projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=pagina+1) }}" class="pag-btn">Próxima ›</a>
+                        <a href="{{ url_for('projetos.projetos', curso=curso_filtro, tipo=tipo_filtro, ordenacao=ordenacao, q=q, pagina=total_paginas) }}" class="pag-btn">Última »</a>
                     {% endif %}
                 </div>
                 {% endif %}

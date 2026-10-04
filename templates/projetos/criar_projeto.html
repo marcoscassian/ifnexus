@@ -1,231 +1,268 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ header_title | default('Cadastrar Projeto') }}{% endblock %}
+{% block title %}{{ header_title }} · IFNexus{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/criar_projeto.css') }}">
 {% endblock %}
 
 {% block conteudo %}
+<main class="project-builder" data-initial-step="{% if errors %}1{% else %}1{% endif %}">
+    <a class="back-link" href="{{ url_for('usuarios.meus_projetos') }}"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Meus projetos</a>
+    <header class="builder-header">
+        <div>
+            <h1>{{ header_title }}</h1>
+            <p>{{ header_subtitle }}</p>
+        </div>
+        {% if projeto %}
+        <span class="publication-badge {{ 'published' if projeto.publicado else 'draft' }}">
+            {{ 'Publicado' if projeto.publicado else 'Rascunho' }}
+        </span>
+        {% endif %}
+    </header>
 
-<div class="header-projeto">
-    <h1>{{ header_title | default('Cadastrar Novo Projeto') }}</h1>
-    <p>{{ header_subtitle | default('Preencha os dados abaixo para publicar seu projeto na vitrine do IF.') }}</p>
-</div>
+    <nav class="stepper" aria-label="Etapas do cadastro">
+        {% for number, label, detail in [
+            (1, 'Informações gerais', 'Dados básicos'),
+            (2, 'Estrutura acadêmica', 'Objetivos e método'),
+            (3, 'Mídias e materiais', 'Arquivos e links'),
+            (4, 'Revisão', 'Confira e publique')
+        ] %}
+        <button class="stepper-item {{ 'active' if number == 1 }}" type="button" data-go-step="{{ number }}" aria-current="{{ 'step' if number == 1 else 'false' }}">
+            <span class="step-number">{{ number }}</span>
+            <span class="step-copy"><strong>{{ label }}</strong><small>{{ detail }}</small></span>
+        </button>
+        {% endfor %}
+    </nav>
 
-<form action="{{ action_url | default(url_for('projetos.criar_projeto')) }}" method="POST" enctype="multipart/form-data">
-
-    <div class="sessao green-header">
-        <legend>Informações Gerais do Projeto</legend>
-        
-        <div class="form-row">
-            <div class="form-group large">
-                <label>Título do Projeto</label>
-                <input type="text" name="titulo" value="{{ titulo }}" required>
-            </div>
-            
-            <div class="form-group small autores-group">
-                <label>Autores</label>
-                <div class="autor-input-group">
-
-                    <input type="text" id="busca-autor" placeholder="Digite o nome do autor">
-
-                    <div id="resultado-autores" class="resultado-autores"></div>
-
-                    <div id="autores-selecionados">
-                        {% for autor in autores %}
-                        {% if autor.usuario %}
-                        <div class="autor">
-                            <strong>{{ autor.usuario.nome }}</strong> ({{ autor.usuario.matricula }})
-
-                            <input type="hidden" name="autores_ids[]" value="{{ autor.usuario.id }}">
-
-                            <button type="button" onclick="this.parentNode.remove()">X</button>
+    <form id="project-form" action="{{ action_url }}" method="post" enctype="multipart/form-data" novalidate>
+        <div class="form-layout">
+            <div class="form-main">
+                <section class="form-step active" data-step="1">
+                    <div class="section-card">
+                        <div class="section-heading">
+                            <span class="section-icon"><i class="fa-regular fa-file-lines"></i></span>
+                            <div><h2>Informações gerais</h2><p>Apresente o projeto de forma clara para a comunidade.</p></div>
                         </div>
-                        {% endif %}
-                        {% endfor %}
+
+                        <div class="field-group">
+                            <div class="label-row"><label for="titulo">Título do projeto <span>*</span></label><small><span data-count-for="titulo">{{ titulo|length }}</span>/120</small></div>
+                            <input id="titulo" name="titulo" maxlength="120" value="{{ titulo }}" placeholder="Ex.: Sistema de monitoramento de irrigação inteligente" aria-describedby="error-titulo">
+                            <p class="field-error" id="error-titulo" data-error-for="titulo" data-step="1">{{ errors.get('titulo', '') }}</p>
+                        </div>
+
+                        <div class="field-group">
+                            <div class="label-row"><label for="subtitulo">Subtítulo <em>opcional</em></label><small><span data-count-for="subtitulo">{{ subtitulo|length }}</span>/150</small></div>
+                            <input id="subtitulo" name="subtitulo" maxlength="150" value="{{ subtitulo }}" placeholder="Uma frase curta sobre o projeto" aria-describedby="error-subtitulo">
+                            <p class="field-error" id="error-subtitulo" data-error-for="subtitulo" data-step="1">{{ errors.get('subtitulo', '') }}</p>
+                        </div>
+
+                        <div class="field-group">
+                            <div class="label-row"><label for="descricao">Resumo / descrição <span>*</span></label><small><span data-count-for="descricao">{{ descricao|length }}</span>/2000</small></div>
+                            <textarea id="descricao" name="descricao" maxlength="2000" rows="7" placeholder="Descreva o problema, a solução proposta e os principais resultados." aria-describedby="error-descricao">{{ descricao }}</textarea>
+                            <p class="field-error" id="error-descricao" data-error-for="descricao" data-step="1">{{ errors.get('descricao', '') }}</p>
+                        </div>
+
+                        <div class="field-grid three-columns">
+                            <div class="field-group">
+                                <label for="tipo">Tipo do projeto <span>*</span></label>
+                                <select id="tipo" name="tipo" aria-describedby="error-tipo">
+                                    <option value="">Selecione o tipo</option>
+                                    {% for value, label in tipos_projeto.items() %}<option value="{{ value }}" {{ 'selected' if tipo == value }}>{{ label }}</option>{% endfor %}
+                                </select>
+                                <p class="field-error" id="error-tipo" data-error-for="tipo" data-step="1">{{ errors.get('tipo', '') }}</p>
+                            </div>
+                            <div class="field-group">
+                                <label for="curso">Curso <span>*</span></label>
+                                <select id="curso" name="curso" aria-describedby="error-curso">
+                                    <option value="">Selecione o curso</option>
+                                    {% for value, label in cursos.items() %}<option value="{{ value }}" {{ 'selected' if curso == value }}>{{ label }}</option>{% endfor %}
+                                </select>
+                                <p class="field-error" id="error-curso" data-error-for="curso" data-step="1">{{ errors.get('curso', '') }}</p>
+                            </div>
+                            <div class="field-group">
+                                <label for="status">Status <span>*</span></label>
+                                <select id="status" name="status" aria-describedby="error-status">
+                                    {% for value, label in status_projeto.items() %}<option value="{{ value }}" {{ 'selected' if status == value }}>{{ label }}</option>{% endfor %}
+                                </select>
+                                <p class="field-error" id="error-status" data-error-for="status" data-step="1">{{ errors.get('status', '') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="field-group people-field">
+                            <label for="busca-autor">Autores <span>*</span></label>
+                            <p class="field-help">Pesquise pessoas cadastradas no IFNexus e defina a participação de cada uma.</p>
+                            <div class="search-combobox">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="search" id="busca-autor" placeholder="Buscar autor por nome" autocomplete="off">
+                                <div id="resultado-autores" class="search-results" role="listbox"></div>
+                            </div>
+                            <div id="autores-selecionados" class="people-list">
+                                {% for autor in autores %}
+                                {% set user = autor.usuario %}
+                                <div class="person-chip" data-user-id="{{ user.id }}">
+                                    <span class="avatar-initials">{{ user.nome.split()|map('first')|join('')|upper|truncate(2, true, '') }}</span>
+                                    <span class="person-name"><strong>{{ user.nome }}</strong><small>{{ user.matricula or user.email }}</small></span>
+                                    <select name="autores_tipos[]" aria-label="Participação de {{ user.nome }}">
+                                        <option value="principal" {{ 'selected' if autor.tipo == 'principal' }}>Autor principal</option>
+                                        <option value="coautor" {{ 'selected' if autor.tipo != 'principal' }}>Coautor</option>
+                                    </select>
+                                    <input type="hidden" name="autores_ids[]" value="{{ user.id }}">
+                                    <button type="button" class="icon-button remove-person" aria-label="Remover {{ user.nome }}"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <p class="field-error" id="error-autores" data-error-for="autores" data-step="1">{{ errors.get('autores', '') }}</p>
+                        </div>
+
+                        <div class="field-group people-field">
+                            <label for="busca-orientador">Professor orientador <em>opcional</em></label>
+                            <div class="search-combobox">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="search" id="busca-orientador" placeholder="Buscar professor ou orientador" autocomplete="off" value="{{ orientador.nome if orientador else '' }}">
+                                <div id="resultado-orientadores" class="search-results" role="listbox"></div>
+                            </div>
+                            <input type="hidden" id="orientador-id" name="orientador_id" value="{{ orientador.id if orientador else '' }}">
+                            <div id="orientador-selecionado" class="selected-advisor {{ '' if orientador else 'hidden' }}">
+                                <span><i class="fa-solid fa-user-graduate"></i> <strong data-advisor-name>{{ orientador.nome if orientador else '' }}</strong></span>
+                                <button type="button" class="icon-button" id="remove-orientador" aria-label="Remover orientador"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <p class="field-error" data-error-for="orientador" data-step="1">{{ errors.get('orientador', '') }}</p>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                <section class="form-step" data-step="2">
+                    <div class="section-card">
+                        <div class="section-heading">
+                            <span class="section-icon"><i class="fa-solid fa-bullseye"></i></span>
+                            <div><h2>Estrutura acadêmica</h2><p>Organize objetivos, metodologia e resultados do projeto.</p></div>
+                        </div>
+                        <div class="academic-grid">
+                            <div class="field-group">
+                                <label>Objetivos do projeto <span>*</span></label>
+                                <div id="objetivos-list" class="dynamic-list">
+                                    {% for objetivo in objetivos or [''] %}
+                                    <div class="dynamic-row"><span class="row-index">{{ loop.index }}</span><input name="objetivos[]" value="{{ objetivo }}" placeholder="Ex.: Desenvolver um protótipo funcional"><button type="button" class="icon-button remove-row" aria-label="Remover objetivo"><i class="fa-solid fa-xmark"></i></button></div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="outline-button add-row" data-target="objetivos-list" data-name="objetivos[]" data-placeholder="Ex.: Avaliar a eficiência do sistema"><i class="fa-solid fa-plus"></i> Adicionar objetivo</button>
+                                <p class="field-error" data-error-for="objetivos" data-step="2">{{ errors.get('objetivos', '') }}</p>
+                            </div>
+                            <div class="field-group">
+                                <label>Metodologia <span>*</span></label>
+                                <div id="metodologias-list" class="dynamic-list">
+                                    {% for metodologia in metodologias or [''] %}
+                                    <div class="dynamic-row"><span class="row-index">{{ loop.index }}</span><input name="metodologias[]" value="{{ metodologia }}" placeholder="Ex.: Pesquisa bibliográfica"><button type="button" class="icon-button remove-row" aria-label="Remover etapa"><i class="fa-solid fa-xmark"></i></button></div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="outline-button add-row" data-target="metodologias-list" data-name="metodologias[]" data-placeholder="Ex.: Testes de usabilidade"><i class="fa-solid fa-plus"></i> Adicionar etapa</button>
+                                <p class="field-error" data-error-for="metodologias" data-step="2">{{ errors.get('metodologias', '') }}</p>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <div class="label-row"><label for="resultados">Resultados esperados ou obtidos <em>opcional</em></label><small><span data-count-for="resultados">{{ resultados|length }}</span>/1200</small></div>
+                            <textarea id="resultados" name="resultados" maxlength="1200" rows="5" placeholder="Descreva protótipos, publicações, premiações, impacto social ou outros resultados.">{{ resultados }}</textarea>
+                            <p class="field-error" data-error-for="resultados" data-step="2">{{ errors.get('resultados', '') }}</p>
+                        </div>
+                        <div class="field-group">
+                            <label for="tecnologia-input">Tecnologias e tags</label>
+                            <div class="tag-input-wrap"><input id="tecnologia-input" placeholder="Digite uma tecnologia e pressione Enter"><button type="button" id="add-tecnologia" class="outline-button">Adicionar</button></div>
+                            <div id="tecnologias-list" class="tags-list">
+                                {% for tecnologia in tecnologias %}<span class="tag-chip"><span>{{ tecnologia }}</span><input type="hidden" name="tecnologias[]" value="{{ tecnologia }}"><button type="button" aria-label="Remover {{ tecnologia }}"><i class="fa-solid fa-xmark"></i></button></span>{% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-step" data-step="3">
+                    <div class="section-card">
+                        <div class="section-heading">
+                            <span class="section-icon"><i class="fa-regular fa-images"></i></span>
+                            <div><h2>Mídias e materiais</h2><p>Inclua imagens, documentos e caminhos para conhecer o projeto.</p></div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Imagens do projeto</label>
+                            <label class="dropzone" id="image-dropzone" for="imagens-input">
+                                <i class="fa-solid fa-cloud-arrow-up"></i><strong>Arraste imagens aqui ou clique para selecionar</strong><small>JPG, PNG ou WEBP · até 8 MB por imagem</small>
+                                <input type="file" id="imagens-input" name="imagens[]" accept=".jpg,.jpeg,.png,.webp" multiple>
+                            </label>
+                            <div id="image-gallery" class="upload-gallery">
+                                {% for imagem in imagens_existentes %}
+                                <article class="image-preview {{ 'is-cover' if imagem.is_capa }}" data-existing-image="{{ imagem.id }}">
+                                    <img src="{{ url_for('static', filename=imagem.caminho) }}" alt="{{ imagem.nome_original or 'Imagem do projeto' }}">
+                                    <input type="hidden" name="existing_image_ids[]" value="{{ imagem.id }}">
+                                    <span class="cover-label">Capa</span>
+                                    <div class="media-actions"><button type="button" class="set-cover" data-existing-cover="{{ imagem.id }}">Definir como capa</button><button type="button" class="remove-media" aria-label="Remover imagem"><i class="fa-solid fa-trash"></i></button></div>
+                                </article>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" id="cover-existing-id" name="cover_existing_id" value="{{ projeto.imagem_capa.id if projeto and projeto.imagem_capa else '' }}">
+                            <input type="hidden" id="cover-new-index" name="cover_new_index" value="">
+                            <p class="field-error" data-error-for="imagens" data-step="3">{{ errors.get('imagens', '') }}</p>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Documentos</label>
+                            <label class="dropzone compact" id="document-dropzone" for="arquivos-input">
+                                <i class="fa-regular fa-file-lines"></i><strong>Selecione documentos do projeto</strong><small>PDF, DOC, DOCX, PPT, PPTX, ODT ou ODP · até 10 MB</small>
+                                <input type="file" id="arquivos-input" name="arquivos[]" accept=".pdf,.doc,.docx,.ppt,.pptx,.odt,.odp" multiple>
+                            </label>
+                            <div id="document-list" class="document-list">
+                                {% for arquivo in arquivos_existentes %}
+                                <div class="document-row" data-existing-file="{{ arquivo.id }}"><span class="file-icon">{{ arquivo.extensao|upper }}</span><span><strong>{{ arquivo.nome_original }}</strong><small>{{ (arquivo.tamanho / 1048576)|round(1) if arquivo.tamanho else 'Arquivo existente' }}{% if arquivo.tamanho %} MB{% endif %}</small></span><input type="hidden" name="existing_file_ids[]" value="{{ arquivo.id }}"><button type="button" class="icon-button remove-document" aria-label="Remover arquivo"><i class="fa-solid fa-xmark"></i></button></div>
+                                {% endfor %}
+                            </div>
+                            <p class="field-error" data-error-for="arquivos" data-step="3">{{ errors.get('arquivos', '') }}</p>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Links externos</label>
+                            <div id="links-list" class="links-list">
+                                {% for link in links %}
+                                <div class="link-row"><select name="links_tipos[]"><option value="github" {{ 'selected' if link.tipo == 'github' }}>GitHub</option><option value="demonstracao" {{ 'selected' if link.tipo == 'demonstracao' }}>Demonstração</option><option value="video" {{ 'selected' if link.tipo == 'video' }}>Vídeo</option><option value="site" {{ 'selected' if link.tipo == 'site' }}>Site</option><option value="outro" {{ 'selected' if link.tipo == 'outro' }}>Outro</option></select><input type="url" name="links_urls[]" value="{{ link.url }}" placeholder="https://"><button type="button" class="icon-button remove-link" aria-label="Remover link"><i class="fa-solid fa-xmark"></i></button></div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" id="add-link" class="outline-button"><i class="fa-solid fa-plus"></i> Adicionar link</button>
+                            {% for key, message in errors.items() %}{% if key.startswith('link_') %}<p class="field-error visible" data-step="3">{{ message }}</p>{% endif %}{% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-step" data-step="4">
+                    <div class="section-card review-card">
+                        <div class="section-heading">
+                            <span class="section-icon"><i class="fa-regular fa-circle-check"></i></span>
+                            <div><h2>Revise antes de publicar</h2><p>Confira como as principais informações serão apresentadas.</p></div>
+                        </div>
+                        <div class="review-hero"><div id="review-cover" class="review-cover"><i class="fa-regular fa-image"></i></div><div class="review-title"><div class="review-badges"><span id="review-type">Tipo do projeto</span><span id="review-status">Status</span></div><h3 id="review-title">Título do projeto</h3><p id="review-subtitle">Subtítulo do projeto</p><div id="review-tags" class="tags-list"></div></div><button type="button" class="edit-section" data-go-step="1">Editar</button></div>
+                        <div class="review-grid">
+                            <article><header><h3>Autores e orientação</h3><button type="button" data-go-step="1">Editar</button></header><div id="review-authors"></div></article>
+                            <article><header><h3>Resumo</h3><button type="button" data-go-step="1">Editar</button></header><p id="review-description"></p></article>
+                            <article><header><h3>Objetivos</h3><button type="button" data-go-step="2">Editar</button></header><ol id="review-objectives"></ol></article>
+                            <article><header><h3>Metodologia</h3><button type="button" data-go-step="2">Editar</button></header><ol id="review-methods"></ol></article>
+                            <article><header><h3>Resultados</h3><button type="button" data-go-step="2">Editar</button></header><p id="review-results"></p></article>
+                            <article><header><h3>Materiais e links</h3><button type="button" data-go-step="3">Editar</button></header><p id="review-materials"></p></article>
+                        </div>
+                    </div>
+                </section>
             </div>
+
+            <aside class="live-preview" aria-label="Prévia do projeto">
+                <div class="preview-heading"><i class="fa-regular fa-eye"></i><div><strong>Prévia do projeto</strong><small>Atualizada enquanto você preenche</small></div></div>
+                <div id="preview-cover" class="preview-cover"><i class="fa-regular fa-image"></i></div>
+                <div class="preview-badges"><span id="preview-type">Tipo do projeto</span><span id="preview-status">Ideia</span></div>
+                <h2 id="preview-title">Título do projeto</h2><p id="preview-subtitle">Subtítulo do projeto</p><p id="preview-description">O resumo do seu projeto aparecerá aqui.</p><div id="preview-authors" class="preview-authors"></div>
+            </aside>
         </div>
 
-        <div class="form-row">
-            <div class="form-group large">
-                <label>Subtítulo do Projeto</label>
-                <input type="text" name="subtitulo" value="{{ subtitulo }}">
-            </div>
-        </div>
+        <footer class="form-footer">
+            <button type="submit" name="submit_action" value="draft" class="secondary-button"><i class="fa-regular fa-floppy-disk"></i> Salvar como rascunho</button>
+            <div><button type="button" id="previous-step" class="secondary-button hidden">Voltar</button><button type="button" id="next-step" class="primary-button">Próximo</button><button type="submit" name="submit_action" value="publish" id="publish-project" class="primary-button hidden"><span class="button-label">Publicar projeto</span><span class="button-loading"><i class="fa-solid fa-spinner fa-spin"></i> Publicando</span></button></div>
+        </footer>
+    </form>
+</main>
 
-        <label>Resumo/Descrição</label>
-        <textarea name="descricao" required>{{ descricao }}</textarea>
-
-        <div class="form-row-small">
-             <div class="form-group-small">
-                <label>Tipo</label>
-                <select name="tipo" required>
-                    <option value="">Selecionar Tipo</option>
-                    <option value="pesquisa" {% if tipo == 'pesquisa' %}selected{% endif %}>Pesquisa</option>
-                    <option value="extensao" {% if tipo == 'extensao' %}selected{% endif %}>Extensão</option>
-                    <option value="ensino" {% if tipo == 'ensino' %}selected{% endif %}>Ensino</option>
-                </select>
-            </div>
-            <div class="form-group-small">
-                <label>Curso</label>
-                <select name="curso" required>
-                    <option value="">Selecionar Curso</option>
-                    <option value="informatica" {% if curso == 'informatica' %}selected{% endif %}>Informática</option>
-                    <option value="textil" {% if curso == 'textil' %}selected{% endif %}>Têxtil</option>
-                    <option value="vestuario" {% if curso == 'vestuario' %}selected{% endif %}>Vestuário</option>
-                    <option value="eletro" {% if curso == 'eletro' %}selected{% endif %}>Eletrotécnica</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="sessao green-header">
-        <legend>Estrutura Acadêmica</legend>
-        
-        <div class="form-row academic-row">
-            <div class="form-group-col">
-                <label>Objetivos do Projeto</label>
-                <div id="objetivos" class="input-list">
-                    {% for objetivo in objetivos %}
-                    <input type="text" name="objetivos[]" placeholder="" value="{{ objetivo.descricao }}" required>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div class="form-group-col">
-                <label>Metodologias</label>
-                <div id="metodologias" class="input-list">
-                    {% for metodologia in metodologias %}
-                    <input type="text" name="metodologias[]" placeholder="" value="{{ metodologia.descricao }}" required>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        
-        <label>Adicione aqui o arquivo do seu Projeto.</label>
-        <div class="file-upload-container">
-            <input type="file" name="arquivo" accept=".pdf,.doc,.docx" id="arquivo-projeto" class="hidden-file-input">
-            <label for="arquivo-projeto" class="custom-file-label">
-                <span id="file-name-display">{{ arquivo_nome or 'Selecionar Arquivo' }}</span>
-                <span class="dropdown-arrow"></span>
-            </label>
-        </div>
-    </div>
-
-    <div class="sessao green-header">
-        <legend>Mídias e Links Externos</legend>
-
-        <div class="media-gallery-pp3">
-            
-            <div class="media-small-grid">
-                {% for i in range(4) %}
-                {% set img_file = imagens[i] if loop.index0 < imagens|length else '' %}
-                {% set img_url = url_for('static', filename=img_file) if img_file and img_file != '' else '' %}
-                <div class="media-card-pp3 image-card-pp3">
-                    <label for="img-{{ i+1 }}" class="media-label-pp3">
-                        <span class="icon-nuvem-upload"></span>
-                         {% if img_file and img_url %}
-                            <img src="{{ img_url }}" class="uploaded-img" alt="Imagem atual">
-                         {% endif %}
-                    </label>
-                    <input type="file" name="imagens[]" accept="image/*" id="img-{{ i+1 }}" class="media-input">
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="media-card-pp3 video-card-pp3 principal">
-                 <label for="video-link" class="video-label-pp3">
-                     <span class="icon-play"></span>
-                 </label>
-                 <input type="url" name="links_principais[]" placeholder="Link do Vídeo" id="video-link" class="media-link-input" value="{{ link_principal }}">
-            </div>
-        </div>
-
-        <label class="links-externos-label-pp3">Links Externos</label>
-        
-        <div id="links" class="links-input-group-pp3">
-            {% for link in links_extras %}
-            <div class="link-input-row-pp3">
-                 <input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3" value="{{ link }}">
-                 <button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>
-            </div>
-            {% endfor %}
-            {% if not links_extras %}
-            <div class="link-input-row-pp3">
-                 <input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3">
-                 <button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>
-            </div>
-            {% endif %}
-        </div>
-        
-        <button type="button" class="add-link-btn-pp3" onclick="addLinkPP3()">+ Adicionar Link</button>
-    </div>
-
-    <br>
-    <div class="cadastro-footer">
-        <button type="submit" class="cadastrar-projeto-btn-pp3">{{ submit_text | default('Cadastrar Projeto') }}</button>
-    </div>
-</form>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.media-input').forEach(input => {
-        input.addEventListener('change', function() {
-            const label = this.closest('.media-card-pp3').querySelector('.media-label-pp3');
-            let img = label.querySelector('.uploaded-img');
-            
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (!img) {
-                        img = document.createElement('img');
-                        img.classList.add('uploaded-img');
-                        img.alt = "Pré-visualização";
-                        label.appendChild(img);
-                    }
-                    img.src = e.target.result;
-                    label.querySelector('.icon-nuvem-upload').style.display = 'none';
-                }
-                reader.readAsDataURL(this.files[0]);
-            } else if (img) { 
-                 img.remove();
-                 const initialImg = label.querySelector('.uploaded-img[data-initial-src]');
-                 if (initialImg) initialImg.style.display = 'block';
-                 else label.querySelector('.icon-nuvem-upload').style.display = 'block';
-            }
-        });
-        
-        const label = input.closest('.media-card-pp3').querySelector('.media-label-pp3');
-        const initialImg = label.querySelector('.uploaded-img');
-        if (initialImg) {
-             label.querySelector('.icon-nuvem-upload').style.display = 'none';
-             initialImg.setAttribute('data-initial-src', initialImg.src);
-        }
-    });
-
-    document.getElementById('arquivo-projeto').addEventListener('change', function() {
-        var fileName = this.files.length > 0 ? this.files[0].name : 'Selecionar Arquivo';
-        document.getElementById('file-name-display').textContent = fileName;
-    });
-
-    function addLinkPP3() {
-        const div = document.getElementById('links');
-        const container = document.createElement('div');
-        container.classList.add('link-input-row-pp3');
-        container.innerHTML = '<input type="url" name="links[]" placeholder="Link" class="base-link-input-pp3"> ' +
-                              '<button type="button" class="remove-link-btn-pp3" onclick="this.parentNode.remove()">X</button>';
-        div.appendChild(container);
-    }
-    window.addLinkPP3 = addLinkPP3;
-
-});
-</script>
-
-<!-- live search de autores -->
-<script src="{{ url_for('static', filename='js/livesearch_autores.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/criar_projeto.js') }}"></script>
 {% endblock %}

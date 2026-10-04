@@ -1,375 +1,278 @@
 {% extends 'base.html' %}
 
-{% block title %}Cadastrar Projeto{% endblock %}
+{% block title %}{{ projeto.titulo }} · IFNexus{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/projetos/listar_projeto.css') }}">
 {% endblock %}
 
-{% block conteudo %}
-
-<div class="page-wrapper">
-
-    <div class="container">
-
-        <div class="left">
-            <div class="block1">
-                <h1> {{projeto.titulo}} - {{projeto.subtitulo}}</h1>
-
-                <div class="descricao">
-                    <p> {{projeto.descricao}} </p>
-                </div>
-
-                <div class="autores">
-                    <p><strong>Autores:</strong>
-                        {% for autor in projeto.autores %}
-                            {{ autor.usuario.nome }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                </div>
-
-                <hr>
-            </div>
-
-            <div class="block2">
-                <h1> Objetivos </h1>
-                <ul>
-                    {% for objetivo in projeto.objetivos %}
-                    <li>{{ objetivo.descricao }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="block3">
-                <h1> Metodologias </h1>
-                <ul>
-                    {% for metodologia in projeto.metodologias %}
-                    <li>{{ metodologia.descricao }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="block4">
-                <h1> Links e Materias Coplementares </h1>
-                <ul>
-                    {% for link in projeto.links %}
-                    <li>{{ link.url }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <div class="right">
-            {% if imagens and imagens|length > 0 %}
-                {% for img in imagens %}
-                <div class="media-block">
-                    <img src="{{ img }}" alt="Imagem do projeto" class="project-img">
-                </div>
-                {% endfor %}
+{% macro avatar(usuario, class_name='intro-avatar') %}
+    <span class="{{ class_name }}">
+        {% if usuario.foto %}
+            {% if usuario.foto.startswith('http') or usuario.foto.startswith('/static/') %}
+                <img src="{{ usuario.foto }}" alt="Foto de {{ usuario.nome }}">
             {% else %}
-                <div class="media-block">
-                    <i class="fas fa-camera"></i>
-                </div>
+                <img src="{{ url_for('static', filename='uploads/users/' ~ usuario.id ~ '.jpg') }}" alt="Foto de {{ usuario.nome }}">
+            {% endif %}
+        {% else %}
+            <span aria-hidden="true">{{ usuario.nome[:2]|upper }}</span>
+        {% endif %}
+    </span>
+{% endmacro %}
+
+{% block conteudo %}
+<main class="project-page">
+    {% if not projeto.publicado %}
+    <div class="draft-notice">
+        <span><i class="fa-regular fa-eye-slash" aria-hidden="true"></i> Este projeto está em rascunho e só pode ser visto pelos autores.</span>
+        <a href="{{ url_for('projetos.editar_projeto', id=projeto.id) }}">Continuar edição</a>
+    </div>
+    {% endif %}
+
+    <article class="project-intro">
+        <a href="{{ url_for('projetos.projetos') }}" class="back-to-projects"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar para projetos</a>
+        <div class="intro-title-row">
+            <div class="intro-copy">
+                <div class="project-kicker">{{ projeto.tipo|replace('-', ' ')|title if projeto.tipo else 'Projeto acadêmico' }}</div>
+                <h1>{{ projeto.titulo }}</h1>
+                {% if projeto.subtitulo %}<p class="project-subtitle">{{ projeto.subtitulo }}</p>{% elif projeto.descricao %}<p class="project-subtitle">{{ projeto.descricao|truncate(180) }}</p>{% endif %}
+            </div>
+            {% if projeto.publicado %}
+            <div class="project-actions" aria-label="Ações do projeto">
+                <button id="like-btn" type="button" data-url="{{ url_for('projetos.curtir_projeto', id=projeto.id) }}" class="action-button {{ 'liked' if liked }}" aria-pressed="{{ 'true' if liked else 'false' }}">
+                    <i class="{{ 'fa-solid' if liked else 'fa-regular' }} fa-heart" aria-hidden="true"></i>
+                    <span id="like-label">{{ 'Curtido' if liked else 'Curtir' }}</span><strong id="like-count">{{ projeto.curtidas or 0 }}</strong>
+                </button>
+                <button id="share-btn" type="button" class="action-button"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i><span>Compartilhar</span></button>
+            </div>
             {% endif %}
         </div>
 
-    </div>
-
-    <div class="interactions">
-
-        <div class="comment-compose">
-
-            <div class="avatar-col">
-                {% if current_user.is_authenticated and current_user.foto %}
-                    {% set foto = current_user.foto %}
-                    {% if 'http' in foto %}
-                        <img src="{{ foto }}" alt="{{ current_user.nome }}" class="comment-avatar-img">
-                    {% else %}
-                        {% if current_user.foto %}
-                            {% if 'http' in current_user.foto %}
-                                <img src="{{ current_user.foto }}" class="comment-avatar-img">
-                            {% else %}
-                                <img src="{{ url_for('static', filename='uploads/users/' ~ current_user.id ~ '.jpg') }}" class="comment-avatar-img">
-                            {% endif %}
-                        {% else %}
-                            <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" class="comment-avatar-img">
-                        {% endif %}
-
-                    {% endif %}
-                {% else %}
-                    <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Avatar" class="comment-avatar-img">
-                {% endif %}
-            </div>
-
-            <div class="input-col">
-                <form id="comment-form" action="{{ url_for('projetos.adicionar_comentario', id=projeto.id) }}" method="post" class="comment-form">
-                    <textarea id="comment-textarea" name="conteudo" rows="3" placeholder="O que você achou desse projeto?"></textarea>
-                    <div style="margin-top:8px; text-align:right;">
-                        <button type="submit" class="btn-submit">Enviar comentário</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="divider-vertical" aria-hidden="true"></div>
-
-            <div class="meta-col">
-
-                <div class="meta-row like-counter">
-                    <form id="like-form" action="{{ url_for('projetos.curtir_projeto', id=projeto.id) }}" method="post">
-                        <button type="submit" id="like-btn" class="like-btn" aria-label="Curtir projeto">
-
-                            {% set liked_src = (url_for('static', filename='img/interacoes/curtidas/heartliked.png') if heart_liked_exists else '') %}
-                            {% set unliked_src = (url_for('static', filename='img/interacoes/curtidas/heart.png') if heart_exists else '') %}
-                            {% set hover_src = (url_for('static', filename='img/interacoes/curtidas/hearthover.png') if heart_hover_exists else '') %}
-
-                            {% if liked %}
-                                <img id="like-img"
-                                    src="{{ liked_src }}"
-                                    alt="curtido"
-                                    data-liked="1"
-                                    data-liked-src="{{ liked_src }}"
-                                    data-unliked-src="{{ unliked_src }}"
-                                    data-hover-src="{{ hover_src }}">
-                            {% else %}
-                                <img id="like-img"
-                                    src="{{ unliked_src }}"
-                                    alt="curtir"
-                                    data-liked="0"
-                                    data-liked-src="{{ liked_src }}"
-                                    data-unliked-src="{{ unliked_src }}"
-                                    data-hover-src="{{ hover_src }}">
-                            {% endif %}
-                            <span id="like-count">{{ projeto.curtidas or 0 }} Curtidas</span>
-                        </button>
-                    </form>
-                </div>
-
-                <div class="meta-row share-action">
-                    <button id="share-btn" class="share-button">
-                        <img src="{{ url_for('static', filename='img/interacoes/compartilhamento/share.png') }}" 
-                            alt="Compartilhar" class="share-icon">
-                        <span>Compartilhar Projeto</span>
-                    </button>
-                </div>
-
-            </div>
+        {% if projeto.autores or projeto.orientador %}
+        <div class="intro-people" aria-label="Autores e orientação do projeto">
+            {% for autor in projeto.autores %}
+            <a href="{{ url_for('usuarios.ver_perfil', id=autor.usuario.id) }}" class="intro-person">
+                {{ avatar(autor.usuario, 'intro-avatar') }}
+                <span><strong>{{ autor.usuario.nome }}</strong><small>{{ 'Autor principal' if autor.tipo == 'principal' else 'Coautor' }}</small></span>
+            </a>
+            {% endfor %}
+            {% if projeto.orientador %}
+            {% if projeto.autores %}<span class="people-divider" aria-hidden="true"></span>{% endif %}
+            <a href="{{ url_for('usuarios.ver_perfil', id=projeto.orientador.id) }}" class="intro-person advisor-person">
+                {{ avatar(projeto.orientador, 'intro-avatar') }}
+                <span><small>Orientador</small><strong>{{ projeto.orientador.nome }}</strong></span>
+            </a>
+            {% endif %}
         </div>
+        {% endif %}
 
-        <div class="comments-list">
-            {% for comentario in comentarios %}
-            <div class="comment-item">
+        <div class="project-meta" aria-label="Informações básicas do projeto">
+            {% if projeto.tipo %}<span><i class="fa-regular fa-circle-check"></i>{{ projeto.tipo|replace('-', ' ')|title }}</span>{% endif %}
+            {% if projeto.curso %}<span><i class="fa-solid fa-graduation-cap"></i>{{ projeto.curso|title }}</span>{% endif %}
+            {% if projeto.dono and projeto.dono.campus %}<span><i class="fa-regular fa-building"></i>{{ projeto.dono.campus }}</span>{% endif %}
+            {% if projeto.status %}<span class="status-chip"><i class="fa-solid fa-circle"></i>{{ projeto.status|replace('desenvolvimento', 'Em desenvolvimento')|replace('testes', 'Em testes')|replace('concluido', 'Concluído')|title }}</span>{% endif %}
+        </div>
+        <p id="action-feedback" class="action-feedback" aria-live="polite"></p>
+    </article>
 
-                <div class="ci-avatar">
-                    {% if comentario.usuario.foto %}
-                        {% if 'http' in comentario.usuario.foto %}
-                            <img src="{{ comentario.usuario.foto }}" alt="{{ comentario.usuario.nome }}" class="comment-avatar-img">
-                        {% else %}
-                            {% if 'http' in comentario.usuario.foto %}
-                                <img src="{{ comentario.usuario.foto }}" class="comment-avatar-img">
-                            {% else %}
-                                <img src="{{ url_for('static', filename='uploads/users/' ~ comentario.usuario.id ~ '.jpg') }}" class="comment-avatar-img">
-                            {% endif %}
-                        {% endif %}
-                    {% else %}
-                        <img src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Avatar" class="comment-avatar-img">
-                    {% endif %}
-                </div>
-
-                <div class="ci-body">
-                    <div class="ci-author">{{ comentario.usuario.nome }}</div>
-                    <div class="ci-meta">
-                        {% if comentario.criado_em %}
-                            <span title="{{ comentario.criado_em.strftime('%d/%m/%Y %H:%M:%S') }}">{{ comentarios_relativos[comentario.id] }}</span>
-                        {% else %}
-                            Data indisponível
-                        {% endif %}
-                    </div>
-                    <div class="ci-text">{{ comentario.conteudo }}</div>
-                </div>
-
-            </div>
+    {% if imagens %}
+    <section class="project-gallery-section" aria-label="Galeria de imagens do projeto">
+        {% set visible_image_count = imagens|length if imagens|length < 4 else 4 %}
+        <div class="project-gallery gallery-count-{{ visible_image_count }}">
+            {% for img in imagens %}
+            <button type="button" class="gallery-item {{ 'gallery-item-hidden' if loop.index > 4 }}" data-gallery-index="{{ loop.index0 }}" data-full-src="{{ img }}" aria-label="Ampliar imagem {{ loop.index }} de {{ imagens|length }}">
+                <img src="{{ img }}" alt="Imagem {{ loop.index }} de {{ projeto.titulo }}">
+                {% if loop.index == 4 and imagens|length > 4 %}<span class="more-images-overlay">+{{ imagens|length - 4 }}<small>imagens</small></span>{% endif %}
+            </button>
             {% endfor %}
         </div>
+    </section>
+    {% endif %}
 
+    {% if projeto.descricao %}
+    <section class="content-section about-section">
+        <div class="content-section-icon"><i class="fa-regular fa-rectangle-list"></i></div>
+        <div><div class="section-label">Sobre o projeto</div><p>{{ projeto.descricao }}</p></div>
+    </section>
+    {% endif %}
+
+    {% if projeto.objetivos or projeto.metodologias %}
+    <div class="academic-columns">
+        {% if projeto.objetivos %}
+        <section class="academic-panel">
+            <div class="section-heading"><span><i class="fa-solid fa-bullseye"></i></span><h2>Objetivos</h2></div>
+            <ul class="objective-list">
+                {% for objetivo in projeto.objetivos %}<li>{{ objetivo.descricao }}</li>{% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+        {% if projeto.metodologias %}
+        <section class="academic-panel">
+            <div class="section-heading"><span><i class="fa-solid fa-gear"></i></span><h2>Metodologia</h2></div>
+            <ol class="method-list">
+                {% for metodologia in projeto.metodologias %}<li>{{ metodologia.descricao }}</li>{% endfor %}
+            </ol>
+        </section>
+        {% endif %}
     </div>
+    {% endif %}
 
+    {% if projeto.resultados %}
+    <section class="content-section results-section">
+        <div class="content-section-icon"><i class="fa-solid fa-chart-column"></i></div>
+        <div><div class="section-label">Resultados</div><p>{{ projeto.resultados }}</p></div>
+    </section>
+    {% endif %}
+
+    {% if projeto.tecnologias %}
+    <section class="plain-section technologies-section">
+        <h2><i class="fa-solid fa-code"></i>Tecnologias utilizadas</h2>
+        <div class="technology-list">{% for tecnologia in projeto.tecnologias %}<span>{{ tecnologia.nome }}</span>{% endfor %}</div>
+    </section>
+    {% endif %}
+
+    {% if projeto.arquivos or projeto.links %}
+    <section class="plain-section materials-section">
+        <h2><i class="fa-solid fa-link"></i>Materiais e links</h2>
+        <div class="materials-grid">
+            {% for arquivo in projeto.arquivos %}
+            <a href="{{ url_for('static', filename=arquivo.caminho) }}" class="material-item" target="_blank" rel="noopener">
+                <span class="material-icon file-type">{{ arquivo.extensao|upper }}</span>
+                <span class="material-copy"><strong>{{ arquivo.nome_original }}</strong><small>{{ (arquivo.tamanho / 1048576)|round(1) if arquivo.tamanho else 'Documento do projeto' }}{% if arquivo.tamanho %} MB{% endif %}</small></span>
+                <span class="material-action">Visualizar <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+            </a>
+            {% endfor %}
+            {% for link in projeto.links %}
+            {% if link.url.startswith('https://') or link.url.startswith('http://') %}
+            <a href="{{ link.url }}" class="material-item" target="_blank" rel="noopener noreferrer">
+                <span class="material-icon"><i class="{{ 'fa-brands fa-github' if link.tipo == 'github' else 'fa-solid fa-link' }}"></i></span>
+                <span class="material-copy"><strong>{{ link.tipo|replace('demonstracao', 'Demonstração')|title }}</strong><small>{{ link.url|truncate(48) }}</small></span>
+                <span class="material-action">Acessar <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if projeto.publicado %}
+    <section class="comments-section">
+        <div class="comments-heading"><i class="fa-regular fa-comments"></i><h2>Comentários ({{ comentarios|length }})</h2></div>
+        {% if current_user.is_authenticated %}
+        <form action="{{ url_for('projetos.adicionar_comentario', id=projeto.id) }}" method="post" class="comment-form">
+            {{ avatar(current_user, 'comment-avatar') }}
+            <div><textarea name="conteudo" rows="3" maxlength="1500" placeholder="Escreva um comentário..." aria-label="Comentário"></textarea><button type="submit">Comentar</button></div>
+        </form>
+        {% else %}
+        <p class="login-prompt"><a href="{{ url_for('auth.login') }}">Entre na sua conta</a> para comentar.</p>
+        {% endif %}
+        <div class="comments-list">
+            {% for comentario in comentarios %}
+            <article class="comment-item">
+                {{ avatar(comentario.usuario, 'comment-avatar') }}
+                <div class="comment-meta"><a href="{{ url_for('usuarios.ver_perfil', id=comentario.usuario.id) }}">{{ comentario.usuario.nome }}</a><time>{{ comentarios_relativos[comentario.id] }}</time></div>
+                <p>{{ comentario.conteudo }}</p>
+            </article>
+            {% else %}
+            <p class="empty-copy">Ainda não há comentários. Seja a primeira pessoa a comentar.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</main>
+
+{% if imagens %}
+<div id="image-modal" class="image-modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-label="Imagem ampliada">
+        <button type="button" class="modal-close" id="modal-close" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+        {% if imagens|length > 1 %}<button type="button" class="modal-navigation modal-previous" id="modal-previous" aria-label="Imagem anterior"><i class="fa-solid fa-chevron-left"></i></button>{% endif %}
+        <img id="modal-image" src="" alt="Imagem ampliada do projeto">
+        {% if imagens|length > 1 %}<button type="button" class="modal-navigation modal-next" id="modal-next" aria-label="Próxima imagem"><i class="fa-solid fa-chevron-right"></i></button>{% endif %}
+        <div class="modal-counter" aria-live="polite"><span id="modal-current">1</span> / {{ imagens|length }}</div>
+    </div>
 </div>
-
+{% endif %}
 
 <script>
-    (function(){
-        function getRelativeTime(tsMs){
-            var now = Date.now();
-            var diffMs = now - tsMs;
-            if(diffMs < 0 || isNaN(diffMs)){
-                return 'data inválida';
-            }
-            
-            var diffSec = Math.floor(diffMs / 1000);
-            var diffMin = Math.floor(diffSec / 60);
-            var diffHour = Math.floor(diffMin / 60);
-            var diffDay = Math.floor(diffHour / 24);
-            
-            if(diffSec < 60) return 'agora';
-            if(diffMin < 60) return 'há ' + diffMin + ' minuto' + (diffMin > 1 ? 's' : '');
-            if(diffHour < 24) return 'há ' + diffHour + ' hora' + (diffHour > 1 ? 's' : '');
-            if(diffDay < 7) return 'há ' + diffDay + ' dia' + (diffDay > 1 ? 's' : '');
+document.addEventListener('DOMContentLoaded', () => {
+    const galleryItems = [...document.querySelectorAll('.gallery-item')];
+    let currentImage = 0;
+    const modal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+    const modalCounter = document.getElementById('modal-current');
+    const closeButton = document.getElementById('modal-close');
+    let lastFocusedElement = null;
 
-            var date = new Date(tsMs);
-            return date.toLocaleDateString('pt-BR') + ' às ' + date.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
-        }
-    
-        var metaElements = document.querySelectorAll('.ci-meta[data-ts-ms]');
-        metaElements.forEach(function(el){
-            var tsMs = parseInt(el.getAttribute('data-ts-ms'), 10);
-            if(!isNaN(tsMs) && tsMs > 0){
-                el.textContent = getRelativeTime(tsMs);
-                el.title = new Date(tsMs).toLocaleString('pt-BR');
-            }
-        });
-    })();
-
-    (function(){
-        var likeForm = document.getElementById('like-form');
-        var likeImg = document.getElementById('like-img');
-        var likeCount = document.getElementById('like-count');
-        if(!likeImg) return;
-
-        function applyHover(){
-            var newImg = likeImg.cloneNode(true);
-            likeImg.parentNode.replaceChild(newImg, likeImg);
-            likeImg = newImg;
-
-            var originalSrc = likeImg.getAttribute('src');
-            var hoverSrc = likeImg.dataset.hoverSrc || null;
-            var liked = likeImg.dataset.liked === '1';
-
-            if(!liked && hoverSrc){
-                likeImg.addEventListener('mouseenter', function(){
-                    likeImg.setAttribute('src', hoverSrc);
-                });
-                likeImg.addEventListener('mouseleave', function(){
-                    likeImg.setAttribute('src', originalSrc);
-                });
-            }
-        }
-
-        applyHover();
-
-        if(!likeForm) return;
-
-        likeForm.addEventListener('submit', function(e){
-            e.preventDefault();
-            var btn = likeForm.querySelector('button[type="submit"]');
-            if(btn) btn.disabled = true;
-
-            fetch(likeForm.action, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }).then(function(resp){
-                return resp.json().then(function(data){ return {status: resp.status, body: data}; });
-            }).then(function(res){
-                if(res.status === 200 && res.body){
-                    var liked = !!res.body.liked;
-                    var curtidas = res.body.curtidas;
-
-                    var likedSrc = likeImg.dataset.likedSrc || '';
-                    var unlikedSrc = likeImg.dataset.unlikedSrc || '';
-                    if(liked && likedSrc){
-                        likeImg.setAttribute('src', likedSrc);
-                        likeImg.dataset.liked = '1';
-                    } else {
-                        if(unlikedSrc) likeImg.setAttribute('src', unlikedSrc);
-                        likeImg.dataset.liked = '0';
-                    }
-                    if(likeCount) likeCount.textContent = curtidas + " Curtidas";
-                    applyHover();
-                } else {
-                    console.error('Erro ao curtir:', res.body && res.body.error ? res.body.error : res);
-                    alert('Erro ao atualizar curtida.');
-                }
-            }).catch(function(err){
-                console.error(err);
-                alert('Erro de rede ao curtir.');
-            }).finally(function(){
-                if(btn) btn.disabled = false;
-            });
-        });
-    })();
-
-    // Compartilhamento via Web Share API
-
-    document.getElementById("share-btn").addEventListener("click", function () {
-
-        if (navigator.share) {
-            navigator.share({
-                title: "Olha esse projeto!",
-                text: "Dá uma olhada nesse projeto do Nexus IF:",
-                url: window.location.href
-            })
-            .then(() => console.log("Compartilhado com sucesso"))
-            .catch((err) => console.log("Erro ao compartilhar:", err));
-
-        } else {
-            alert("Compartilhamento não suportado neste navegador.");
-        }
+    function updateModalImage() {
+        if (!modalImage || !galleryItems.length) return;
+        const item = galleryItems[currentImage];
+        const thumbnail = item.querySelector('img');
+        modalImage.src = item.dataset.fullSrc;
+        modalImage.alt = thumbnail?.alt || `Imagem ${currentImage + 1} do projeto`;
+        if (modalCounter) modalCounter.textContent = currentImage + 1;
+    }
+    function openModal(index, trigger) {
+        if (!modal || !modalImage || !galleryItems.length) return;
+        currentImage = (index + galleryItems.length) % galleryItems.length;
+        lastFocusedElement = trigger;
+        updateModalImage();
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        closeButton?.focus();
+    }
+    function navigateModal(direction) {
+        if (galleryItems.length < 2) return;
+        currentImage = (currentImage + direction + galleryItems.length) % galleryItems.length;
+        updateModalImage();
+    }
+    function closeModal() {
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+        modalImage.src = '';
+        lastFocusedElement?.focus();
+    }
+    galleryItems.forEach((item, index) => item.addEventListener('click', () => openModal(index, item)));
+    closeButton?.addEventListener('click', closeModal);
+    document.getElementById('modal-previous')?.addEventListener('click', () => navigateModal(-1));
+    document.getElementById('modal-next')?.addEventListener('click', () => navigateModal(1));
+    modal?.addEventListener('click', event => { if (event.target === modal || event.target === modal.querySelector('.modal-content')) closeModal(); });
+    document.addEventListener('keydown', event => {
+        if (!modal?.classList.contains('open')) return;
+        if (event.key === 'Escape') closeModal();
+        if (event.key === 'ArrowLeft') navigateModal(-1);
+        if (event.key === 'ArrowRight') navigateModal(1);
     });
 
-</script>
-
-<!-- modal para visualização ampliada das imagens -->
-
-<div id="img-modal" class="img-modal" aria-hidden="true">
-    <div class="modal-content" role="dialog" aria-modal="true">
-        <button class="close-btn" id="img-modal-close" aria-label="Fechar">✕</button>
-        <img id="img-modal-img" class="modal-img" src="" alt="Imagem ampliada">
-    </div>
-</div>
-
-<script>
-    (function(){
-        var modal = document.getElementById('img-modal');
-        var modalImg = document.getElementById('img-modal-img');
-        var closeBtn = document.getElementById('img-modal-close');
-
-        function openModal(src, alt){
-            if(!modal || !modalImg) return;
-            modalImg.src = src;
-            modalImg.alt = alt || 'Imagem do projeto';
-            modal.classList.add('open');
-            modal.setAttribute('aria-hidden', 'false');
-            // trava o scroll de fundo
-            document.body.style.overflow = 'hidden';
+    const feedback = document.getElementById('action-feedback');
+    const likeButton = document.getElementById('like-btn');
+    likeButton?.addEventListener('click', async () => {
+        likeButton.disabled = true;
+        try {
+            const response = await fetch(likeButton.dataset.url, { method: 'POST', headers: { Accept: 'application/json' } });
+            if (response.redirected) { window.location.href = response.url; return; }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Não foi possível atualizar a curtida.');
+            likeButton.classList.toggle('liked', data.liked);
+            likeButton.setAttribute('aria-pressed', data.liked ? 'true' : 'false');
+            likeButton.querySelector('i').className = `${data.liked ? 'fa-solid' : 'fa-regular'} fa-heart`;
+            document.getElementById('like-label').textContent = data.liked ? 'Curtido' : 'Curtir';
+            document.getElementById('like-count').textContent = data.curtidas;
+            if (feedback) feedback.textContent = data.liked ? 'Projeto curtido.' : 'Curtida removida.';
+        } catch (error) {
+            if (feedback) feedback.textContent = error.message;
+        } finally { likeButton.disabled = false; }
+    });
+    document.getElementById('share-btn')?.addEventListener('click', async () => {
+        try {
+            if (navigator.share) await navigator.share({ title: document.title, url: window.location.href });
+            else { await navigator.clipboard.writeText(window.location.href); if (feedback) feedback.textContent = 'Link copiado.'; }
+        } catch (error) {
+            if (error.name !== 'AbortError' && feedback) feedback.textContent = 'Não foi possível compartilhar agora.';
         }
-
-        function closeModal(){
-            if(!modal) return;
-            modal.classList.remove('open');
-            modal.setAttribute('aria-hidden', 'true');
-            modalImg.src = '';
-            document.body.style.overflow = '';
-        }
-
-        // Delegação: atribui clique em cada imagem de projeto
-        var thumbs = document.querySelectorAll('.project-img');
-        thumbs.forEach(function(img){
-            img.style.cursor = 'zoom-in';
-            img.addEventListener('click', function(e){
-                openModal(img.src, img.alt || 'Imagem do projeto');
-            });
-        });
-
-        // Fechar por botão, clique no backdrop ou ESC
-        if(closeBtn) closeBtn.addEventListener('click', closeModal);
-        if(modal) modal.addEventListener('click', function(e){
-            if(e.target === modal) closeModal();
-        });
-        document.addEventListener('keydown', function(e){
-            if(e.key === 'Escape') closeModal();
-        });
-    })();
+    });
+});
 </script>
 {% endblock %}

@@ -10,7 +10,10 @@ from . import usuarios_bp
 @usuarios_bp.route("/projetoscurtidos")
 @login_required
 def projetos_curtidos():
-    projetos = Projeto.query.join(Curtida, Curtida.projeto_id == Projeto.id).filter(Curtida.usuario_id == current_user.id).all()
+    projetos = Projeto.query.join(Curtida, Curtida.projeto_id == Projeto.id).filter(
+        Curtida.usuario_id == current_user.id,
+        Projeto.publicado.is_(True),
+    ).all()
     return render_template("usuario/projetos_curtidos.html", projetos=projetos)
 
 @usuarios_bp.route('/meus_projetos')
