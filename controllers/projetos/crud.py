@@ -197,10 +197,10 @@ def _form_context(projeto=None, errors=None):
         else:
             project_authors = [{'usuario': current_user, 'tipo': 'principal'}]
         context = {
-            'titulo': projeto.titulo if projeto else '', 'subtitulo': projeto.subtitulo if projeto else '',
+            'titulo': projeto.titulo if projeto else '', 'subtitulo': (projeto.subtitulo or '') if projeto else '',
             'descricao': projeto.descricao if projeto else '', 'tipo': projeto.tipo if projeto else '',
             'curso': projeto.curso if projeto else '', 'status': projeto.status if projeto else 'ideia',
-            'resultados': projeto.resultados if projeto else '',
+            'resultados': (projeto.resultados or '') if projeto else '',
             'autores': project_authors,
             'orientador': projeto.orientador if projeto else None,
             'objetivos': [item.descricao for item in projeto.objetivos] if projeto else [''],

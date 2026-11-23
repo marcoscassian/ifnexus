@@ -226,6 +226,24 @@ class ProjectFlowTest(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         requests_get.assert_not_called()
 
+    def test_edit_form_handles_null_optional_fields(self):
+        with app.app_context():
+            project = Projeto(
+                titulo='Projeto sem opcionais', descricao='Descrição válida',
+                tipo='pesquisa', curso='informatica', status='ideia',
+                publicado=False, usuario_id=self.owner_id,
+                subtitulo=None, resultados=None,
+            )
+            db.session.add(project)
+            db.session.commit()
+            project_id = project.id
+
+        response = self.client.get(f'/editarprojeto/{project_id}')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'name="subtitulo"', response.data)
+        self.assertIn(b'name="resultados"', response.data)
+
 
 if __name__ == '__main__':
     unittest.main()
