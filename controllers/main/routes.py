@@ -4,29 +4,86 @@ from . import main_bp
 
 @main_bp.route('/')
 def index():
-    projetos_top = Projeto.query.filter(Projeto.publicado.is_(True)).order_by(Projeto.curtidas.desc()).limit(4).all()
-    
+    projetos_publicados = Projeto.query.filter(Projeto.publicado.is_(True))
+    projetos_top = projetos_publicados.order_by(
+        Projeto.curtidas.desc(),
+        Projeto.id.desc(),
+    ).limit(4).all()
+
+    categorias = {
+        'informatica': ['informatica', 'informática', 'info'],
+        'eletro': ['eletro', 'eletrotecnica', 'eletrotécnica'],
+        'textil': ['textil', 'têxtil'],
+        'vestuario': ['vestuario', 'vestuário'],
+    }
+    projetos_top_por_categoria = {}
+    for categoria, variacoes in categorias.items():
+        encontrados = []
+        vistos = set()
+        for variacao in variacoes:
+            candidatos = projetos_publicados.filter(
+                Projeto.curso.ilike(f'%{variacao}%')
+            ).order_by(
+                Projeto.curtidas.desc(),
+                Projeto.id.desc(),
+            ).limit(4).all()
+            for projeto in candidatos:
+                if projeto.id not in vistos:
+                    vistos.add(projeto.id)
+                    encontrados.append(projeto)
+            if len(encontrados) == 4:
+                break
+        projetos_top_por_categoria[categoria] = encontrados[:4]
+
     cards = []
-    for projeto in projetos_top:
+    projetos_necessarios = list(projetos_top)
+    seen_ids = {projeto.id for projeto in projetos_top}
+    for projeto in [
+        projeto
+        for lista in projetos_top_por_categoria.values()
+        for projeto in lista
+    ]:
+        if projeto.id not in seen_ids:
+            seen_ids.add(projeto.id)
+            projetos_necessarios.append(projeto)
+
+    for projeto in projetos_necessarios:
+        if projeto.curso:
+            curso_normalizado = projeto.curso.strip().lower()
+        else:
+            curso_normalizado = ''
+        categoria_projeto = next(
+            (
+                categoria
+                for categoria, variacoes in categorias.items()
+                if any(variacao in curso_normalizado for variacao in variacoes)
+            ),
+            curso_normalizado.replace(' ', '-'),
+        )
+
         img_url = projeto.caminho_capa or "/static/img1.jpg"
-        
+        autores = [
+            autor.usuario.nome
+            for autor in projeto.autores
+            if autor.usuario
+        ]
+        if projeto.dono:
+            autores.append(projeto.dono.nome)
+
         cards.append({
             "id": projeto.id,
             "titulo": projeto.titulo,
             "descricao": projeto.descricao,
             "imagem": img_url,
-            "tag": projeto.curso or "Sem curso"
+            "tag": projeto.curso or "Sem curso",
+            "tecnologias": [tecnologia.nome for tecnologia in projeto.tecnologias],
+            "autores": list(dict.fromkeys(autores)),
+            "general_top": projeto.id in {item.id for item in projetos_top},
+            "course_top": projeto.id in {
+                item.id
+                for item in projetos_top_por_categoria.get(categoria_projeto, [])
+            },
         })
-    
-    # se houver menos de 4 projetos, preencher com dados padrão
-    if len(cards) < 4:
-        cards_padrao = [
-            { "id": 1, "titulo": "IFNexus", "descricao": "O IFNexus é uma vitrine digital desenvolvida para divulgar e valorizar os projetos criados por estudantes e servidores do IFRN.", "tag": "Informatica" },
-            { "id": 2, "titulo": "SIMER", "descricao": "Sistema que monitora o consumo de energia em tempo real, identifica os maiores gastos e sugere formas de economizar.", "tag": "eletro" },
-            { "id": 3, "titulo": "EcoFios", "descricao": "Projeto voltado à produção de fios ecológicos reutilizando sobras de tecido. Busca reduzir o desperdício na indústria têxtil.", "tag": "textil" },
-            { "id": 4, "titulo": "Modus", "descricao": "Criação de roupas sustentáveis usando materiais ecológicos para reduzir o impacto ambiental da moda.", "tag": "vestuario" },
-        ]
-        cards.extend(cards_padrao[len(cards):4])
     
     return render_template('index.html', cards=cards)
 

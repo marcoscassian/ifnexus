@@ -1,41 +1,47 @@
 body {
-    background: #f5f6f7;
-    color: #2d2d2d;
-    font-family: "Inter", sans-serif;
+    background: #f3f6f4;
+    color: #243129;
 }
 
 .perfil-container {
-    max-width: 1000px;
-    margin: 40px auto 70px;
-    padding: 30px;
+    max-width: 980px;
+    margin: 40px auto 72px;
     background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    border: 1px solid #e9e9e9;
+    border: 1px solid #e3eae5;
+    border-radius: 22px;
+    box-shadow: 0 18px 50px rgba(34, 74, 46, 0.10);
+    overflow: hidden;
 }
 
-.info-perfil {
+.perfil-header {
+    position: relative;
     display: flex;
-    gap: 25px;
     align-items: center;
-    margin-bottom: 35px;
+    gap: 28px;
+    min-height: 190px;
+    padding: 38px 42px;
+    background:
+        radial-gradient(circle at 92% 12%, rgba(149, 210, 160, 0.32), transparent 28%),
+        linear-gradient(135deg, #fbfdfb 0%, #edf6ef 100%);
+}
+
+.perfil-accent {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 7px;
+    background: linear-gradient(180deg, #1f6d36, #69ad78);
 }
 
 .foto {
-    width: 140px;
-    height: 140px;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #f0f0f0;
-    border: 3px solid #2f6f39;
     position: relative;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.foto:hover {
-    border-color: #3d8f47;
-    transform: scale(1.02);
+    flex: 0 0 150px;
+    width: 150px;
+    height: 150px;
+    border: 5px solid #ffffff;
+    border-radius: 50%;
+    background: #e8eee9;
+    box-shadow: 0 10px 28px rgba(29, 70, 42, 0.18);
+    overflow: hidden;
 }
 
 .foto img {
@@ -44,113 +50,229 @@ body {
     object-fit: cover;
 }
 
+.foto-editavel {
+    cursor: pointer;
+}
+
 .foto-overlay {
     position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 6px 0;
-    background: rgba(0, 0, 0, 0.45);
-    color: #dfffe6;
-    text-align: center;
-    font-size: 0.78rem;
-    border-radius: 0 0 16px 16px;
-    opacity: 0;
-    transition: 0.2s;
-}
-
-.foto:hover .foto-overlay {
-    opacity: 1;
-}
-
-.nome-info h2 {
-    font-size: 1.9rem;
+    inset: auto 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    background: rgba(20, 63, 34, 0.82);
+    color: #ffffff;
+    font-size: 0.76rem;
     font-weight: 700;
-    margin-bottom: 6px;
-    color: #30782B;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: 180ms ease;
+}
+
+.foto-editavel:hover .foto-overlay,
+.foto-editavel:focus .foto-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.nome-info {
+    min-width: 0;
+}
+
+.perfil-eyebrow {
+    margin: 0 0 5px;
+    color: #66806d;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.nome-info h1 {
+    margin: 0 0 8px;
+    color: #1f6332;
+    font-size: clamp(1.8rem, 4vw, 2.45rem);
+    line-height: 1.12;
+    overflow-wrap: anywhere;
 }
 
 .nome-info .curso {
-    color: #6d6d6d;
-    margin-bottom: 12px;
-    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 13px;
+    color: #637368;
+    font-size: 0.94rem;
+}
+
+.perfil-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .badge {
-    display: inline-block;
-    padding: 6px 14px;
-    background: #f8faf9;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid #cae1cf;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
     color: #2f6f39;
-    border: 1px solid #cfe8d4;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.suap-auth {
+    margin-top: 14px;
+}
+
+.btn-suap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    background: #2f6f39;
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: 160ms ease;
+}
+
+.btn-suap:hover {
+    background: #245d30;
+    transform: translateY(-1px);
 }
 
 .card-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    padding: 28px 42px 42px;
 }
 
 .card {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #e3e9e4;
+    border-radius: 15px;
     background: #ffffff;
-    border-radius: 18px;
-    padding: 25px;
-    border: 1px solid #e7e7e7;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-    transition: 0.2s;
+    box-shadow: 0 7px 22px rgba(42, 72, 52, 0.05);
+    transition: 180ms ease;
 }
 
 .card:hover {
+    border-color: #cbded0;
+    box-shadow: 0 12px 28px rgba(42, 72, 52, 0.09);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf1ee;
+}
+
+.card-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 10px;
+    background: #edf6ef;
+    color: #2f6f39;
 }
 
 .card-title {
-    font-size: 1rem;
+    margin: 0;
     color: #2f6f39;
+    font-size: 0.92rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 14px;
-    letter-spacing: 0.8px;
 }
 
-.card p {
-    margin-bottom: 10px;
-    color: #3c3c3c;
+.info-list {
+    margin: 0;
 }
 
-.card strong {
-    color: #1e1e1e;
-}
-.suap-auth {
-    margin-top: 8px;
-}
-
-.btn-suap {
-    display: inline-block;
-    padding: 10px 15px;
-    background-color: #2f6f39;
-    color: #ffffff;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.75rem;
-    transition: 0.2s;
+.info-list div {
+    display: grid;
+    grid-template-columns: 138px minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    padding: 9px 0;
 }
 
-.btn-suap:hover {
-    background-color: #3d8f47;
-    transform: scale(1.03);
+.info-list dt {
+    color: #7a877e;
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+.info-list dd {
+    margin: 0;
+    color: #26352b;
+    font-size: 0.91rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {
-    .perfil-container { margin: 24px 14px 44px; padding: 22px 16px; border-radius: 14px; }
-    .info-perfil { align-items: center; flex-direction: column; gap: 16px; text-align: center; }
-    .foto { width: 120px; height: 120px; }
-    .nome-info { min-width: 0; max-width: 100%; }
-    .nome-info h2 { overflow-wrap: anywhere; font-size: 1.55rem; }
-    .card-grid { grid-template-columns: 1fr; gap: 14px; }
-    .card { padding: 19px 16px; border-radius: 13px; }
-    .card p { overflow-wrap: anywhere; line-height: 1.55; }
+    .perfil-container {
+        margin: 20px 12px 36px;
+        border-radius: 16px;
+    }
+
+    .perfil-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        padding: 32px 18px 26px;
+        text-align: center;
+    }
+
+    .perfil-accent {
+        width: 100%;
+        height: 6px;
+        inset: 0 0 auto;
+    }
+
+    .foto {
+        width: 126px;
+        height: 126px;
+        flex-basis: 126px;
+    }
+
+    .nome-info .curso,
+    .perfil-badges,
+    .suap-auth {
+        justify-content: center;
+    }
+
+    .card-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 18px 14px 24px;
+    }
+
+    .card {
+        padding: 18px 16px;
+    }
+
+    .info-list div {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
 }

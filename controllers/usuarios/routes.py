@@ -33,8 +33,11 @@ def meus_projetos():
 @usuarios_bp.route('/meu_perfil')
 @login_required
 def meu_perfil():
-    
-    return render_template('usuario/perfil.html', perfil=current_user)
+    return render_template(
+        'usuario/perfil.html',
+        perfil=current_user,
+        is_self=True,
+    )
 
 @usuarios_bp.route("/alterar_foto", methods=["POST"])
 @login_required
@@ -43,7 +46,7 @@ def alterar_foto():
 
     if not foto:
         flash("Nenhuma imagem enviada.", "error")
-        return redirect(url_for("usuarios.perfil"))
+        return redirect(url_for("usuarios.meu_perfil"))
 
     caminho = f"static/uploads/users/{current_user.id}.jpg"
     foto.save(caminho)
@@ -57,10 +60,13 @@ def alterar_foto():
 @usuarios_bp.route("/perfil/<int:id>")
 @login_required
 def ver_perfil(id):
-    
-    perfil = Usuario.query.get(id)
+    perfil = db.session.get(Usuario, id)
     if perfil:
-        return render_template("usuario/perfil.html", perfil=perfil)
+        return render_template(
+            "usuario/perfil.html",
+            perfil=perfil,
+            is_self=perfil.id == current_user.id,
+        )
     else:
         flash('Usuário não encontrado', 'error')
         return redirect (url_for('index'))

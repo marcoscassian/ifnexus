@@ -9,6 +9,28 @@ body { min-width: 320px; overflow-x: hidden; font-family: 'Montserrat', sans-ser
 img, video { max-width: 100%; }
 button, input, textarea, select { font: inherit; }
 
+.projeto-card,
+.card {
+    position: relative;
+}
+
+.card-stretched-link {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: inherit;
+    cursor: pointer;
+}
+
+.card-stretched-link:focus-visible {
+    outline: 3px solid #78b982;
+    outline-offset: 3px;
+}
+
+.projeto-card[hidden] {
+    display: none !important;
+}
+
 .site-header {
     position: relative;
     z-index: 100;

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Meu Perfil{% endblock %}
+{% block title %}{{ 'Meu Perfil' if is_self else perfil.nome }}{% endblock %}
 
 {% block estilos %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/usuario/meuperfil.css') }}">
@@ -8,58 +8,84 @@
 
 {% block conteudo %}
 
-<div class="perfil-container">
+<main class="perfil-container">
+    <header class="perfil-header">
+        <div class="perfil-accent" aria-hidden="true"></div>
 
-    <div class="info-perfil">
-        
-        <div class="foto" onclick="document.getElementById('fotoInput').click()">
-
+        <div class="foto{% if is_self %} foto-editavel{% endif %}"{% if is_self %} onclick="document.getElementById('fotoInput').click()" role="button" tabindex="0" aria-label="Alterar foto"{% endif %}>
             {% if perfil.foto %}
                 <img id="fotoPreview" src="{{ perfil.foto }}" alt="Foto de {{ perfil.nome }}">
             {% else %}
                 <img id="fotoPreview" src="{{ url_for('static', filename='img/geral/default-user.jpg') }}" alt="Sem foto">
             {% endif %}
-            <div class="foto-overlay">Alterar foto</div>
-
+            {% if is_self %}<div class="foto-overlay"><i class="fa-solid fa-camera"></i> Alterar foto</div>{% endif %}
         </div>
 
-        <form id="formFoto" action="{{ url_for('usuarios.alterar_foto') }}" method="POST" enctype="multipart/form-data">
-            <input type="file" name="foto" id="fotoInput" style="display:none;" accept="image/*" onchange="document.getElementById('formFoto').submit()">
-        </form>
+        {% if is_self %}
+            <form id="formFoto" action="{{ url_for('usuarios.alterar_foto') }}" method="POST" enctype="multipart/form-data">
+                <input type="file" name="foto" id="fotoInput" style="display:none;" accept="image/*" onchange="document.getElementById('formFoto').submit()">
+            </form>
+        {% endif %}
 
         <div class="nome-info">
-            <h2>{{ perfil.nome }}</h2>
+            <p class="perfil-eyebrow">{{ 'Minha conta' if is_self else 'Perfil público' }}</p>
+            <h1>{{ perfil.nome }}</h1>
             {% if perfil.tipo_usuario in ['Aluno', 'Docente'] %}
-                <p class="curso">{{ perfil.curso }}</p>
+                <p class="curso"><i class="fa-solid fa-graduation-cap"></i> {{ perfil.curso or 'Curso não informado' }}</p>
             {% endif %}
-            <span class="badge tipo">{{ perfil.tipo_usuario }}</span>
-
-            <div class="suap-auth">
-                {% if perfil.tipo_usuario not in ['Aluno', 'Docente'] %}
-                    <a href="{{ url_for('auth.login_suap') }}" class="btn-suap">Autenticar conta via SUAP</a>
+            <div class="perfil-badges">
+                <span class="badge tipo"><i class="fa-solid fa-user"></i> {{ perfil.tipo_usuario }}</span>
+                {% if perfil.matricula %}
+                    <span class="badge matricula"><i class="fa-solid fa-id-card"></i> {{ perfil.matricula }}</span>
                 {% endif %}
             </div>
+
+            {% if is_self and perfil.tipo_usuario not in ['Aluno', 'Docente'] %}
+                <div class="suap-auth">
+                    <a href="{{ url_for('auth.login_suap') }}" class="btn-suap"><i class="fa-solid fa-right-to-bracket"></i> Autenticar conta via SUAP</a>
+                </div>
+            {% endif %}
         </div>
-
-
-    </div>
+    </header>
 
     <div class="card-grid">
+        <section class="card">
+            <div class="card-heading">
+                <span class="card-icon"><i class="fa-solid fa-user-check"></i></span>
+                <h2 class="card-title">Identificação</h2>
+            </div>
+            <dl class="info-list">
+                <div>
+                    <dt>Matrícula</dt>
+                    <dd>{{ perfil.matricula or 'Não informada' }}</dd>
+                </div>
+                <div>
+                    <dt>Campus</dt>
+                    <dd>{{ perfil.campus or 'Não informado' }}</dd>
+                </div>
+            </dl>
+        </section>
 
-        <div class="card">
-            <h3 class="card-title">Identificação</h3>
-            <p><strong>Matrícula:</strong> {{ perfil.matricula }}</p>
-            <p><strong>Campus:</strong> {{ perfil.campus }}</p>
-        </div>
-
-        <div class="card">
-            <h3 class="card-title">Outras Informações</h3>
-            <p><strong>Data de Nascimento:</strong> {{ perfil.data_nascimento }}</p>
-            <p><strong>Email:</strong> {{ perfil.email }}</p>
-        </div>
+        <section class="card">
+            <div class="card-heading">
+                <span class="card-icon"><i class="fa-solid fa-circle-info"></i></span>
+                <h2 class="card-title">Contato e informações</h2>
+            </div>
+            <dl class="info-list">
+                {% if is_self and perfil.data_nascimento %}
+                    <div>
+                        <dt>Data de Nascimento</dt>
+                        <dd>{{ perfil.data_nascimento }}</dd>
+                    </div>
+                {% endif %}
+                <div>
+                    <dt>Email</dt>
+                    <dd>{{ perfil.email or 'Não informado' }}</dd>
+                </div>
+            </dl>
+        </section>
     </div>
-
-</div>
+</main>
 
 {% endblock %}
 

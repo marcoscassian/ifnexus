@@ -180,6 +180,55 @@ class ProjectFlowTest(unittest.TestCase):
         with app.app_context():
             self.assertIsNotNone(Tecnologia.query.filter_by(nome='React').first())
 
+    def test_home_filter_includes_four_top_informatica_projects(self):
+        with app.app_context():
+            for index in range(5):
+                project = Projeto(
+                    titulo=f'Projeto Info {index}',
+                    descricao='Projeto do curso de informatica',
+                    tipo='pesquisa',
+                    curso='informatica',
+                    publicado=True,
+                    curtidas=index,
+                    usuario_id=self.owner_id,
+                )
+                db.session.add(project)
+            db.session.commit()
+
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        html = response.get_data(as_text=True)
+        card_blocks = html.split('<article class="projeto-card"')[1:]
+        self.assertEqual(len(card_blocks), 4)
+        self.assertIn(b'Projeto Info 4', response.data)
+        self.assertIn(b'data-category="informatica"', response.data)
+        self.assertNotIn(b'Projeto Info 0', response.data)
+
+    def test_home_cards_include_complete_filter_search_data(self):
+        with app.app_context():
+            project = Projeto(
+                titulo='Robótica IFRN',
+                descricao='Controle inteligente',
+                tipo='pesquisa',
+                curso='informatica',
+                publicado=True,
+                usuario_id=self.owner_id,
+            )
+            db.session.add(project)
+            db.session.flush()
+            technology = Tecnologia.query.filter_by(nome='Python').first()
+            if not technology:
+                technology = Tecnologia(nome='Python')
+            project.tecnologias.append(technology)
+            db.session.commit()
+
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'data-category="informatica"', response.data)
+        self.assertIn('Robótica IFRN'.encode(), response.data)
+        self.assertIn(b'Python', response.data)
+        self.assertIn(b'matchesSearch', response.data)
+
     def test_liked_project_displays_cover_image(self):
         with app.app_context():
             project = Projeto(
@@ -205,6 +254,7 @@ class ProjectFlowTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'/static/uploads/projetos/capa-teste.png', response.data)
         self.assertIn(b'alt="Projeto curtido"', response.data)
+        self.assertIn(b'class="card-stretched-link"', response.data)
 
     def test_draft_can_be_incomplete_and_is_hidden_from_public_listing(self):
         response = self.client.post('/criarprojeto', data={
@@ -271,6 +321,25 @@ class ProjectFlowTest(unittest.TestCase):
             with app.app_context():
                 db.session.delete(db.session.get(Projeto, project_id))
                 db.session.commit()
+
+    def test_profile_hides_birth_date_from_other_users(self):
+        with app.app_context():
+            owner = db.session.get(Usuario, self.owner_id)
+            owner.data_nascimento = '20/05/2004'
+            db.session.commit()
+
+        self._login(self.owner_id)
+        own_profile = self.client.get('/meu_perfil')
+        self.assertIn(b'Data de Nascimento', own_profile.data)
+
+        other_profile = self.client.get(f'/perfil/{self.coauthor_id}')
+        with app.app_context():
+            coauthor = db.session.get(Usuario, self.coauthor_id)
+            coauthor.data_nascimento = '15/08/2003'
+            db.session.commit()
+
+        other_profile = self.client.get(f'/perfil/{self.coauthor_id}')
+        self.assertNotIn(b'Data de Nascimento', other_profile.data)
 
     def test_suap_login_uses_public_environment_callback(self):
         response = self.client.get('/auth/login', base_url='https://ifnexus.vercel.app')

@@ -60,13 +60,24 @@
     const emptyMessage = document.querySelector('.projects-empty');
 
     function filterProjects() {
-        const query = (searchInput.value || '').toLowerCase().trim();
-        const activeFilter = document.querySelector('.filter-chip.is-active').dataset.filter;
+        const normalize = (value) => (value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/^#/, '')
+            .trim();
+        const terms = normalize(searchInput.value).split(/\s+/).filter(Boolean);
+        const activeFilter = normalize(document.querySelector('.filter-chip.is-active').dataset.filter);
         let visibleProjects = 0;
 
         projectCards.forEach((card) => {
-            const matchesFilter = activeFilter === 'todos' || card.dataset.category === activeFilter;
-            const matchesSearch = !query || card.textContent.toLowerCase().includes(query);
+            const category = normalize(card.dataset.category);
+            const searchableText = normalize(card.dataset.search + ' ' + card.textContent);
+            const matchesFilter =
+                activeFilter === 'todos'
+                    ? card.dataset.generalTop === 'true'
+                    : category === activeFilter && card.dataset.courseTop === 'true';
+            const matchesSearch = terms.every((term) => searchableText.includes(term));
             const visible = matchesFilter && matchesSearch;
             card.hidden = !visible;
             if (visible) visibleProjects += 1;

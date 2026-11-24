@@ -78,6 +78,7 @@
                 <div class="projetos-grid">
                     {% for projeto in projetos %}
                     <article class="projeto-card">
+                        <a class="card-stretched-link" href="{{ url_for('projetos.ver_projeto', id=projeto.id) }}" aria-label="Ver projeto {{ projeto.titulo }}"></a>
                         <div class="projeto-image">
                             {% if projeto.caminho_capa %}
                                     <img src="{{ url_for('static', filename=projeto.caminho_capa) }}"

@@ -10,7 +10,12 @@
 {% else %}
     {% set category = tag_lower|replace(' ', '-') %}
 {% endif %}
-<article class="projeto-card" data-category="{{ category }}">
+<article class="projeto-card"
+         data-category="{{ category }}"
+         data-general-top="{{ 'true' if card.general_top|default(false) else 'false' }}"
+         data-course-top="{{ 'true' if card.course_top|default(false) else 'false' }}"
+         data-search="{{ ([card.titulo, card.descricao, card.tag] + (card.tecnologias|default([])) + (card.autores|default([])))|join(' ')|e }}">
+    <a class="card-stretched-link" href="{{ url_for('projetos.ver_projeto', id=card.id) }}" aria-label="Ver projeto {{ card.titulo }}"></a>
     <div class="projeto-image">
         {% if card.imagem and card.imagem != '/static/img1.jpg' %}
             <img src="{{ url_for('static', filename=card.imagem.lstrip('/')) }}" alt="{{ card.titulo }}" class="card-img">
