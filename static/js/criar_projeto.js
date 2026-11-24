@@ -240,9 +240,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!event.target.closest('.search-combobox')) document.querySelectorAll('.search-results').forEach(item => item.classList.remove('open'));
     });
 
-    function addTechnology() {
+    function addTechnology(valueFromSuggestion = '') {
         const input = document.getElementById('tecnologia-input');
-        const value = input.value.trim().replace(/^,+|,+$/g, '');
+        const value = (valueFromSuggestion || input.value).trim().replace(/^,+|,+$/g, '');
         if (!value) return;
         const list = document.getElementById('tecnologias-list');
         const duplicate = [...list.querySelectorAll('input')].some(item => item.value.toLowerCase() === value.toLowerCase());
@@ -254,9 +254,46 @@ document.addEventListener('DOMContentLoaded', () => {
         remove.addEventListener('click', () => { chip.remove(); updatePreview(); });
         chip.append(label, hidden, remove); list.appendChild(chip); input.value = ''; updatePreview();
     }
-    document.getElementById('add-tecnologia').addEventListener('click', addTechnology);
+    document.getElementById('add-tecnologia').addEventListener('click', () => addTechnology());
     document.getElementById('tecnologia-input').addEventListener('keydown', event => {
         if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTechnology(); }
+    });
+    const technologyInput = document.getElementById('tecnologia-input');
+    const technologyResults = document.getElementById('resultado-tecnologias');
+    let technologyTimer;
+    technologyInput.addEventListener('input', () => {
+        const query = technologyInput.value.trim();
+        clearTimeout(technologyTimer);
+        if (query.length < 1) {
+            technologyResults.replaceChildren();
+            technologyResults.classList.remove('open');
+            return;
+        }
+        technologyTimer = setTimeout(async () => {
+            try {
+                const response = await fetch(`/livesearch/tecnologias?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Falha ao buscar tecnologias');
+                const technologies = await response.json();
+                technologyResults.replaceChildren();
+                technologies.forEach(item => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'search-result';
+                    button.textContent = item.nome;
+                    button.addEventListener('mousedown', event => event.preventDefault());
+                    button.addEventListener('click', () => {
+                        addTechnology(item.nome);
+                        technologyResults.replaceChildren();
+                        technologyResults.classList.remove('open');
+                    });
+                    technologyResults.appendChild(button);
+                });
+                technologyResults.classList.toggle('open', technologies.length > 0);
+            } catch (_) {
+                technologyResults.replaceChildren();
+                technologyResults.classList.remove('open');
+            }
+        }, 200);
     });
     document.querySelectorAll('#tecnologias-list .tag-chip button').forEach(button => button.addEventListener('click', () => { button.closest('.tag-chip').remove(); updatePreview(); }));
 

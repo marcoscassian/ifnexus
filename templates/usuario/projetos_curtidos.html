@@ -12,17 +12,8 @@
     <div class="cards">
         {% for projeto in projetos %}
             <div class="card">
-                {# obter primeira imagem da estrutura, se existir #}
-                {% set thumb = None %}
-                {% if projeto.estrutura %}
-                    {% set parts = projeto.estrutura.split(',') %}
-                    {% if parts and parts[0] %}
-                        {% set thumb = parts[0].strip() %}
-                    {% endif %}
-                {% endif %}
-
-                {% if thumb %}
-                    <img class="card-img" src="{{ url_for('static', filename='uploads/img/' ~ thumb) }}" alt="{{ projeto.titulo }}">
+                {% if projeto.caminho_capa %}
+                    <img class="card-img" src="{{ url_for('static', filename=projeto.caminho_capa) }}" alt="{{ projeto.titulo }}">
                 {% else %}
                     <div class="card-img" aria-hidden="true"></div>
                 {% endif %}

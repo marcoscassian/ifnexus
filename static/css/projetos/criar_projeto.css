@@ -111,6 +111,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--if-green); box-s
 .outline-button { color: var(--if-green-dark); background: white; border: 1px solid #94c7a1; }
 .outline-button:hover { background: var(--if-green-soft); }
 .tag-input-wrap { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.technology-combobox { position: relative; }
 .tags-list { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
 .tag-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 9px 6px 11px; background: var(--if-green-soft); color: var(--if-green-dark); font-size: .78rem; font-weight: 700; }
 .tag-chip button { border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0; }

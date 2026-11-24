@@ -1,5 +1,7 @@
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 database_url = os.environ.get('DATABASE_URL')
 if database_url and database_url.startswith('postgres://'):
@@ -9,7 +11,7 @@ class Config:
     """Configurações padrão da aplicação"""
     
     # Banco de dados
-    SQLALCHEMY_DATABASE_URI = database_url or 'sqlite:///ifnexus.db'
+    SQLALCHEMY_DATABASE_URI = database_url or 'mysql+pymysql://ifnexus:ifnexus-local@127.0.0.1:3306/ifnexus'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Chave secreta para sessões

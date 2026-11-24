@@ -24,7 +24,7 @@
 
                     <div class="filtro-inline-group filtro-busca-group">
                         <label for="busca">Buscar</label>
-                        <input id="busca" name="q" type="search" class="search-input" placeholder="Buscar por título, autor, ou palavra-chave" value="{{ request.args.get('q', '') }}">
+                        <input id="busca" name="q" type="search" class="search-input" placeholder="Buscar por título, autor, tecnologia ou palavra-chave" value="{{ request.args.get('q', '') }}">
                     </div>
                     <div class="filtro-inline-group">
                         <label for="filtro-curso">Curso</label>
@@ -212,7 +212,7 @@
         // Submete automaticamente após digitar (debounce)
         busca.addEventListener('input', debounce(function() {
             submitForm();
-        }, 700));
+        }, 350));
     })();
 
 </script>

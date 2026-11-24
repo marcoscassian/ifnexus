@@ -167,7 +167,11 @@
                         </div>
                         <div class="field-group">
                             <label for="tecnologia-input">Tecnologias e tags</label>
-                            <div class="tag-input-wrap"><input id="tecnologia-input" placeholder="Digite uma tecnologia e pressione Enter"><button type="button" id="add-tecnologia" class="outline-button">Adicionar</button></div>
+                            <div class="tag-input-wrap technology-combobox">
+                                <input id="tecnologia-input" placeholder="Digite ou busque uma tecnologia" autocomplete="off">
+                                <button type="button" id="add-tecnologia" class="outline-button">Adicionar</button>
+                                <div id="resultado-tecnologias" class="search-results" role="listbox"></div>
+                            </div>
                             <div id="tecnologias-list" class="tags-list">
                                 {% for tecnologia in tecnologias %}<span class="tag-chip"><span>{{ tecnologia }}</span><input type="hidden" name="tecnologias[]" value="{{ tecnologia }}"><button type="button" aria-label="Remover {{ tecnologia }}"><i class="fa-solid fa-xmark"></i></button></span>{% endfor %}
                             </div>

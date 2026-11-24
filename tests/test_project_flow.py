@@ -11,7 +11,7 @@ os.environ['SECRET_KEY'] = 'test-secret'
 from app import app
 from controllers.projetos import crud
 from extensions import db
-from models import Projeto, ProjetoImagem, Usuario
+from models import Projeto, ProjetoImagem, Usuario, Curtida, Tecnologia
 
 
 class ProjectFlowTest(unittest.TestCase):
@@ -119,6 +119,92 @@ class ProjectFlowTest(unittest.TestCase):
             self.assertEqual(project.titulo, 'Irriga IFRN 2.0')
             self.assertEqual(len(project.imagens), 1)
             self.assertEqual(len(project.arquivos), 1)
+
+    def test_multiple_authors_can_be_marked_as_principal(self):
+        payload = self._published_payload()
+        payload['autores_tipos[]'] = ['principal', 'principal']
+        response = self.client.post(
+            '/criarprojeto',
+            data=payload,
+            content_type='multipart/form-data',
+        )
+        self.assertEqual(response.status_code, 302)
+        with app.app_context():
+            project = Projeto.query.one()
+            principal_ids = {
+                autor.usuario_id
+                for autor in project.autores
+                if autor.tipo == 'principal'
+            }
+            self.assertEqual(principal_ids, {self.owner_id, self.coauthor_id})
+
+    def test_project_search_finds_technology_tag(self):
+        with app.app_context():
+            project = Projeto(
+                titulo='Automacao Verde',
+                descricao='Projeto de monitoramento',
+                publicado=True,
+                usuario_id=self.owner_id,
+            )
+            db.session.add(project)
+            db.session.flush()
+            technology = Tecnologia.query.filter_by(nome='React').first()
+            if not technology:
+                technology = Tecnologia(nome='React')
+            project.tecnologias.append(technology)
+            db.session.commit()
+            project_id = project.id
+
+        response = self.client.get('/projetos?q=%23React')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Automacao Verde', response.data)
+        self.assertIn(str(project_id).encode(), response.data)
+
+    def test_saved_technology_can_be_searched_by_another_user(self):
+        payload = self._published_payload()
+        payload['tecnologias[]'] = ['Python', 'React']
+        response = self.client.post(
+            '/criarprojeto',
+            data=payload,
+            content_type='multipart/form-data',
+        )
+        self.assertEqual(response.status_code, 302)
+
+        with self.client.session_transaction() as session:
+            session.clear()
+        self._login(self.coauthor_id)
+        response = self.client.get('/livesearch/tecnologias?q=rea')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [{'nome': 'React'}])
+
+        with app.app_context():
+            self.assertIsNotNone(Tecnologia.query.filter_by(nome='React').first())
+
+    def test_liked_project_displays_cover_image(self):
+        with app.app_context():
+            project = Projeto(
+                titulo='Projeto curtido',
+                descricao='Descricao do projeto',
+                publicado=True,
+                usuario_id=self.owner_id,
+            )
+            db.session.add(project)
+            db.session.flush()
+            db.session.add(ProjetoImagem(
+                caminho='uploads/projetos/capa-teste.png',
+                nome_original='capa-teste.png',
+                is_capa=True,
+                ordem=0,
+                projeto_id=project.id,
+            ))
+            db.session.add(Curtida(usuario_id=self.owner_id, projeto_id=project.id))
+            db.session.commit()
+            project_id = project.id
+
+        response = self.client.get('/projetoscurtidos')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'/static/uploads/projetos/capa-teste.png', response.data)
+        self.assertIn(b'alt="Projeto curtido"', response.data)
 
     def test_draft_can_be_incomplete_and_is_hidden_from_public_listing(self):
         response = self.client.post('/criarprojeto', data={

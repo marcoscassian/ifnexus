@@ -5,7 +5,7 @@ from flask_login import current_user
 from datetime import datetime
 
 from extensions import db
-from models import Projeto
+from models import Projeto, projeto_tecnologias, Tecnologia
 from . import projetos_bp
 
 from models import Comentario, Curtida, Autor, Usuario
@@ -90,16 +90,32 @@ def projetos():
         query = query.filter_by(tipo=tipo_filtro)
 
     if q:
-        like_q = f"%{q}%"
-        query = query.outerjoin(Autor, Projeto.id == Autor.projeto_id).outerjoin(
-            Usuario, Autor.usuario_id == Usuario.id
-        ).filter(
-            db.or_(
-                Projeto.titulo.ilike(like_q),
-                Projeto.descricao.ilike(like_q),
-                Usuario.nome.ilike(like_q)
-            )
-        ).distinct()
+        query = (
+            query
+            .outerjoin(Autor, Projeto.id == Autor.projeto_id)
+            .outerjoin(Usuario, db.or_(Autor.usuario_id == Usuario.id, Projeto.usuario_id == Usuario.id))
+            .outerjoin(projeto_tecnologias, Projeto.id == projeto_tecnologias.c.projeto_id)
+            .outerjoin(Tecnologia, projeto_tecnologias.c.tecnologia_id == Tecnologia.id)
+        )
+
+        terms = [
+            term.strip().lower().lstrip('#')
+            for term in q.replace(',', ' ').split()
+            if term.strip().lstrip('#')
+        ]
+        for term in terms:
+            like_term = f"%{term}%"
+            query = query.filter(db.or_(
+                db.func.lower(Projeto.titulo).ilike(like_term),
+                db.func.lower(Projeto.subtitulo).ilike(like_term),
+                db.func.lower(Projeto.descricao).ilike(like_term),
+                db.func.lower(Projeto.tipo).ilike(like_term),
+                db.func.lower(Projeto.curso).ilike(like_term),
+                db.func.lower(Projeto.resultados).ilike(like_term),
+                db.func.lower(Usuario.nome).ilike(like_term),
+                db.func.lower(Tecnologia.nome).ilike(like_term),
+            ))
+        query = query.distinct()
 
     if ordenacao == 'curtidas':
         query = query.order_by(Projeto.curtidas.desc(), Projeto.id.desc())

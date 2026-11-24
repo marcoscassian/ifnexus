@@ -57,11 +57,21 @@ def _migrate_legacy_authors():
         return
     with db.engine.begin() as connection:
         connection.execute(text("UPDATE autores SET tipo='coautor' WHERE tipo IS NULL OR tipo=''"))
-        connection.execute(text(
-            "UPDATE autores SET tipo='principal' WHERE id IN ("
-            "SELECT MIN(a.id) FROM autores a JOIN projetos p ON p.id=a.projeto_id "
-            "WHERE a.usuario_id=p.usuario_id GROUP BY a.projeto_id)"
-        ))
+        dialect = db.engine.dialect.name
+        if dialect == 'mysql':
+            connection.execute(text(
+                "UPDATE autores a JOIN ("
+                "SELECT projeto_id, MIN(id) AS id FROM autores "
+                "GROUP BY projeto_id "
+                "HAVING SUM(tipo='principal') = 0"
+                ") sem_principal ON sem_principal.id=a.id SET a.tipo='principal'"
+            ))
+        else:
+            connection.execute(text(
+                "UPDATE autores SET tipo='principal' WHERE id IN ("
+                "SELECT MIN(id) FROM autores "
+                "GROUP BY projeto_id HAVING SUM(tipo='principal') = 0)"
+            ))
         connection.execute(text(
             "INSERT INTO autores (tipo, usuario_id, projeto_id) "
             "SELECT 'principal', p.usuario_id, p.id FROM projetos p "

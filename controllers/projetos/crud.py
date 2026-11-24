@@ -245,7 +245,6 @@ def _safe_remove(relative_path):
 
 @projetos_bp.route('/criarprojeto', methods=['GET', 'POST'], endpoint='criar_projeto')
 @projetos_bp.route('/editarprojeto/<int:id>', methods=['GET', 'POST'], endpoint='editar_projeto')
-@suap_required
 def gerenciar_projeto(id=None):
     projeto = Projeto.query.get_or_404(id) if id else None
     if projeto:
@@ -292,18 +291,22 @@ def gerenciar_projeto(id=None):
             if not db.session.get(Usuario, user_id):
                 continue
             role = autor_roles[index] if index < len(autor_roles) else 'coautor'
+            role = role if role in {'principal', 'coautor'} else 'coautor'
             pending_authors.append((user_id, role))
             seen_authors.add(user_id)
-        principal_assigned = False
-        for index, (user_id, role) in enumerate(pending_authors):
-            is_principal = role == 'principal' and not principal_assigned
-            if not principal_assigned and index == len(pending_authors) - 1:
-                is_principal = True
-            principal_assigned = principal_assigned or is_principal
+        if pending_authors and not any(role == 'principal' for _, role in pending_authors):
+            owner_index = next(
+                (index for index, (user_id, _) in enumerate(pending_authors)
+                 if user_id == projeto.usuario_id),
+                0,
+            )
+            user_id, _ = pending_authors[owner_index]
+            pending_authors[owner_index] = (user_id, 'principal')
+        for user_id, role in pending_authors:
             db.session.add(Autor(
                 usuario_id=user_id,
                 projeto_id=projeto.id,
-                tipo='principal' if is_principal else 'coautor',
+                tipo='principal' if role == 'principal' else 'coautor',
             ))
 
         Objetivo.query.filter_by(projeto_id=projeto.id).delete()
@@ -399,7 +402,7 @@ def gerenciar_projeto(id=None):
 
 
 @projetos_bp.route('/projeto/<int:id>/excluir', methods=['POST'])
-@suap_required
+
 def excluir_projeto(id):
     projeto = Projeto.query.get_or_404(id)
     pode_excluir = projeto.usuario_id == current_user.id or any(autor.usuario_id == current_user.id for autor in projeto.autores)
