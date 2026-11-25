@@ -242,7 +242,7 @@ def _safe_remove(relative_path):
         except OSError:
             pass
 
-
+@suap_required
 @projetos_bp.route('/criarprojeto', methods=['GET', 'POST'], endpoint='criar_projeto')
 @projetos_bp.route('/editarprojeto/<int:id>', methods=['GET', 'POST'], endpoint='editar_projeto')
 def gerenciar_projeto(id=None):
@@ -400,7 +400,7 @@ def gerenciar_projeto(id=None):
         flash(f'Não foi possível salvar o projeto: {exc}', 'error')
         return render_template('projetos/criar_projeto.html', **_form_context(projeto)), 500
 
-
+@suap_required
 @projetos_bp.route('/projeto/<int:id>/excluir', methods=['POST'])
 
 def excluir_projeto(id):

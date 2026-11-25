@@ -8,6 +8,7 @@ from utils.decorator import suap_required
 
 from models import Usuario, Tecnologia
 
+@suap_required
 @projetos_bp.route("/livesearch/usuarios")
 def livesearch_usuarios():
     q = request.args.get("q", "").strip()
